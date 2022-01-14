@@ -1,0 +1,211 @@
+Julia for high-performance scientific computing
+===============================================
+
+Julia is a scientific programming language that is free and open
+source - see https://julialang.org/ for downloads, documentation,
+learning resources etc. Bridging high-level interpreted and low-level
+compiled languages, it offers high performance (comparable to C and
+Fortran) without sacrificing simplicity and programming productivity
+(like in Python or R).
+
+Julia has a rich ecosystem of libraries aimed
+towards scientific computing and a powerful in-built package manager
+to install and manage their dependencies. Julia is also gaining ground
+in HPC as it supports both threading and distributed-memory
+parallelization as well as GPU computing.
+
+This lesson starts with the basics of Julia, its syntax,
+multiple-dispatch paradigm, package development and best practices. It
+then moves on to topics relevant to high-performance scientific
+computing, including an overview of powerful libraries for modeling
+and machine learning, visualization, parallelization and GPU
+computing.
+
+.. prereq::
+
+   prerequisites
+
+
+
+.. csv-table::
+   :widths: auto
+   :delim: ;
+
+   20 min ; :doc:`motivation`
+   20 min ; :doc:`overview`
+   20 min ; :doc:`development`
+   20 min ; :doc:`data-science`   
+   20 min ; :doc:`performant-code`
+   20 min ; :doc:`parallelization`
+   20 min ; :doc:`GPU`         
+   
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: The lesson
+
+   motivation
+   overview
+   development
+   data-science   
+   performant-code
+   parallelization
+   GPU
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference
+
+   setup
+   quick-reference
+   guide
+
+
+
+.. _learner-personas:
+
+Who is the course for?
+----------------------
+
+This lesson material is targeted towards students, researchers and developers
+who:
+
+ - are already familiar with one or more programming languages (Python, R, C/C++, Fortran, Matlab, ...)
+ - want to add a new exciting high-level yet performant language to their reportoar
+ - might be mixing a high-level and a low-level language for performance reasons but want to make their life easier
+ - need to analyze big data or perform computationally demanding modeling, analysis or simulations
+ - want to develop code HPC systems and/or graphical processing units (GPUs) but prefer to stay within a
+   productive high-level language.
+
+
+About the course
+----------------
+
+This lesson material is developed by the `EuroCC National Competence Center
+Sweden (ENCCS) <https://enccs.se/>`_ and taught in ENCCS workshops. It is aimed
+at researchers and developers who want to learn a modern, high-level, high-performace 
+programming language suitable for scientific computing, data science, machine learning
+and high-performance computing on CPUs or GPUs.
+Each lesson episode has clearly defined learning objectives and includes
+multiple exercises along with solutions, and is therefore also useful for
+self-learning.
+The lesson material is licensed under `CC-BY-4.0
+<https://creativecommons.org/licenses/by/4.0/>`_ and can be reused in any form
+(with appropriate credit) in other courses and workshops.
+Instructors who wish to teach this lesson can refer to the :doc:`guide` for
+practical advice.
+
+Graphical and text conventions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Different graphical elements are used to organize the material.
+
+Type-along sections
+~~~~~~~~~~~~~~~~~~~
+
+Type-along sections are intended for live coding where all participants 
+type-along and appear in a separate text box, marked with a keyboard emoji:
+
+.. type-along:: Defining a variables
+
+  This is how you set a variable in Julia:
+
+  .. code-block:: julia
+
+    x = 1
+
+Exercises
+~~~~~~~~~
+
+All lesson episodes (sections) end with one or more exercises for participants 
+to practice what they've learned, marked with a hand-writing emoji. Sometimes 
+there's also a solution:
+
+.. exercise:: Printing to screen
+
+  Which of these commands prints the value of the variable ``x``?
+
+  1. ``print(x)``
+  2. ``println(x)``
+  3. ``write(x)``
+
+  .. solution::
+
+    Correct answer is both 1 and 2! ``println()`` uses ``print()`` and adds a new line.
+
+Important information
+~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes important information is displayed inside boxes with an exclamation mark emoji:
+
+.. callout:: Important info
+
+  Please don't hesitate to ask questions during the workshop!
+
+
+
+See also
+--------
+
+Excellent resources for learning Julia can be found
+in the following pages:
+
+- https://github.com/csc-training/julia-introduction/
+
+
+
+Credits
+-------
+
+The lesson file structure and browsing layout is inspired by and derived from
+`work <https://github.com/coderefinery/sphinx-lesson>`_ by `CodeRefinery
+<https://coderefinery.org/>`_ licensed under the `MIT license
+<http://opensource.org/licenses/mit-license.html>`_. We have copied and adapted
+most of their license text.
+
+Several examples and formulations are inspired by and derived from other Julia
+lessons, particularly:
+
+- `Carsten Bauer's 3-day Julia workshop <https://github.com/carstenbauer/JuliaCologne21>`_
+- `The Carpentry lesson Introduction to Julia <https://carpentries-incubator.github.io/julia-novice/>`_
+- `Storopoli, Huijzer and Alonso (2021). Julia Data Science. ISBN: 9798489859165. <https://juliadatascience.io>`_
+  
+Instructional Material
+^^^^^^^^^^^^^^^^^^^^^^
+
+All ENCCS instructional material is made available under the `Creative Commons
+Attribution license (CC-BY-4.0)
+<https://creativecommons.org/licenses/by/4.0/>`_. The following is a
+human-readable summary of (and not a substitute for) the `full legal text of the
+CC-BY-4.0 license <https://creativecommons.org/licenses/by/4.0/legalcode>`_.
+You are free:
+
+- to **share** - copy and redistribute the material in any medium or format
+- to **adapt** - remix, transform, and build upon the material for any purpose,
+  even commercially.
+
+The licensor cannot revoke these freedoms as long as you follow these license terms:
+
+- **Attribution** - You must give appropriate credit (mentioning that your work
+  is derived from work that is Copyright (c) ENCCS and, where practical, linking
+  to `<https://enccs.se>`_), provide a `link to the license
+  <https://creativecommons.org/licenses/by/4.0/>`_, and indicate if changes were
+  made. You may do so in any reasonable manner, but not in any way that suggests
+  the licensor endorses you or your use.
+- **No additional restrictions** - You may not apply legal terms or
+  technological measures that legally restrict others from doing anything the
+  license permits. With the understanding that:
+
+  - You do not have to comply with the license for elements of the material in
+    the public domain or where your use is permitted by an applicable exception
+    or limitation.
+  - No warranties are given. The license may not give you all of the permissions
+    necessary for your intended use. For example, other rights such as
+    publicity, privacy, or moral rights may limit how you use the material.
+  
+Software
+^^^^^^^^
+
+Except where otherwise noted, the example programs and other software provided
+by ENCCS are made available under the `OSI <http://opensource.org/>`_-approved
+`MIT license <http://opensource.org/licenses/mit-license.html>`_.
