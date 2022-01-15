@@ -27,7 +27,7 @@ below.
 
    .. tab:: HeatEquation.jl
 
-      .. literalinclude:: code/Heatequation/src/HeatEquation.jl
+      .. literalinclude:: code/HeatEquation/src/HeatEquation.jl
          :language: julia
 
    .. tab:: setup.jl
@@ -157,7 +157,7 @@ Several packages are available for more advanced visualization of profiling resu
 - `StatProfilerHTML.jl <https://github.com/tkluck/StatProfilerHTML.jl>`_ 
   produces HTML and presents some additional summaries, 
   and also integrates well with Jupyter notebooks.
-- `PProf.jl <https://github.com/JuliaPerf/PProf.jl>` an interactive, web-based profile 
+- `PProf.jl <https://github.com/JuliaPerf/PProf.jl>`_ an interactive, web-based profile 
   GUI explorer, implemented as a wrapper around google/pprof. 
 
 

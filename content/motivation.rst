@@ -17,7 +17,7 @@ Why Julia?
 Julia has been designed to be both fast and dynamic.
 In the words of its developers::
 
-   `We want a language that's open source, with a liberal license. We
+   We want a language that's open source, with a liberal license. We
    want the speed of C with the dynamism of Ruby. We want a language
    that's homoiconic, with true macros like Lisp, but with obvious,
    familiar mathematical notation like Matlab. We want something as
@@ -26,11 +26,11 @@ In the words of its developers::
    algebra as Matlab, as good at gluing programs together as the
    shell. Something that is dirt simple to learn, yet keeps the most
    serious hackers happy. We want it interactive and we want it
-   compiled. (Did we mention it should be as fast as C?)`
+   compiled. (Did we mention it should be as fast as C?)
 
-   From `Why We Created Julia
-   <https://julialang.org/blog/2012/02/why-we-created-julia/>`_ by
-   Jeff Bezanson Stefan Karpinski Viral B. Shah Alan Edelman
+From `Why We Created Julia
+<https://julialang.org/blog/2012/02/why-we-created-julia/>`_ by
+Jeff Bezanson Stefan Karpinski Viral B. Shah Alan Edelman
 
 Many researchers and programmers are drawn to Julia because of its
 speed. Indeed, Julia is among the few languages in the exclusive
