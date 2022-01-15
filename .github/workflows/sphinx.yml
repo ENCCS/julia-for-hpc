@@ -1,0 +1,110 @@
+# From: https://github.com/rkdarst/sphinx-actions-test/blob/master/.github/workflows/sphinx-build.yml
+
+name: sphinx
+on: [push, pull_request]
+
+# If these SPHINXOPTS are enabled, then be strict about the builds and
+# fail on any warnings
+#env:
+#  SPHINXOPTS: "-W --keep-going -T"
+
+
+jobs:
+  build-and-deploy:
+    name: Build and gh-pages
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - uses: actions/checkout@v2
+      # https://github.com/marketplace/actions/setup-python
+      # ^-- This gives info on matrix testing.
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Fetch all refs
+        run: |
+          git fetch
+      # I don't know where the "run" thing is documented.
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Debugging information
+        run: |
+          echo "github.ref:" ${{github.ref}}
+          echo "github.event_name:" ${{github.event_name}}
+          echo "github.head_ref:" ${{github.head_ref}}
+          echo "github.base_ref:" ${{github.base_ref}}
+          git rev-parse --abbrev-ref HEAD
+          git branch
+          git branch -a
+          git remote -v
+
+      # Build
+      - uses: ammaraskar/sphinx-problem-matcher@master
+      - name: Build Sphinx docs
+        run: |
+          make dirhtml
+
+
+      # The following supports building all branches and combining on
+      # gh-pages
+
+      # Clone and set up the old gh-pages branch
+      - name: Clone old gh-pages
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -x
+          git fetch
+          ( git branch gh-pages remotes/origin/gh-pages && git clone . --branch=gh-pages _gh-pages/ ) || mkdir _gh-pages
+          rm -rf _gh-pages/.git/
+          mkdir -p _gh-pages/branch/
+      # If a push and main, copy build to _gh-pages/ as the "main"
+      # deployment.
+      - name: Copy new build (main)
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          set -x
+          # Delete everything under _gh-pages/ that is from the
+          # primary branch deployment.  Eicludes the other branches
+          # _gh-pages/branch-* paths, and not including
+          # _gh-pages itself.
+          find _gh-pages/ -mindepth 1 ! -path '_gh-pages/branch*' -delete
+          rsync -a _build/dirhtml/ _gh-pages/
+      # If a push and not on main, then copy the build to
+      # _gh-pages/branch/$brname (transforming '/' into '--')
+      - name: Copy new build (branch)
+        if: ${{ github.event_name == 'push' && github.ref != 'refs/heads/main' }}
+        run: |
+          set -x
+          #brname=$(git rev-parse --abbrev-ref HEAD)
+          brname="${{github.ref}}"
+          brname="${brname##refs/heads/}"
+          brdir=${brname//\//--}   # replace '/' with '--'
+          rm -rf   _gh-pages/branch/${brdir}
+          rsync -a _build/dirhtml/ _gh-pages/branch/${brdir}
+      # Go through each branch in _gh-pages/branch/, if it's not a
+      # ref, then delete it.
+      - name: Delete old feature branches
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          set -x
+          for brdir in `ls _gh-pages/branch/` ; do
+              brname=${brdir//--/\/}   # replace '--' with '/'
+              if ! git show-ref remotes/origin/$brname ; then
+                  echo "Removing $brdir"
+                  rm -r _gh-pages/branch/$brdir/
+              fi
+          done
+
+      # Deploy
+      # https://github.com/peaceiris/actions-gh-pages
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' }}
+        #if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _gh-pages/
+          force_orphan: true
