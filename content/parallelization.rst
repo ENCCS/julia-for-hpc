@@ -36,7 +36,8 @@ Julia can be started with a given number of threads in two ways:
 
 .. code-block:: bash
 
-   julia -t 4
+   julia -t 4  
+   julia -t auto
    # or (can also set the env-var in e.g. .bashrc)
    JULIA_NUM_THREADS = 4 julia
 
@@ -52,21 +53,139 @@ which parallelizes a `for` loop to run with multiple threads:
 
 .. code-block:: julia
 
+   using .Threads
    a = zeros(10)
-   Threads.@threads for i = 1:10
-       a[i] = Threads.threadid()
+   @threads for i = 1:10
+       a[i] = threadid()
    end
    println(a)
 
+Let's see if we can achieve any speed gain when performing a 
+costly calculation.
+
+.. tabs::
+
+   .. tab:: Serial
+   
+      .. code-block:: julia
+
+         function sqrt_array(A)
+             B = similar(A)
+             for i in eachindex(A)
+                 @inbounds B[i] = sqrt(A[i])
+             end
+             B
+         end
+   
+   .. tab:: Threaded
+   
+      .. code-block:: julia
+
+         function threaded_sqrt_array(A)
+             B = similar(A)
+             @threads for i in eachindex(A)
+                 @inbounds B[i] = sqrt(A[i])
+             end
+             B
+         end
+
+We can now compare the performance:
+
+.. code-block:: julia
+
+   a = rand(1000, 1000)
+   @btime sqrt_array(a);
+   @btime threaded_sqrt_array(a);
+
+   # make sure we're getting the correct value
+   sqrt_array(a) ≈ threaded_sqrt_array(a)
+
+With 4 threads, the speedup could be between a factor 2 or 3.   
 
 
-Note that ``@threads`` currently only works on outermost loops.
+Pitfalls
+^^^^^^^^
+
+Just like with multithreading in other languages, one needs to be 
+aware of possible `race conditions <https://en.wikipedia.org/wiki/Race_condition>`_, 
+i.e. when the order in which threads read from and write to memory 
+can change the result of a computation. 
+
+We can illustrate this with an example where we sum up the square 
+root of elements of an array. 
+- The serial version provides the correct value and reference execution time. 
+- The "race condition" version illustrates how a naive implementation can lead to problems.
+- The "atomic" version shows how we can ensure a correct results by using `atomic operations`.
+- The "workaround" version shows how we can refactor the code to get both correct result and speedup.
+
+.. tabs:: 
+
+   .. tab:: Serial
+
+      .. code-block:: julia
+
+         function sqrt_sum(A)
+             s = zero(eltype(A))
+             for i in eachindex(A)
+                 @inbounds s += sqrt(A[i])
+             end
+             s
+         end
 
 
-Summary
-^^^^^^^
+   .. tab:: Race condition
 
-WRITEME
+      .. code-block:: julia
+
+         function threaded_sqrt_sum(A)
+             s = zero(eltype(A))
+             @threads for i in eachindex(A)
+                 @inbounds s += sqrt(A[i])
+             end
+             return s
+         end
+
+   .. tab:: Atomic
+
+      .. code-block:: julia
+
+         function threaded_sqrt_sum_atomic(A)
+             s = Atomic{eltype(A)}(zero(eltype(A)))
+             @threads for i in eachindex(A)
+                 @inbounds atomic_add!(s, sqrt(A[i]))
+             end
+             return s[]
+         end
+
+   .. tab:: Workaround
+
+      .. code-block:: julia
+
+         function threaded_sqrt_sum_workaround(A)
+             partial = zeros(eltype(A), nthreads())
+             @threads for i in eachindex(A)
+                 @inbounds partial[threadid()] += sqrt(A[i])
+             end
+             s = zero(eltype(A))
+             for i in eachindex(partial)
+                 s += partial[i]
+             end     
+             return s
+         end         
+
+We will observe that:
+
+- The serial version is slow but correct.
+- The race condition version is both slow and wrong.
+- The atomic version is correct but extremely slow.
+- The workaround is fast and correct, but required refactoring.
+
+
+Threading with ``Threads.@threads`` is quite straightforward, 
+but one needs to be careful not to introduce race conditions 
+and sometimes that requires code refactorization.
+
+
 
 Distributed computing
 ---------------------
@@ -151,7 +270,8 @@ Exercises
    Can it safely be threaded, i.e. is there any risk of race 
    conditions?
 
-   - Insert the ``Threads.@threads`` macro in the right location.
+   - Insert the ``Threads.@threads`` macro in the right location - 
+     note that ``@threads`` currently only works on outermost loops!
    - Measure its effects with ``@benchmark``.
      Since it's cumbersome to change the "Julia: Num Threads" option 
      in VSCode and relaunch the Julia REPL over and over, use the 
