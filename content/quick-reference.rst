@@ -88,10 +88,12 @@ Basic syntax
 |                  | - ``t = (a=2, b=1+2)``             | - Named tuple, access: ``t.a``  |
 |                  | - ``d = Dict("A"=>1, "B"=>2)``     | - Dictionary                    |
 |                  | - ``a = [1, 2, 3, 4]``             | - 4-element Vector{Int64}       |
+|                  | - ``Vector{T}(undef, n)``          | - undef 1-D array length n      |
 |                  | - ``Float64[1,2]``                 | - 2-element Vector{Float64}     |
 |                  | - ``[1:5;]``                       | - 5-element Array{Int64,1}      |
 |                  | - ``[1:5]``                        | - 1-element vector with a range |
 |                  | - ``[range(0,stop=2π,length=5);]`` | - 5-element Vector{Float64}     |
+|                  | - ``collect(T, itr)``              | - array from iterable           |
 |                  | - ``rand(5)``                      | - random 5-elem vector in [0,1) |
 |                  | - ``rand(Int, 5)``                 | - random vector with integers   |
 |                  | - ``ones(5)``                      | - 5-elem vector with FP64 ones  |
@@ -106,8 +108,9 @@ Basic syntax
 |                  | - ``splice!(a,2:3)``               | - Remove items at given indices |
 |                  | - ``splice!(a,2:3, 5:7)``          | - Rm & add items at given inds  |
 +------------------+------------------------------------+---------------------------------+
-| Multidimensional | - ``mat = [1 2; 3 4]``             | - 2×2 Matrix{Int64}             |
-| arrays           | - ``zeros(4,4,4,4)``               | - Zero 4×4×4×4 Array{Float64, 4}|
+| Multidimensional | - ``Array{T}(undef, dims)``        | - New undef array type T        |
+| arrays           | - ``mat = [1 2; 3 4]``             | - Zero 4×4×4×4 Array{Float64, 4}|
+|                  | - ``zeros(4,4,4,4)``               | - Random 12×4 Matrix{Float64}   |
 |                  | - ``rand(12,4)``                   | - Random 12×4 Matrix{Float64}   |
 +------------------+------------------------------------+---------------------------------+
 | Inspecting       | - ``length(a)``                    |                                 |
@@ -122,6 +125,7 @@ Basic syntax
 | Manipulating     | - ``push!(a, 10)``                 | - Append in-place               |
 | arrays           | - ``insert!(a, 1, 42)``            | - Insert in given position      |
 |                  | - ``append!(a, [3, 5, 7])``        | - Append another array          |
+|                  | - ``splice!(a, 3, -1])``           | - Rm in given pos and replace   |
 +------------------+------------------------------------+---------------------------------+
 | Miscellanous     | - ``δ = 0.1``  (type \delta <TAB>) | - Unicode names with LaTeX      |
 |                  | - ``println("A = $A")``            | - Print using interpolation     |
@@ -135,21 +139,27 @@ Loops and conditionals
 For loops iterate over iterables, including types like ``Range``,
 ``Array``, ``Set`` and ``Dict``.
 
-.. code:: julia
+.. code-block:: julia
 
 	  for i in [1,2,3,4,5]
 	      println("i = $i")
 	  end
 
-.. code:: julia
+.. code-block:: julia
 
 	  for (k, v) in Dict("A" => 1, "B" => 2, "C" => 3)
 	      println("$k is $v")
 	  end
 
+.. code-block:: julia
+
+	for (i, j) in ([1, 2, 3], ("a", "b", "c"))
+		println("$i $j")
+	end
+
 Conditionals work like in other languages.
 
-.. code:: julia
+.. code-block:: julia
 	  
 	  if x > 5
 	      println("x > 5")
@@ -158,7 +168,72 @@ Conditionals work like in other languages.
 	  else                    # optional else
 	      println("x = 5")
 	  end
-	  
+
+The ternary operator exists in Julia:
+
+.. code-block:: julia
+
+	a ? b : c
+
+The meaning is `[condition] ? [execute if true] : [execute if false]`.
+
+While loops:
+
+.. code-block:: julia
+
+   n = 0
+   while n < 10
+       n += 1
+       println(n)
+   end
+
+Working with files
+------------------
+
+Obtain a file handle to start reading from file, 
+and then close it:
+
+.. code-block:: julia
+
+   f = open("myfile.txt")
+   # work with file...
+   close(f)
+
+The recommended way to work with files is to use a 
+do-block. At the end of the do-block the file will 
+be closed automatically:
+
+.. code-block:: julia
+
+   open("myfile.txt") do f
+       # read from file
+       lines = readlines(f)
+       println(lines)
+   end
+
+Writing to a file:
+
+.. code-block:: julia
+
+   open("myfile.txt", "w") do f
+       write(f, "another line")
+   end
+
+
+Some useful functions to work with files:
+
++------------------------+-----------------------------------------------------------+
+| Function               |  What it does                                             |
++========================+===========================================================+
+| - ``cd(path)``         | - Change directory                                        |
+| - ``readdir(path)``    | - Return list of current directory                        |
+| - ``abspath(path)``    | - Add current dir to filename                             |
+| - ``joinpath(p1, p2)`` | - Join two paths                                          |
+| - ``isdir(path)``      | - Check if path is a directory                            |         
+| - ``splitdir(path)``   | - Split path into tuple of dirname and filename           |
+| - ``homedir()``        | - Return home directory                                   |
++------------------------+-----------------------------------------------------------+
+
 Functions
 ---------
 
@@ -166,7 +241,7 @@ A function is an object that maps a tuple of argument values to a return value.
 
 Example of a regular, named function:
 
-.. code:: julia
+.. code-block:: julia
 
 	  function f(x,y)
 	      x + y   # can also use return keyword to return immediately 
@@ -174,7 +249,7 @@ Example of a regular, named function:
 
 A more compact form:
 
-.. code:: julia
+.. code-block:: julia
 
 	  f(x,y) = x + y	  
 
@@ -183,7 +258,7 @@ This function can be called by ``f(4,5)``.
 The expression ``f`` refers to the function object, and can be passed
 around like any other value (functions in Julia are `first-class objects`):
 
-.. code:: julia
+.. code-block:: julia
 
 	  g = f;
 	  g(4,5)
@@ -191,7 +266,7 @@ around like any other value (functions in Julia are `first-class objects`):
 
 Functions can be combined by composition:
 
-.. code::
+.. code-block::
 
    f(x) = x^2
    g(x) = sqrt(x)
@@ -200,13 +275,13 @@ Functions can be combined by composition:
 
 An alternative syntax is to use ∘ (typed by ``\circ<tab>``)   
 
-.. code:: julia
+.. code-block:: julia
 
 	  (f ∘ g)(3)   # returns 3.0 
 
 Most operators (``+``, ``-``, ``*`` etc) are in fact functions, and can be used as such:
 
-.. code:: julia
+.. code-block:: julia
 
 	  +(1, 2, 3)   # 6
 
@@ -214,9 +289,10 @@ Most operators (``+``, ``-``, ``*`` etc) are in fact functions, and can be used 
 	  (sqrt ∘ +)(3, 6)  # 3.0 (first summation, then square root)
 
 Just like Vectors and Arrays can be operated on element-wise (vectorized)
-by dot-operators (e.g. ``[1, 2, 3].^2``), functions can also be vectorized:
+by dot-operators (e.g. ``[1, 2, 3].^2``), functions can also be vectorized
+(broadcasting):
 
-.. code:: julia
+.. code-block:: julia
 
 	  sin.([1.0, 2.0, 3.0])
 	  
@@ -224,7 +300,7 @@ by dot-operators (e.g. ``[1, 2, 3].^2``), functions can also be vectorized:
 Keyword arguments can be added after ``;``, which is useful for functions
 with many arguments and it can be difficult to remember the correct order:
 
-.. code:: julia
+.. code-block:: julia
 	  
 	  function greet_dog(; greeting = "Hi", dog_name = "Fido")  # note the ;
 	      println("$greeting $dog_name")
@@ -235,7 +311,7 @@ with many arguments and it can be difficult to remember the correct order:
 
 Optional arguments are given default value:
 
-.. code:: julia
+.. code-block:: julia
 
 	  function date(y, m=1, d=1)
 	      month = lpad(m, 2, "0")  # lpad pads from the left
@@ -249,7 +325,7 @@ Optional arguments are given default value:
 	  
 Return types can be specified explicitly:
 
-.. code:: julia
+.. code-block:: julia
 
    function g(x, y)::Int8
        return x * y
@@ -257,7 +333,7 @@ Return types can be specified explicitly:
 
 Argument types can also be specified:
 
-.. code:: julia
+.. code-block:: julia
 
    function f(x::Float64, y::Float64)
        return x*y
@@ -266,7 +342,7 @@ Argument types can also be specified:
 Additional **methods** can be added to functions simply by
 new definitions with different argument types:
 
-.. code:: julia
+.. code-block:: julia
 
    function f(x::Int64, y::Int64)
        return x*y
@@ -275,7 +351,7 @@ new definitions with different argument types:
 To find out which method is being dispatched for a particular
 function call:
 
-.. code:: julia
+.. code-block:: julia
 
 	  @which f(3, 4)
    
@@ -283,14 +359,14 @@ As functions in Julia are first-class objects, they can be passed
 as arguments to other functions.
 `Anonymous functions` are useful for such constructs:
 
-.. code:: julia
+.. code-block:: julia
 
    map(x -> x^2 + 2x - 1, [1, 3, -1])  # passes each element of the vector to the anonymous function
 
    
 `Varargs` functions can take an arbitrary number of arguments:
 
-.. code:: julia
+.. code-block:: julia
 
 	  f(a,b,x...) = a + b + sum(x)
 
@@ -300,7 +376,7 @@ as arguments to other functions.
 "Splatting" is when values contained in an iterable collection
 are split into individual arguments of a function call:
 
-.. code:: julia
+.. code-block:: julia
 
 	  x = (3, 4, 5)
 
@@ -314,46 +390,21 @@ are split into individual arguments of a function call:
 
 Julia functions can be piped (chained) together:
 
-.. code:: julia
+.. code-block:: julia
 
 	  1:10 |> sum |> sqrt    # 7.416198487095663 (first summed, then square root)
 
-The table below lists a few useful functions in Julia's base library and briefly 
-explains their purpose.
-
-+----------------------+---------------------------------------------------------------+
-| Function             |  What it does                                                 |
-+======================+===============================================================+
-| dump(a)            | Show full representation of value                   |
-| collect(T, iter)          | Return array of given type with items from iterable                           |
-| zip(a, b)             |                  |
-| minimum(a)                  |                  |
-| maximum(a)        |                               |
-| findfirst        |                               |
-| push!()        |                               |
-| splice!()        |                               |
-| split()        |                               |
-| splice!()        |                               |
-| push!()        |                               |
-| splice!()        |                               |
-| push!()        |                               |
-| splice!()        |                               |
-| push!()        |                               |
-| splice!()        |                               |
-+------------------+------------------------------------------------------------+
-
-	  
 	 
 Exception handling
 ------------------
 
 Exceptions are thrown when an unexpected condition has occurred:
 
-.. code:: julia
+.. code-block:: julia
 
 	  sqrt(-1)
 
-.. code:: output
+.. code-block:: output
 
    DomainError with -1.0:
    sqrt will only return a complex result if called with a complex argument. Try sqrt(Complex(x)).
@@ -367,7 +418,7 @@ Exceptions are thrown when an unexpected condition has occurred:
 
 Exceptions can be handled with a try/catch block:
 
-.. code:: julia
+.. code-block:: julia
 
 	  try
 	      sqrt(-1)
@@ -375,14 +426,14 @@ Exceptions can be handled with a try/catch block:
 	      println("caught the error: $e")
 	  end
 
-.. code:: output
+.. code-block:: output
 
 	  caught the error: DomainError(-1.0, "sqrt will only return a complex result if called with a complex argument. Try sqrt(Complex(x)).")
 
 
 Exceptions can be created explicitly with `throw`:
 
-.. code:: julia
+.. code-block:: julia
 
 	  function negexp(x)
 	      if x>=0
@@ -415,23 +466,23 @@ and called by:
 
 	@sayhello "world!"
 
-The table below contains a list of useful macros and a short explanation of their function. 
-Many are available in ``Base``, i.e. the base library of Julia. Others are implemented in 
-other packages and thus need those packages to be loaded.
+Many useful macros are already predefined in base Julia or in various 
+packages. For example:
 
-+----------------------+-----------------|-----------------------------------------------------------+
-| Macro                | From package    | What it does                                              |
-+======================+=================|===========================================================+
-| ``@time``            | ``Base``        | Prints time it takes to execute statement                  |
-| ``@show``            | Show an expression and result                              |
-| ``Threads.@threads`` |                               |                              |
-| ``@everywhere``      |                               |                              |
-|         |                               |                              |
-|         |                               |                              |
-|         |                               |                              |
-|         |                               |                              |
-+------------------+----------------------+-------------------------------------+
+.. code-block::
 
+	# time an expression
+	@time sum(rand(1000,1000))
+
+.. code-block::
+
+	# which function method will be used for specified args
+	@which(sin(2.0))
+
+.. code-block::
+
+	# print generated LLVM bitcode for given type
+	@code_llvm sin(2.0)
 
 
 
