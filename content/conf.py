@@ -17,11 +17,11 @@ sys.path.insert(0, os.path.abspath('.'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Julia for high-performance scientific computing'
-copyright = '2020, EuroCC National Competence Center Sweden'
+project = 'Julia for High-Performance Scientific Computing'
+copyright = '2022, EuroCC National Competence Center Sweden'
 author = 'Kjartan Thor Wikfeldt'
-github_user = 'wikfeldt'
-github_repo_name = 'julia-for-scicomp'  # auto-detected from dirname if blank
+github_user = 'enccs'
+github_repo_name = 'Julia-for-HPC'  # auto-detected from dirname if blank
 github_version = 'master'
 conf_py_path = '/content/' # with leading and trailing slash
 
