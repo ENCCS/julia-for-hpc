@@ -112,11 +112,12 @@ i.e. when the order in which threads read from and write to memory
 can change the result of a computation. 
 
 We can illustrate this with an example where we sum up the square 
-root of elements of an array. 
-- The serial version provides the correct value and reference execution time. 
-- The "race condition" version illustrates how a naive implementation can lead to problems.
-- The "atomic" version shows how we can ensure a correct results by using `atomic operations`.
-- The "workaround" version shows how we can refactor the code to get both correct result and speedup.
+root of elements of an array. The serial version provides the correct 
+value and reference execution time. The "race condition" version illustrates 
+how a naive implementation can lead to problems. The "atomic" version shows 
+how we can ensure a correct results by using `atomic operations`.
+The "workaround" version shows how we can refactor the code to get both 
+correct result and speedup.
 
 .. tabs:: 
 
@@ -183,47 +184,128 @@ We will observe that:
 
 Threading with ``Threads.@threads`` is quite straightforward, 
 but one needs to be careful not to introduce race conditions 
-and sometimes that requires code refactorization.
+and sometimes that requires code refactorization. Using atomic operations 
+adds significant overhead and thus only makes sense if each iteration 
+of the loop takes significant time to compute.
 
 
 
 Distributed computing
 ---------------------
 
+Julia's main implementation of message passing for distributed-memory systems is contained in 
+the ``Distributed`` module. Its approach is different from other frameworks like MPI in 
+that communication is generally "one-sided", meaning that the programmer needs to explicitly 
+manage only one process in a two-process operation. 
+ 
+Julia can be started with a given number of `local` processes using the ``-p``:
 
-WRITEME: General discussion
+.. code-block:: bash
 
-- MPI.jl
-- Distributed.jl
-- Kubernetes.jl
-- ClusterManagers
+   julia -p 4
 
-.. code-block::
+The ``Distributed`` module is automatically loaded if the ``-p`` flag is used.  
+But we can also dynamically add processes in a running Julia session:
+
+.. code-block:: julia
+
+   using Distributed
    
-   function throw_darts(N)
-       n = 0
-       for i in 1:N
-           if rand()^2 + rand()^2 < 1
-           n += 1
-           end
+   println(nprocs())
+   addprocs(4)
+   println(nprocs())
+   println(nworkers())
+
+
+Note what happens here: there is one `master` process which can create 
+additional `worker` processes, and as we shall see it can also distribute work to these 
+workers.
+
+For running on a cluster, we instead need to provide the ``--machine-file`` option 
+and the name of a file containing a list of machines that are accessible via 
+password-less ``ssh``.
+
+Each process has a unique identifier accessible via the ``myid()`` function (`master` 
+has ``myid() = 1``). The ``@spawn`` and ``@spawnat`` macros can be used to transfer 
+work to a process, and then return the resulting ``Future`` to the `master` process 
+using the ``fetch`` function (``@spawn`` selects the process automatically while 
+``@spawnat`` lets you choose: 
+
+.. code-block:: julia
+
+   # execute myid() and rand() on process 2
+   r = @spawnat 2 (myid(), rand())
+   # fetch the result
+   fetch(r)
+
+One use case could be to manually distribute expensive function calls 
+between processes,
+but there are higher-level and simpler constructs than ``@spawn`` / ``@spawnat``:
+
+- the ``@distributed`` macro for ``for`` loops. Can be used with a 
+  reduction operator to gather work performed by the independent tasks.
+- the ``pmap`` function which maps an array or range to a given function.
+
+To illustrate the difference between these approaches we revisit the 
+``sum_sqrt`` function from above. To use ``pmap`` we need to modify our 
+function to accept a range so we will use this modified version.
+Note that to make any function available to all processes it needs to 
+be decorated with the ``@everywhere`` macro:
+
+.. code-block:: julia
+
+   @everywhere function sqrt_sum_range(A, r)
+       s = zero(eltype(A))
+       for i in r
+           @inbounds s += sqrt(A[i])
        end
-       return n
+       return s
    end
 
-.. code-block::
+Let us look at and discuss example implementations using each of these 
+techniques:
 
-   function estimate_pi(N, loops)
-       n = sum(pmap((x)->darts_in_circle(N), 1:loops))
-       return 4 * n / (loops * N)
-   end
+.. tabs:: 
+
+   .. tab:: ``@distributed (+)``
+
+      .. code-block:: julia
+      
+         batch = length(A) / 10
+         @distributed (+) for r in [(1:batch) .+ offset for offset in 0:batch:length(A)-1]
+             sqrt_sum_range(A, r)
+         end
 
 
-@distributed
-^^^^^^^^^^^^
+   .. tab:: ``pmap``
+
+      .. code-block:: julia
+      
+         batch = length(A) / 10
+         sum(pmap(r -> sqrt_sum_range(A, r), [(1:batch) .+ offset for offset in 0:batch:length(A)-1]))
 
 
-``pmap``
-^^^^^^^^
+   .. tab:: ``@spawnat``
+
+      .. code-block:: 
+      
+         futures = Array{Future}(undef, nworkers())
+      
+         @time begin
+             for (i, id) in enumerate(workers())
+                 batch = floor(Int, length(A) / nworkers())
+                 remainder = length(A) % nworkers()
+                 if (i-1) < remainder
+                     start = 1 + (i - 1) * (batch + 1)
+                     stop = start + batch
+                 else 
+                     start = 1 + (i - 1) * batch + remainder
+                     stop = start + batch - 1
+                 end
+                 futures[i] = @spawnat myid() sqrt_sum_range(A, start:stop)
+             end
+             p = sum(fetch.(futures))
+         end
 
 
 SharedArrays
