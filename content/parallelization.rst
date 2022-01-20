@@ -17,12 +17,24 @@ Parallelization
 Overview
 --------
 
-WRITEME
+Julia supports four main types of parallel programming:
+
+- **Asynchronous tasks or coroutines**: Tasks allow suspending and resuming 
+  computations for I/O, event handling and similar patterns. Not really HPC and 
+  outside the scope of the this lesson. 
+- **Multi-threading**: Provides the ability to schedule Tasks simultaneously 
+  on more than one thread or CPU core, sharing memory. The easiest way to parallelize 
+  on shared-memory systems. Contained in the ``Threads`` standard library.
+- **Distributed computing**: Runs multiple Julia processes with separate memory 
+  spaces on the same or multiple computers. Useful high-level constructs are implemented 
+  in the standard library ``Distributed`` module. For those that like MPI there is 
+  `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_.
+- **GPU computing**: Covered in the next episode!   
 
 Threading
 ---------
 
-We will now walk through how to use multithreading in Julia. 
+We start by walking through how to use multithreading in Julia. 
 In the VSCode REPL, let's see how many threads we have access to:
 
 .. code-block:: julia
@@ -181,13 +193,16 @@ We will observe that:
 - The atomic version is correct but extremely slow.
 - The workaround is fast and correct, but required refactoring.
 
+Bonus questions: 
+
+- What does ``eltype`` do?
+- What does ``eachindex`` do?
 
 Threading with ``Threads.@threads`` is quite straightforward, 
 but one needs to be careful not to introduce race conditions 
 and sometimes that requires code refactorization. Using atomic operations 
 adds significant overhead and thus only makes sense if each iteration 
 of the loop takes significant time to compute.
-
 
 
 Distributed computing
@@ -267,25 +282,27 @@ techniques:
 
 .. tabs:: 
 
-   .. tab:: ``@distributed (+)``
+   .. tab:: @distributed (+)
 
       .. code-block:: julia
       
          batch = length(A) / 10
+
          @distributed (+) for r in [(1:batch) .+ offset for offset in 0:batch:length(A)-1]
              sqrt_sum_range(A, r)
          end
 
 
-   .. tab:: ``pmap``
+   .. tab:: pmap
 
       .. code-block:: julia
       
          batch = length(A) / 10
+
          sum(pmap(r -> sqrt_sum_range(A, r), [(1:batch) .+ offset for offset in 0:batch:length(A)-1]))
 
 
-   .. tab:: ``@spawnat``
+   .. tab:: @spawnat
 
       .. code-block:: 
       
@@ -307,28 +324,74 @@ techniques:
              p = sum(fetch.(futures))
          end
 
+The ``@spawnat`` version is cumbersome to use in this case and the algorithm 
+required to partition the array reminds of MPI. 
+The ``@distributed (+)`` parallel for loop and the ``pmap`` mapping are much simpler,
+but which one is preferable for a given use case?
+
+- ``@distributed`` is appropriate for reductions. It does not load-balance and 
+  simply divides the work evenly between processes. It is best in cases where 
+  each loop iteration is cheap.
+- ``pmap`` can handle reductions as well as other algorithms. It performs load-balancing
+  and since dynamic scheduling introduces some overhead it's best to use ``pmap`` 
+  for computationally heavy tasks.
 
 SharedArrays
 ^^^^^^^^^^^^
+
+Shared arrays, supplied by the ``SharedArrays`` module in base Julia, are 
+arrays that are shared across multiple processes on the same machine. They 
+can be used to distribute operations on an array across processes.
+
+Let us revisit the ``sqrt_array`` function and modify it to mutate the 
+argument passed to it, and also add a method to it for 
+SharedArrays which has the required ``@distributed`` and ``@sync`` macros  
+(``@sync`` is needed to wait for all processes to finish):
+
+.. tabs::
+
+   .. tab:: Serial
+
+      .. code-block:: julia
+      
+         function sqrt_array!(A)
+             for i in eachindex(A)
+                 @inbounds A[i] = sqrt(A[i])
+             end
+         end
+
+   .. tab:: SharedArray
+
+      .. code-block:: julia
+
+         @everywhere function sqrt_array!(A::SharedArray)
+             @sync @distributed for i in eachindex(A)
+                 @inbounds A[i] = sqrt(A[i])
+             end
+         end
+
+
+Remember that Julia always selects the most specialized method for 
+dispatch based on the argument type. We can now time these two methods: 
+
+.. code-block::
+
+   A = rand(100_000_000);
+   @time sqrt_array!(A)
+
+   SA = SharedArray(A);
+   @time sqrt_array!(SA)
+
+Bonus questions:
+
+- Should the ``@time`` expression be called more than once?
+- How can we check which method is being dispatched for ``A`` and ``SA``?
 
 
 DistributedArrays
 ^^^^^^^^^^^^^^^^^
 
-notes
-^^^^^
 
-example function to distribute:
-
-.. code-block:: julia
-
-   @everywhere function compute_pi(N)
-      series = 1.0
-      for i in 1:N
-         series += (isodd(i) ? -1 : 1) / (2i + 1)
-      end
-      return 4*series
-   end
 
 Summary
 ^^^^^^^
@@ -342,6 +405,10 @@ time and memory parameters of your problem
 - DistributedArrays lets the data do the work splitting
 
 
+Where to go from here
+^^^^^^^^^^^^^^^^^^^^^
+
+- how to run on cluster, SLURM etc
 
 Exercises
 ---------
@@ -401,6 +468,6 @@ See also
 
 - https://docs.julialang.org/en/v1/manual/multi-threading/
 - https://julialang.org/blog/2019/07/multithreading/
-- https://docs.julialang.org/en/v1/manual/performance-tips/
+- https://github.com/JuliaParallel/MPI.jl
 - https://docs.julialang.org/en/v1/manual/distributed-computing/
 
