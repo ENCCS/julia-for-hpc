@@ -57,108 +57,126 @@ analyze the penguins dataset, but first we need to install it:
    using DataFrames
 
 
+
+A dataframe is a 2-dimensional table of rows and columns, much 
+like a Excel spreadsheet. The rows usually represent independent 
+observations, while the columns represent the 
+features (variables) for each observation. Just like in Python and R, 
+the DataFrames.jl package provides functionality for data 
+manipulation and analysis.  
+Here's how you can create a new dataframe:
+
+ .. code-block:: julia
+
+   using DataFrames
+   names = ["Ali", "Clara", "Jingfei", "Stefan"]
+   age = ["25", "39", "64", "45"]
+   df = DataFrame(; name=names, age=age)
+
+ .. code-block:: text
+
+    4×2 DataFrame
+    Row │ first_name  age    
+        │ String      String 
+    ────┼────────────────────
+      1 │ Ali         25
+      2 │ Clara       39
+      3 │ Jingfei     64
+      4 │ Stefan      45
+
+
 .. type-along:: Dataframes
 
-   A dataframe is a 2-dimensional table of rows and columns, much 
-   like a Excel spreadsheet. The rows usually represent independent 
-   observations, while the columns represent the 
-   features (variables) for each observation. Just like in Python and R, 
-   the DataFrames.jl package provides functionality for data 
-   manipulation and analysis.  
-   Here's how you can create a new dataframe:
-
+   We now create a dataframe containing the PalmerPenguins dataset.
+   Note that the ``table`` variable is of type ``CSV.File``; the 
+   PalmerPenguins package uses the `CSV.jl <https://csv.juliadata.org/stable/>`_ 
+   package for fast loading of data. Note further that ``DataFrame`` can 
+   accept a ``CSV.File`` object and read it into a dataframe!
+   
    .. code-block:: julia
-
-      using DataFrames
-      names = ["Ali", "Clara", "Jingfei", "Stefan"]
-      age = ["25", "39", "64", "45"]
-      df = DataFrame(; name=names, age=age)
-
+   
+      table = PalmerPenguins.load()
+      df = DataFrame(table)
+   
+      # the raw data can be loaded by
+      #tableraw = PalmerPenguins.load(; raw = true)
+   
+      first(df, 5)
+   
    .. code-block:: text
+   
+      344×7 DataFrame
+       Row │ species    island     bill_length_mm  bill_depth_mm  flipper_length_mm  body_mass_g  sex     
+           │ String     String     Float64?        Float64?       Int64?             Int64?       String? 
+      ─────┼──────────────────────────────────────────────────────────────────────────────────────────────
+         1 │ Adelie   Torgersen            39.1           18.7                181         3750  male
+         2 │ Adelie   Torgersen            39.5           17.4                186         3800  female
+         3 │ Adelie   Torgersen            40.3           18.0                195         3250  female
+         4 │ Adelie   Torgersen       missing        missing              missing      missing  missing 
+         5 │ Adelie   Torgersen            36.7           19.3                193         3450  female
+   
+   
+   We can inspect the data using a few basic operations:
+   
+   .. code-block:: julia
+   
+      # slicing
+      df[1, 1:3]
+   
+      # slicing and column name (can also use "island")
+      df[1:20:100, :island]
+   
+      # dot syntax (editing will change the dataframe)
+      df.species
+   
+      # get a copy of a column 
+      df[:, [:sex, :body_mass_g]]
+   
+      # access column directly without copying (editing will change the dataframe)
+      df[!, :bill_length_mm]
+   
+      # get size
+      size(df), ncol(df), nrow(df)
+   
+      # find unique species
+      unique(df.species)
+   
+      # names of columns
+      names(df)
+   
+   
+   Summary statistics can be displayed with the ``describe`` function:
+   
+   .. code-block:: julia
+   
+      describe(df)
+   
+   .. code-block:: text
+   
+      7×7 DataFrame
+       Row │ variable           mean     min     median  max        nmissing  eltype                  
+           │ Symbol             Union…   Any     Union…  Any        Int64     Type                    
+      ─────┼──────────────────────────────────────────────────────────────────────────────────────────
+         1 │ species                     Adelie          Gentoo            0  String
+         2 │ island                      Biscoe          Torgersen         0  String
+         3 │ bill_length_mm     43.9219  32.1    44.45   59.6              2  Union{Missing, Float64}
+         4 │ bill_depth_mm      17.1512  13.1    17.3    21.5              2  Union{Missing, Float64}
+         5 │ flipper_length_mm  200.915  172     197.0   231               2  Union{Missing, Int64}
+         6 │ body_mass_g        4201.75  2700    4050.0  6300              2  Union{Missing, Int64}
+         7 │ sex                         female          male             11  Union{Missing, String}
 
-      4×2 DataFrame
-       Row │ first_name  age    
-           │ String      String 
-       ────┼────────────────────
-         1 │ Ali         25
-         2 │ Clara       39
-         3 │ Jingfei     64
-         4 │ Stefan      45
+   We can see in the output of ``describe`` that the element type of 
+   all the columns is a union of ``missing`` and a numeric type. This
+   implies that our dataset contains missing values.
+   
+   We can remove these by the ``dropmissing`` or ``dropmissing!`` functions
+   (what is the difference between them?):
+   
+   .. code-block:: julia
+   
+      dropmissing!(df)
+   
 
-
-We now create a dataframe containing the PalmerPenguins dataset:
-
-.. code-block:: julia
-
-   table = PalmerPenguins.load()
-   df = DataFrame(table)
-
-   # the raw data can be loaded by
-   #tableraw = PalmerPenguins.load(; raw = true)
-
-   first(df, 5)
-
-.. code-block:: text
-
-   344×7 DataFrame
-    Row │ species    island     bill_length_mm  bill_depth_mm  flipper_length_mm  body_mass_g  sex     
-        │ String     String     Float64?        Float64?       Int64?             Int64?       String? 
-   ─────┼──────────────────────────────────────────────────────────────────────────────────────────────
-      1 │ Adelie   Torgersen            39.1           18.7                181         3750  male
-      2 │ Adelie   Torgersen            39.5           17.4                186         3800  female
-      3 │ Adelie   Torgersen            40.3           18.0                195         3250  female
-      4 │ Adelie   Torgersen       missing        missing              missing      missing  missing 
-      5 │ Adelie   Torgersen            36.7           19.3                193         3450  female
-
-
-We can inspect the data using a few basic operations:
-
-.. code-block:: julia
-
-   # slicing
-   df[1, 1:3]
-
-   # slicing and column name (can also use "island")
-   df[1:20:100, :island]
-
-   # dot syntax (editing will change the dataframe)
-   df.species
-
-   # get a copy of a column 
-   df[:, [:sex, :body_mass_g]]
-
-   # access column directly without copying (editing will change the dataframe)
-   df[!, :bill_length_mm]
-
-   # get size
-   size(df), ncol(df), nrow(df)
-
-   # find unique species
-   unique(df.species)
-
-   # names of columns
-   names(df)
-
-
-Summary statistics can be displayed with the ``describe`` function:
-
-.. code-block:: julia
-
-   describe(df)
-
-.. code-block:: text
-
-   7×7 DataFrame
-    Row │ variable           mean     min     median  max        nmissing  eltype                  
-        │ Symbol             Union…   Any     Union…  Any        Int64     Type                    
-   ─────┼──────────────────────────────────────────────────────────────────────────────────────────
-      1 │ species                     Adelie          Gentoo            0  String
-      2 │ island                      Biscoe          Torgersen         0  String
-      3 │ bill_length_mm     43.9219  32.1    44.45   59.6              2  Union{Missing, Float64}
-      4 │ bill_depth_mm      17.1512  13.1    17.3    21.5              2  Union{Missing, Float64}
-      5 │ flipper_length_mm  200.915  172     197.0   231               2  Union{Missing, Int64}
-      6 │ body_mass_g        4201.75  2700    4050.0  6300              2  Union{Missing, Int64}
-      7 │ sex                         female          male             11  Union{Missing, String}
 
 The main features we are interested in for each penguin observation are 
 `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm` and `body_mass_g`.
@@ -170,16 +188,6 @@ What the first three features mean is illustrated in the picture below.
    Artwork by @allison_horst
 
 
-We can see in the output of ``describe`` that the element type of 
-all the columns is a union of ``missing`` and a numeric type. This
-implies that our dataset contains missing values.
-
-We can remove these by the ``dropmissing`` or ``dropmissing!`` functions
-(what is the difference between them?):
-
-.. code-block:: julia
-
-   dropmissing!(df)
 
 
 
@@ -267,13 +275,10 @@ Multiple subplots can be created by:
 
 .. type-along:: Visualizing the Penguin dataset
 
-   First we make sure to have the packages installed and set the backend to GR:
+   First set the backend to GR:
 
    .. code-block::
 
-      using Pkg
-      Pkg.add("Plots")
-      Pkg.add("StatsPlots")
       gr()
 
    For the Penguin dataset it is more appropriate to use scatter plots, for example:
@@ -310,10 +315,14 @@ Multiple subplots can be created by:
               ylabel = "bill depth (g)",
               group = df[!, :species],
               marker = [:circle :ltriangle :star5],
-              color = [:magenta :springgreen :yellow],
+              color = [:magenta :springgreen :blue],
               markersize = 5,
               alpha = 0.8
               )
+
+   .. figure:: img/penguin_scatter.png
+      :align: center
+      :scale: 50%
 
    The ``scatter`` function comes from the base `Plots` package. `StatsPlots` provides
    many other types of plot types, for example ``density``. To use dataframes with `StatsPlots`
@@ -325,8 +334,12 @@ Multiple subplots can be created by:
       @df df density(:flipper_length_mm,
                      xlabel = "flipper length (mm)",
                      group = :species,
-                     color = [:magenta :springgreen :yellow],
+                     color = [:magenta :springgreen :blue],
                      )
+
+   .. figure:: img/penguin_density.png
+      :align: center
+      :scale: 50%
 
 
 Machine learning in Julia
@@ -402,6 +415,7 @@ Exercises
 
       WRITEME
 
+
 .. exercise::
 
    Start from the neural network we trained to identify penguins, and try adding 
@@ -427,4 +441,4 @@ See also
       iris = dataset("datasets", "iris")
       neuro = dataset("boot", "neuro")
 
-- `"The Future of Machine Learning and why it looks a lot like Julia" by Logan Kilpatrick <https://towardsdatascience.com/the-future-of-machine-learning-and-why-it-looks-a-lot-like-julia-a0e26b51f6a6>_
+- `"The Future of Machine Learning and why it looks a lot like Julia" by Logan Kilpatrick <https://towardsdatascience.com/the-future-of-machine-learning-and-why-it-looks-a-lot-like-julia-a0e26b51f6a6>`_
