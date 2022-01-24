@@ -367,12 +367,19 @@ Julia has packages for traditional (non-deep) machine learning:
 - `MLJ.jl <https://alan-turing-institute.github.io/MLJ.jl/dev/>`_ provides a common interface 
   and meta-algorithms for selecting, tuning, evaluating, composing and comparing over 150 machine learning models.
 
+We will use a few utility functions from ``MLJ.jl`` in our deep learning 
+exercise below, so we will need to add it to our environment:
 
-Flux.jl
-^^^^^^^
+.. code-block::
 
-Flux comes "batteries-included" with many useful tools built in, but also enables the user to 
-write own Julia code for DL components.
+   using Pkg
+   Pkg.add("MLJ")
+
+Deep learning
+^^^^^^^^^^^^^
+
+`Flux.jl <https://fluxml.ai/>`_ comes "batteries-included" with many useful tools 
+built in, but also enables the user to write own Julia code for DL components.
 
 - Flux has relatively few explicit APIs for features like regularisation or embeddings. 
 - All of Flux is straightforward Julia code and. It can be worth to inspect it build own parts if needed.
@@ -380,19 +387,115 @@ write own Julia code for DL components.
   One can build complex data processing pipelines that integrate Flux models.
 
 
-Training a model
-~~~~~~~~~~~~~~~~
 
-To train a model we need four things:
+.. type-along:: Training a deep neural network to classify penguins
 
-- A objective function, that evaluates how well a model is doing given
-  some input data.
-- The trainable parameters of the model.
-- A collection of data points that will be provided to the objective
-  function.
-- An optimiser that will update the model parameters appropriately.
+   To train a model we need four things:
 
+   - A collection of data points that will be provided to the objective
+     function.
+   - A objective (cost or loss) function, that evaluates how well a model 
+     is doing given some input data.
+   - The definition of a model and access to its trainable parameters.
+   - An optimiser that will update the model parameters appropriately.
 
+   First we import the required modules:
+
+   .. code-block:: julia
+
+      using Flux
+      using MLJ: partition, ConfusionMatrix
+
+   We can now preprocess our dataset to make it suitable for training a network:
+
+   .. code-block:: julia
+
+      # select feature and label columns
+      X = select(df, Not([:species, :sex, :island]))
+      Y = df[:, :species]
+      
+      # split into training and testing parts
+      (xtrain, xtest), (ytrain, ytest) = partition((X, Y), 0.8, shuffle=true, rng=123, multi=true)
+      
+      # use single precision and transpose arrays
+      xtrain, xtest = Float32.(Array(xtrain)'), Float32.(Array(xtest)')
+      
+      # one-hot encoding
+      ytrain = Flux.onehotbatch(ytrain, ["Adelie", "Gentoo", "Chinstrap"])
+      ytest = Flux.onehotbatch(ytest, ["Adelie", "Gentoo", "Chinstrap"])
+      
+      # count penguin classes to see if it's balanced
+      sum(ytrain, dims=2)
+      sum(ytest, dims=2)
+
+   Next up is the loss function which will be minimized during the training.
+   We also define another function which will give us the accuracy of the model:
+
+   .. code-block:: julia
+
+      # we use the cross-entropy loss function typically used for classification
+      loss(x, y) = Flux.crossentropy(model(x), y)
+
+      # onecold (opposite to onehot) gives back the original representation
+      function accuracy(x, y)
+          return sum(Flux.onecold(model(x)) .== Flux.onecold(y)) / size(y, 2)
+      end
+
+   ``model`` will be our neural network, so we go ahead and define it:
+
+   .. code-block:: julia
+
+      n_features, n_classes, n_neurons = 4, 3, 10
+      model = Chain(
+              Dense(n_features, n_neurons, sigmoid),
+              Dense(n_neurons, n_classes),
+              softmax)  
+
+   We now define an anonymous callback function to pass into the training function 
+   to monitor the progress, select the standard ADAM optimizer, and extract the parameters 
+   of the model:
+
+   .. code-block:: julia
+
+      callback = () -> @show(loss(xtrain, ytrain))
+      opt = ADAM()
+      θ = Flux.params(model)
+
+   Before training the model, let's have a look at some initial predictions 
+   and the accuracy:
+
+   .. code-block:: julia
+
+      # predictions before training
+      model(xtrain[:,1:5])
+      ytrain[:,1:5]
+      # accuracy before training
+      accuracy(xtrain, ytrain)
+      accuracy(xtest, ytest)
+
+   Finally we are ready to train the model. Let's run 100 epochs:
+
+   .. code-block:: julia
+
+      # the training data and the labels can be passed as tuples to train!
+      for i in 1:10
+          Flux.train!(loss, θ, [(xtrain, ytrain)], opt, cb = Flux.throttle(callback, 1))
+      end
+
+      # check final accuracy
+      accuracy(xtrain, ytrain)
+      accuracy(xtest, ytest)
+
+   The performance of the model is probably somewhat underwhelming, but you will 
+   fix that in an exercise below!
+
+   We finally create a confusion matrix to quantify the performance of the model:
+
+   .. code-block:: julia
+
+      predicted_species = Flux.onecold(model(xtest), ["Adelie", "Gentoo", "Chinstrap"])
+      true_species = Flux.onecold(ytest, ["Adelie", "Gentoo", "Chinstrap"])
+      ConfusionMatrix()(predicted_species, true_species)
 
 
 Exercises
@@ -418,12 +521,44 @@ Exercises
 
 .. exercise::
 
-   Start from the neural network we trained to identify penguins, and try adding 
-   the following layers one by one and see if the predictive ability improves:
+   Improve the performance of the neural network we trained above! 
+   The network is not improving much because of the large numerical 
+   range of the input features (from around 15 to around 6000) combined 
+   with the fact that we use a ``sigmoid`` activation function. A standard 
+   method in machine learning is to normalize features by "batch 
+   normalization". Replace the network definition with the following and 
+   see if the performance improves:
+   
+   .. code-block:: julia
 
-   - dense layer
-   - ...
-  
+      n_features, n_classes, n_neurons = 4, 3, 10
+      model = Chain(
+                 Dense(n_features, n_neurons),
+                 BatchNorm(n_neurons, relu),
+                 Dense(n_neurons, n_classes),
+                 softmax)  
+
+   Performance is usually better also if we, instead of training on the entire 
+   dataset at once, divide the training data into "minibatches" and update 
+   the network weights on each minibatch separately.
+   First define the following function:
+
+   .. code-block:: julia
+
+      function create_minibatches(xtrain, ytrain, batch_size=32, n_batch=10)
+          minibatches = Tuple[]
+          for i in 1:n_batch
+              randinds = sample(1:size(xtrain, 2), batch_size)
+              push!(minibatches, (xtrain[:, randinds], ytrain[:,randinds]))
+          end
+          return minibatches
+      end
+
+   and then create the minibatches by calling the function.  
+
+   You will not need to manually loop over the minibatches, simply pass 
+   the ``minibatches`` vector of tuples to the ``Flux.train!`` function. 
+   Does this make a difference?
 
 See also
 --------
