@@ -63,8 +63,9 @@ Modules are imported by either the ``using`` or ``import`` keywords.
 The difference is how variables defined in the module are brought into scope:
 
 - With ``using ModuleName``, all `exported` names (variables and functions) in the 
-  module are brought into scope.
-- With ``import ModuleName``, the module's names need to be qualified, e.g. 
+  module are brought into scope. Non-exported names are still available via 
+  ``ModuleName.func()`` or ``ModuleName.var1``.
+- With ``import ModuleName``, all the module's names need to be qualified, e.g. 
   ``ModuleName.func()`` or ``ModuleName.var1``.
 
 .. type-along:: Creating a module
@@ -287,6 +288,22 @@ Exercises
    - `PalmerPenguins <https://github.com/devmotion/PalmerPenguins.jl>`_
    - `Plots <https://github.com/JuliaPlots/Plots.jl>`_
    - `Flux <https://github.com/FluxML/Flux.jl>`_
+   - `MLJ <https://alan-turing-institute.github.io/MLJ.jl/dev/>`_
+
+   .. solution::
+
+      First create a new directory in a preferred location on your machine with
+      ``mkdir datascience`` or through a File Browser.
+      Then, inside a Julia session:
+
+      .. code-block:: julia
+
+         # navigate to the datascience directory
+         using Pkg
+         Pkg.activate(".")
+         Pkg add DataFrames, PalmerPenguins, Plots, Flux, MLJ
+
+
 
 .. exercise:: Writing a test
 
