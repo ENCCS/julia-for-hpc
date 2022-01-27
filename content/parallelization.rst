@@ -17,7 +17,19 @@ Parallelization
 Overview
 --------
 
-Julia supports four main types of parallel programming:
+Julia has inbuilt automatic parallelism which is useful to know about.
+Consider the multiplication of two large array:
+
+.. code-block:: julia
+
+   A = rand(10000,10000)
+   B = rand(10000,10000)
+   A*B
+
+If we run this in a Julia session and monitor the resource usage (e.g. via ``top``) 
+we can see that all cores on our computers are used! 
+
+But to beyond that, Julia supports four main types of parallel programming:
 
 - **Asynchronous tasks or coroutines**: Tasks allow suspending and resuming 
   computations for I/O, event handling and similar patterns. Not really HPC and 
@@ -30,6 +42,7 @@ Julia supports four main types of parallel programming:
   in the standard library ``Distributed`` module. For those that like MPI there is 
   `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_.
 - **GPU computing**: Covered in the next episode!   
+  
 
 Threading
 ---------
@@ -238,7 +251,10 @@ workers.
 
 For running on a cluster, we instead need to provide the ``--machine-file`` option 
 and the name of a file containing a list of machines that are accessible via 
-password-less ``ssh``.
+password-less ``ssh``. Support for running on clusters with various schedulers 
+(including SLURM) can be found in the 
+`ClusterManagers.jl <https://github.com/JuliaParallel/ClusterManagers.jl>`_ 
+package.
 
 Each process has a unique identifier accessible via the ``myid()`` function (`master` 
 has ``myid() = 1``). The ``@spawn`` and ``@spawnat`` macros can be used to transfer 
@@ -372,7 +388,8 @@ SharedArrays which has the required ``@distributed`` and ``@sync`` macros
 
 
 Remember that Julia always selects the most specialized method for 
-dispatch based on the argument type. We can now time these two methods: 
+dispatch based on the argument type. We can now time these two methods 
+using ``@time`` instead of ``@btime``, this time: 
 
 .. code-block::
 
@@ -387,28 +404,51 @@ Bonus questions:
 - Should the ``@time`` expression be called more than once?
 - How can we check which method is being dispatched for ``A`` and ``SA``?
 
+We should keep in mind however that every change to a SharedArray causes message 
+passing to keep them in sync between processes, and this can affect performance.
+
 
 DistributedArrays
 ^^^^^^^^^^^^^^^^^
 
+Another way to approach parallelization over multiple machines is through 
+`DistributedArrays.jl <https://github.com/JuliaParallel/DistributedArrays.jl>`_, 
+which implements a *Global Array* interface. A DArray is distributed across a 
+set of workers. Each worker can read and write from its local portion of the 
+array and each worker has read-only access to the portions of the array held 
+by other workers.
 
+Currently, using ``DArrays`` requires significant book-keeping of array indices 
+and we will not go into it here.
+
+
+MPI
+^^^
+
+`MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_ is a Julia interface to 
+the Message Passing Interface, which has been the standard workhorse of 
+parallel computing for decades. If you know how to parallelize a program 
+with MPI in any other languages, you know how to do it in Julia!
 
 Summary
-^^^^^^^
+-------
 
 One should choose a distributed mechanism that fits with the 
 time and memory parameters of your problem
 
-- @distributed is good for reductions and even relatively fast inner loops with limited explicit data transfer
-- pmap is good for expensive inner loops that return a value
-- SharedArrays can be an easier drop-in replacement for threading-like behaviors (on a single machine)
-- DistributedArrays lets the data do the work splitting
+- ``Threads`` is as easy as decorating for loops with ``@threads``, but data 
+  dependencies (race conditions) need to be avoided.
+- ``@distributed`` is good for reductions and fast inner loops with limited 
+  data transfer.
+- ``pmap`` is good for expensive inner loops that return a value.
+- ``SharedArrays`` can be an easier drop-in replacement for threading-like 
+  behaviors on a single machine.
 
 
-Where to go from here
-^^^^^^^^^^^^^^^^^^^^^
 
-- how to run on cluster, SLURM etc
+
+
+
 
 Exercises
 ---------
@@ -440,8 +480,8 @@ Exercises
 
 .. exercise:: Using SharedArrays with Heatequation
 
-   Open up the Heatequation.jl package in VSCode and read the "SharedArrayHint"
-   comments. Think about what you should do, and then try doing it.
+   Look again at the double for loop in the ``evolve!`` function. 
+   Think about what you should do, and then try doing it.
    After you're done, benchmark a few test runs. 
 
    .. solution:: 
@@ -466,6 +506,8 @@ Exercises
 See also
 --------
 
+- The `Julia Parallel <https://github.com/JuliaParallel>`_ organization collects 
+  packages developed for parallel computing in Julia.
 - https://docs.julialang.org/en/v1/manual/multi-threading/
 - https://julialang.org/blog/2019/07/multithreading/
 - https://github.com/JuliaParallel/MPI.jl
