@@ -12,6 +12,11 @@ As an alternative to going through this page, you can also watch
 `this video <https://www.youtube.com/watch?v=sE67bP2PnOo&t=28s>`_ 
 which covers "a 300 page book on Julia in one hour".
 
+If you are coming from MATLAB, R, Python, C/C++ or Common Lisp, 
+you should also have a look at `this page 
+<https://docs.julialang.org/en/v1/manual/noteworthy-differences/>`_
+which lists the respective differences in Julia.
+
 Running Julia
 -------------
 
@@ -79,6 +84,8 @@ Basic syntax
 |                  | - ``supertype(Integer)``           | - Find supertypes               |
 |                  | - ``subtype(Integer)``             | - Find subtypes                 |
 |                  | - ``Integer <: Real``              | - "Subtype of", returns True    |
+|                  | - ``struct``                       | - Immutable composite type      |
+|                  | - ``mutable struct``               | - Mutable composite type        |
 +------------------+------------------------------------+---------------------------------+
 | Special values   | - ``Inf``                          | - Infinity (e.g. ``1 / 0``)     |
 |                  | - ``Nan``                          | - Not a number (e.g. ``0 / 0``) |
@@ -131,7 +138,6 @@ Basic syntax
 |                  | - ``println("A = $A")``            | - Print using interpolation     |
 |                  | - ``:something``                   | - Symbol for a name or label    |
 +------------------+------------------------------------+---------------------------------+
-
 
 Loops and conditionals
 ----------------------
