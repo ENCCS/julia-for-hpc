@@ -109,9 +109,12 @@ Some key aspects of GPUs that need to be kept in mind:
 The array interface
 -------------------
 
-GPU programming with Julia can be as simple as using ``CuArray``s
-(``ROCArray``s for AMD) instead of regular arrays. The following 
-code copies an array to the GPU and executes a simple operation on 
+GPU programming with Julia can be as simple as using ``CuArray``
+(``ROCArray`` for AMD) instead of regular ``Base.Array`` arrays. 
+The ``CuArray`` type closely resembles ``Base.Array`` which enables 
+us to write generic code which works on both types.
+
+The following code copies an array to the GPU and executes a simple operation on 
 the GPU:
 
 .. code-block:: julia
@@ -124,7 +127,7 @@ the GPU:
 However, the overhead of copying data to the GPU makes such simple calculations 
 very slow.
 
-Let's have a look at a more realistic example - matrix multiplication. We 
+Let's have a look at a more realistic example: matrix multiplication. We 
 create two random arrays, one on the CPU and one on the GPU, and compare the 
 performance:
 
@@ -140,10 +143,66 @@ performance:
 
 There should be a dramatic speedup!
 
+The NVIDIA libraries contain precompiled kernels for common 
+operations like matrix multiplication (`cuBLAS`), fast Fourier transforms 
+(`cuFFT`), linear solvers (`cuSOLVER`), etc. These kernels are wrapped
+in ``CUDA.jl`` and can be used directly with ``CuArrays``:
+
+.. code-block:: julia
+
+   # create a 100x100 Float32 random array and an uninitialized array
+   a = CUDA.rand(100, 100)
+   b = CuArray{Float32, 2}(undef, 100, 100)
+
+   # use cuBLAS for matrix multiplication
+   using LinearAlgebra
+   mul!(b, a, a)
+
+   # use cuSOLVER for QR factorization
+   qr(b)
+
+   # use cuFFT for FFT
+   using AbstractFFTs
+   fft(b)
+
+To move an array back from the GPU to the CPU, we can simply do ``Array(b)``.
+
 
 Writing your own kernels
 ------------------------
 
+Not all algorithms can be made to work with the higher-level abstractions 
+in ``CUDA.jl``. In such cases it's necessary to write our own GPU kernel.
+We will now do this for the ``evolve!`` function in ``HeatEquation.jl``.
+
+
+
+.. exercise:: Write a kernel for HeatEquation.evolve! 
+
+   step-by-step guide to write the kernel
+
+
+
+Profiling
+---------
+
+We can not use the regular Julia profilers to profile GPU code. However, 
+we can use NVIDIA's `nvprof` profiler simply by starting Julia like this:
+
+.. code-block:: bash
+
+   nvprof --profile-from-start off julia
+
+To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
+
+.. code-block:: julia
+
+   # first run it once to force compilation
+   my_function(y_d, x_d)  
+   CUDA.@profile my_function(y_d, x_d)
+
+When we quit the REPL again, the profiler process will print information about 
+the executed kernels and API calls.
 
 
 Neural networks on the GPU
