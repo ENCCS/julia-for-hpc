@@ -40,6 +40,47 @@ and translation between the two is straightforward.
 very little programming effort and a lower level approach for writing kernels 
 for fine-grained control.
 
+Setup
+-----
+
+Installing ``CUDA.jl``:
+
+.. code-block:: julia
+
+   using Pkg
+   Pkg.add("CUDA")
+
+To use the Julia GPU stack, one needs to have NVIDIA drivers installed and
+the CUDA toolkit to go with the drivers. Supercomputers with NVIDIA GPUs 
+will already have both. For installation on other workstations one can follow the 
+`instructions from NVIDIA <https://www.nvidia.com/Download/index.aspx>`_ to 
+install the drivers, and let Julia automatically install the correct version 
+of the toolkit upon the first import: ``using CUDA``.
+
+Access to GPUs in the cloud
+---------------------------
+
+To fully experience the walkthrough in this episode we need to have access 
+to an NVIDIA GPU and the necessary software stack. Access to a HPC system with 
+GPUs and a Julia installation will work. Another option is to use 
+`JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from 
+`Julia Computing <https://juliacomputing.com/>`_ with 
+access to all of Julia and GPUs. Or one can use 
+`Google Colab <https://colab.research.google.com/>`_ which requires a Google 
+account and a manual Julia installation, but using simple NVIDIA GPUs is free.
+
+A quick way to get started is to use this 
+`Colab Julia notebook template 
+<https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_Colab_Notebook_Template.ipynb>`_.
+If you have a Google account and agree to using it here, follow these steps:
+
+- Open the notebook, save it to your Drive and optionally rename it
+- Click on `Runtime` > `Change runtime type` and select GPU under `Hardware accelerator`
+- Execute the first code cell (starting with ``%%shell``) to install Julia
+- Reload the page
+- Execute the second code cell (``versioninfo()``) with `SHIFT-ENTER` to see if it works
+- Press "b" to create a new code cell below and start typing along.
+
 
 GPUs vs CPUs
 ------------
@@ -64,11 +105,40 @@ Some key aspects of GPUs that need to be kept in mind:
   they are divided into "streaming multiprocessors". Some of these details are 
   important when writing own GPU kernels.
 
-  
 
+The array interface
+-------------------
 
-CuArrays
---------
+GPU programming with Julia can be as simple as using ``CuArray``s
+(``ROCArray``s for AMD) instead of regular arrays. The following 
+code copies an array to the GPU and executes a simple operation on 
+the GPU:
+
+.. code-block:: julia
+
+   using CUDA
+
+   a = CuArray([1,2,3,4])
+   a += 1
+
+However, the overhead of copying data to the GPU makes such simple calculations 
+very slow.
+
+Let's have a look at a more realistic example - matrix multiplication. We 
+create two random arrays, one on the CPU and one on the GPU, and compare the 
+performance:
+
+.. code-block:: julia
+
+   using BenchmarkTools
+
+   A_cpu = rand(2^13, 2^13)
+   A_gpu = CUDA.rand(2^13, 2^13)
+
+   @btime A_cpu * A_cpu
+   @btime A_gpu * A_gpu
+
+There should be a dramatic speedup!
 
 
 Writing your own kernels
