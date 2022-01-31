@@ -1,12 +1,15 @@
 Quick Reference
 ===============
 
-This page provides a quick overview of Julia's syntax and features.
-To prepare for a workshop where this material is taught, please 
-first install Julia as described in :doc:`setup`, and then go through 
-the overview below and experiment with it either in the Julia REPL, 
-a Jupyter or Pluto notebook, or in VSCode (refer to :doc:`setup` for 
-installation and configuration instructions).
+This page provides a condensed overview of Julia's main syntax and features.
+
+.. callout:: Preparing for a workshop
+
+   To prepare for a workshop where this material is taught, please 
+   first install Julia as described in :doc:`setup`, and then go through 
+   the overview below and experiment with it either in the Julia REPL, 
+   a Jupyter or Pluto notebook, or in VSCode (refer to :doc:`setup` for 
+   installation and configuration instructions).
 
 As an alternative to going through this page, you can also watch 
 `this video <https://www.youtube.com/watch?v=sE67bP2PnOo&t=28s>`_ 
@@ -35,21 +38,20 @@ We can write Julia code in various ways:
      ``shell>``. You can type any shell commands as you would from terminal.
    - Type ``]`` to go to **Package mode** where prompt starts with
      ``(@v1.5) pkg>`` (if you have Julia version 1.5). Here you can add
-     packages with ``add`, update packages with ``update`` etc. To see
+     packages with ``add``, update packages with ``update`` etc. To see
      all options type ``?``.
    - To exit any non-Julian mode, hit Escape key.
 
-2. `Jupyter <https://jupyter.org/>`_
+2. `Jupyter <https://jupyter.org/>`_:
    Jupyter notebooks are familiar to many Python and R users. 
 
-3. `Pluto.jl <https://github.com/fonsp/Pluto.jl>`_
-
+3. `Pluto.jl <https://github.com/fonsp/Pluto.jl>`_:
    Pluto offers a similar notebook experience to Jupyter, but in contrast
    to Jupyter
    Pluto understands global references between cells, and
    reactively re-evaluates cells affected by a code change.
 
-4. `Visual Studio Code <https://code.visualstudio.com/>`_ (VSCode)
+4. `Visual Studio Code <https://code.visualstudio.com/>`_ (VSCode):
 
    - a full-fledged Integrated Development Environment which is
      very useful for larger codebases. Extensions are needed to
@@ -63,86 +65,86 @@ We can write Julia code in various ways:
 Basic syntax
 ------------
 
-+------------------+------------------------------------+---------------------------------+
-| Feature          | Example syntax                     | Result / meaning                |
-+==================+====================================+=================================+
-| Arithmetic       | - ``2 + 3 * 1.1``                  | - Summing, multiplying          |
-|                  | - ``2^3``                          | - Power                         |
-|                  | - ``sqrt(9)``                      | - Square root                   |
-|                  | - ``40 / 5``                       | - ``8.0`` (Float)               |
-|                  | - ``12 % 2``                       | - ``2`` (remainder)             |
-|                  | - ``10^19``                        | - Results in integer overflow!  |
-|                  | - ``1e19`` or ``big(10)^19``       | - -> solves the problem         |
-|                  | - ``exp(pi*im)``                   | - Exponentiation, imaginary nr. |
-|                  | - ``sin(2*pi)``                    | - Trigonometry                  |
-+------------------+------------------------------------+---------------------------------+
-| Types            | - ``A = 3.14``                     | - Scalar, float                 |
-|                  | - ``B = 10``                       | - Scalar, integer               |
-|                  | - ``C = "hello"``                  | - String                        |
-|                  | - ``D = true``                     | - Boolean                       |
-|                  | - ``typeof(A)``                    | - Find type                     |
-|                  | - ``supertype(Integer)``           | - Find supertypes               |
-|                  | - ``subtype(Integer)``             | - Find subtypes                 |
-|                  | - ``Integer <: Real``              | - "Subtype of", returns True    |
-|                  | - ``struct``                       | - Immutable composite type      |
-|                  | - ``mutable struct``               | - Mutable composite type        |
-+------------------+------------------------------------+---------------------------------+
-| Special values   | - ``Inf``                          | - Infinity (e.g. ``1 / 0``)     |
-|                  | - ``Nan``                          | - Not a number (e.g. ``0 / 0``) |
-|                  | - ``nothing``                      | - e.g. for variables w/o value  |
-+------------------+------------------------------------+---------------------------------+
-| 1D arrays        | - ``t = (1, 2, 3)``                | - Tuple (immutable)             |
-|                  | - ``t = (a=2, b=1+2)``             | - Named tuple, access: ``t.a``  |
-|                  | - ``d = Dict("A"=>1, "B"=>2)``     | - Dictionary                    |
-|                  | - ``a = [1, 2, 3, 4]``             | - 4-element Vector{Int64}       |
-|                  | - ``Vector{T}(undef, n)``          | - undef 1-D array length n      |
-|                  | - ``Float64[1,2]``                 | - 2-element Vector{Float64}     |
-|                  | - ``[1:5;]``                       | - 5-element Array{Int64,1}      |
-|                  | - ``[1:5]``                        | - 1-element vector with a range |
-|                  | - ``[range(0,stop=2π,length=5);]`` | - 5-element Vector{Float64}     |
-|                  | - ``collect(T, itr)``              | - array from iterable           |
-|                  | - ``rand(5)``                      | - random 5-elem vector in [0,1) |
-|                  | - ``rand(Int, 5)``                 | - random vector with integers   |
-|                  | - ``ones(5)``                      | - 5-elem vector with FP64 ones  |
-|                  | - ``zeros(5)``                     | - 5-elem vector with FP64 zeros |
-|                  | - ``[1,2,3].^2``                   | - Element-wise dot-operation    |
-+------------------+------------------------------------+---------------------------------+
-| Indexing and     | - ``a[1]``                         | - first element                 |
-| slicing          | - ``a[1:3]``                       | - 3-element vector              |
-|                  | - ``a[3:end]``                     | - ``end`` is last element       |
-|                  | - ``a[1:2:end]``                   | - step size of 2                |
-|                  | - ``a[3:end]``                     | - ``end`` is last element       |
-|                  | - ``splice!(a,2:3)``               | - Remove items at given indices |
-|                  | - ``splice!(a,2:3, 5:7)``          | - Rm & add items at given inds  |
-+------------------+------------------------------------+---------------------------------+
-| Multidimensional | - ``Array{T}(undef, dims)``        | - New undef array type T        |
-| arrays           | - ``mat = [1 2; 3 4]``             | - Zero 4×4×4×4 Array{Float64, 4}|
-|                  | - ``zeros(4,4,4,4)``               | - Random 12×4 Matrix{Float64}   |
-|                  | - ``rand(12,4)``                   | - Random 12×4 Matrix{Float64}   |
-+------------------+------------------------------------+---------------------------------+
-| Inspecting       | - ``length(a)``                    |                                 |
-| array properties | - ``first(a)``                     |                                 |
-|                  | - ``last(a)``                      |                                 |
-|                  | - ``minimum(a)``                   |                                 |
-|                  | - ``maximum(a)``                   |                                 |
-|                  | - ``argmin(a)``                    |                                 |
-|                  | - ``argmax(a)``                    |                                 |
-|                  | - ``size(a)``                      |                                 |
-+------------------+------------------------------------+---------------------------------+
-| Manipulating     | - ``push!(a, 10)``                 | - Append in-place               |
-| arrays           | - ``insert!(a, 1, 42)``            | - Insert in given position      |
-|                  | - ``append!(a, [3, 5, 7])``        | - Append another array          |
-|                  | - ``splice!(a, 3, -1])``           | - Rm in given pos and replace   |
-+------------------+------------------------------------+---------------------------------+
-| Miscellanous     | - ``δ = 0.1``  (type \delta <TAB>) | - Unicode names with LaTeX      |
-|                  | - ``println("A = $A")``            | - Print using interpolation     |
-|                  | - ``:something``                   | - Symbol for a name or label    |
-+------------------+------------------------------------+---------------------------------+
++------------------+-------------------------------------------------------------------+
+| Feature          | Example syntax and its result/meaning                             |
++==================+===================================================================+
+| Arithmetic       | - ``2 + 3 * 1.1``                   Summing, multiplying          |
+|                  | - ``2^3``                           Power                         |
+|                  | - ``sqrt(9)``                       Square root                   |
+|                  | - ``40 / 5``                        ``8.0`` (Float)               |
+|                  | - ``12 % 2``                        ``2`` (remainder)             |
+|                  | - ``10^19``                         Results in integer overflow!  |
+|                  | - ``1e19`` or ``big(10)^19``        -> solves the problem         |
+|                  | - ``exp(pi*im)``                    Exponentiation, imaginary nr. |
+|                  | - ``sin(2*pi)``                     Trigonometry                  |
++------------------+-------------------------------------------------------------------+
+| Types            | - ``A = 3.14``                      Scalar, float                 |
+|                  | - ``B = 10``                        Scalar, integer               |
+|                  | - ``C = "hello"``                   String                        |
+|                  | - ``D = true``                      Boolean                       |
+|                  | - ``typeof(A)``                     Find type                     |
+|                  | - ``supertype(Integer)``            Find supertypes               |
+|                  | - ``subtype(Integer)``              Find subtypes                 |
+|                  | - ``Integer <: Real``               "Subtype of", returns True    |
+|                  | - ``struct``                        Immutable composite type      |
+|                  | - ``mutable struct``                Mutable composite type        |
++------------------+-------------------------------------------------------------------+
+| Special values   | - ``Inf``                           Infinity (e.g. ``1 / 0``)     |
+|                  | - ``Nan``                           Not a number (e.g. ``0 / 0``) |
+|                  | - ``nothing``                       e.g. for variables w/o value  |
++------------------+-------------------------------------------------------------------+
+| 1D arrays        | - ``t = (1, 2, 3)``                 Tuple (immutable)             |
+|                  | - ``t = (a=2, b=1+2)``              Named tuple, access: ``t.a``  |
+|                  | - ``d = Dict("A"=>1, "B"=>2)``      Dictionary                    |
+|                  | - ``a = [1, 2, 3, 4]``              4-element Vector{Int64}       |
+|                  | - ``Vector{T}(undef, n)``           undef 1-D array length n      |
+|                  | - ``Float64[1,2]``                  2-element Vector{Float64}     |
+|                  | - ``[1:5;]``                        5-element Array{Int64,1}      |
+|                  | - ``[1:5]``                         1-element vector with a range |
+|                  | - ``[range(0,stop=2π,length=5);]``  5-element Vector{Float64}     |
+|                  | - ``collect(T, itr)``               array from iterable           |
+|                  | - ``rand(5)``                       random 5-elem vector in [0,1) |
+|                  | - ``rand(Int, 5)``                  random vector with integers   |
+|                  | - ``ones(5)``                       5-elem vector with FP64 ones  |
+|                  | - ``zeros(5)``                      5-elem vector with FP64 zeros |
+|                  | - ``[1,2,3].^2``                    Element-wise dot-operation    |
++------------------+-------------------------------------------------------------------+
+| Indexing and     | - ``a[1]``                          first element                 |
+| slicing          | - ``a[1:3]``                        3-element vector              |
+|                  | - ``a[3:end]``                      ``end`` is last element       |
+|                  | - ``a[1:2:end]``                    step size of 2                |
+|                  | - ``a[3:end]``                      ``end`` is last element       |
+|                  | - ``splice!(a,2:3)``                Remove items at given indices |
+|                  | - ``splice!(a,2:3, 5:7)``           Rm & add items at given inds  |
++------------------+-------------------------------------------------------------------+
+| Multidimensional | - ``Array{T}(undef, dims)``         New undef array type T        |
+| arrays           | - ``mat = [1 2; 3 4]``              Zero 4×4×4×4 Array{Float64, 4}|
+|                  | - ``zeros(4,4,4,4)``                Random 12×4 Matrix{Float64}   |
+|                  | - ``rand(12,4)``                    Random 12×4 Matrix{Float64}   |
++------------------+-------------------------------------------------------------------+
+| Inspecting       | - ``length(a)``                                                   |
+| array properties | - ``first(a)``                                                    |
+|                  | - ``last(a)``                                                     |
+|                  | - ``minimum(a)``                                                  |
+|                  | - ``maximum(a)``                                                  |
+|                  | - ``argmin(a)``                                                   |
+|                  | - ``argmax(a)``                                                   |
+|                  | - ``size(a)``                                                     |
++------------------+-------------------------------------------------------------------+
+| Manipulating     | - ``push!(a, 10)``                  Append in-place               |
+| arrays           | - ``insert!(a, 1, 42)``             Insert in given position      |
+|                  | - ``append!(a, [3, 5, 7])``         Append another array          |
+|                  | - ``splice!(a, 3, -1])``            Rm in given pos and replace   |
++------------------+-------------------------------------------------------------------+
+| Miscellanous     | - ``δ = 0.1``  (type ``\delta`` <TAB>)  Unicode names with LaTeX  |
+|                  | - ``println("A = $A")``            Print using interpolation      |
+|                  | - ``:something``                   Symbol for a name or label     |
++------------------+-------------------------------------------------------------------+
 
 Loops and conditionals
 ----------------------
 
-For loops iterate over iterables, including types like ``Range``,
+``for`` loops iterate over iterables, including types like ``Range``,
 ``Array``, ``Set`` and ``Dict``.
 
 .. code-block:: julia
@@ -171,7 +173,7 @@ Conditionals work like in other languages.
 	      println("x > 5")
 	  elseif x < 5    # optional elseif
 	      println("x < 5")
-	  else                    # optional else
+	  else            # optional else
 	      println("x = 5")
 	  end
 
@@ -250,7 +252,7 @@ Example of a regular, named function:
 .. code-block:: julia
 
 	  function f(x,y)
-	      x + y   # can also use return keyword to return immediately 
+	      x + y   # can also use "return" keyword 
 	  end
 
 A more compact form:
@@ -266,7 +268,7 @@ around like any other value (functions in Julia are `first-class objects`):
 
 .. code-block:: julia
 
-	  g = f;
+	  g = f
 	  g(4,5)
 
 
@@ -303,8 +305,7 @@ by dot-operators (e.g. ``[1, 2, 3].^2``), functions can also be vectorized
 	  sin.([1.0, 2.0, 3.0])
 	  
 	  
-Keyword arguments can be added after ``;``, which is useful for functions
-with many arguments and it can be difficult to remember the correct order:
+Keyword arguments can be added after ``;``:
 
 .. code-block:: julia
 	  
@@ -329,7 +330,15 @@ Optional arguments are given default value:
 	  date(2021, 2)   # "2021-02-01
 	  date(2021, 2, 3)   # "2021-02-03
 	  
-Return types can be specified explicitly:
+Argument types can be specified explicitly:
+
+.. code-block:: julia
+
+   function f(x::Float64, y::Float64)
+       return x*y
+   end
+
+Return types can also be specified:
 
 .. code-block:: julia
 
@@ -337,13 +346,7 @@ Return types can be specified explicitly:
        return x * y
    end
 
-Argument types can also be specified:
 
-.. code-block:: julia
-
-   function f(x::Float64, y::Float64)
-       return x*y
-   end
 
 Additional **methods** can be added to functions simply by
 new definitions with different argument types:
@@ -400,6 +403,16 @@ Julia functions can be piped (chained) together:
 
 	  1:10 |> sum |> sqrt    # 7.416198487095663 (first summed, then square root)
 
+Inbuilt functions ending with ``!`` mutate their input variables, and this 
+convention should be adhered to when writing own functions. 
+Compare, for example:
+
+.. code-block:: julia
+
+	A = [1 2; 3 4]
+	sum(A)   # gives 10
+	sum!([1 1], A)  # mutates A into 1x2 Matrix with elements 4, 6
+
 	 
 Exception handling
 ------------------
@@ -410,7 +423,7 @@ Exceptions are thrown when an unexpected condition has occurred:
 
 	  sqrt(-1)
 
-.. code-block:: output
+.. code-block:: text
 
    DomainError with -1.0:
    sqrt will only return a complex result if called with a complex argument. Try sqrt(Complex(x)).
@@ -432,7 +445,7 @@ Exceptions can be handled with a try/catch block:
 	      println("caught the error: $e")
 	  end
 
-.. code-block:: output
+.. code-block:: text
 
 	  caught the error: DomainError(-1.0, "sqrt will only return a complex result if called with a complex argument. Try sqrt(Complex(x)).")
 
@@ -455,10 +468,9 @@ Macros
 
 The `metaprogramming support in Julia <https://docs.julialang.org/en/v1/manual/metaprogramming/>`_ 
 allows code to be automatically transformed and generated. A full treatment of metaprogramming 
-is outside the scope of this lesson but familiarity with macros, which are made possible by 
-metaprogramming, is highly useful and will be covered in the lesson. 
+is outside the scope of this lesson but familiarity with macros is highly useful. 
 Macros provide a mechanism to include generated code in the final body of a program.
-To give only one simple example, a new macro can be created by:
+A simple macro can be created by:
 
 .. code-block:: julia
 	
@@ -490,15 +502,53 @@ packages. For example:
 	# print generated LLVM bitcode for given type
 	@code_llvm sin(2.0)
 
-
-
-
-
-
 Scope
 -----
 
-WRITEME
+The scope of a variable is the region of code within which a variable is visible. 
+Certain constructs introduce *scope blocks*:
+
+- Modules introduce a global scope that is separate from the global 
+  scopes of other modules. 
+- There is no all-encompassing global scope.
+- Functions and macros define *hard* local scopes.
+- for, while and try blocks and structs define *soft* local scopes.
+
+When ``x = 123`` occurs in a local scope, the following rules apply:
+
+- Existing local: If x is already a local variable, then the existing local ``x`` is assigned.
+- Hard scope: If ``x`` is not already a local variable, a new local named ``x`` 
+  is created in the same scope.
+- Soft scope: If ``x`` is not already a local variable the behavior depends on whether 
+  the *global* variable ``x`` is defined:
+
+  - if global ``x`` is undefined, a new local named ``x`` is created.
+  - if global ``x`` is defined, the assignment is considered ambiguous.
+
+Examples:
+
+.. code-block:: julia
+
+   x = 123 # global
+
+   function greet()
+       x = "hello" # new local
+       println(x)
+   end
+
+   greet()  # gives "hello"
+   println(x)  # gives 123
+
+   function greet2()
+       global x = "hello"
+   end
+
+   greet2()
+   println(x)  # gives "hello" (global x redefined)
+
+Further details can be found at 
+https://docs.julialang.org/en/v1/manual/variables-and-scoping/
+
 
 Style conventions
 -----------------
