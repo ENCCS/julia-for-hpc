@@ -1,5 +1,7 @@
-Working with data
-=================
+.. _scientific-computing:
+
+Scientific computing
+====================
 
 .. questions::
 
