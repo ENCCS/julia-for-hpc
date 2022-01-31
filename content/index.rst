@@ -23,7 +23,13 @@ computing.
 
 .. prereq::
 
-   prerequisites
+   - Experience in one or more programming languages.
+   - Familiarity with basic concepts in high-performance computing (HPC) 
+     (including parallelization by threading or multiprocessing) 
+     and programming graphical processing units (GPUs). No direct experience 
+     is required.
+   - Willingness to prepare for the workshop by going through the 
+     :doc:`quick-reference` guide.
 
 
 
@@ -38,7 +44,9 @@ computing.
    20 min ; :doc:`performant-code`
    20 min ; :doc:`parallelization`
    20 min ; :doc:`GPU`         
-   
+   20 min ; :doc:`outlook`         
+
+
 .. toctree::
    :hidden:
    :maxdepth: 1
@@ -51,6 +59,7 @@ computing.
    performant-code
    parallelization
    GPU
+   outlook
 
 .. toctree::
    :maxdepth: 1
@@ -74,7 +83,7 @@ who:
  - want to add a new exciting high-level yet performant language to their reportoar
  - might be mixing a high-level and a low-level language for performance reasons but want to make their life easier
  - need to analyze big data or perform computationally demanding modeling, analysis or simulations
- - want to develop code HPC systems and/or graphical processing units (GPUs) but prefer to stay within a
+ - want to develop high-performance parallelized and/or GPU code but prefer to stay within a
    productive high-level language.
 
 
@@ -148,11 +157,11 @@ See also
 --------
 
 Excellent resources for learning Julia can be found
-in the following pages:
-
-- https://github.com/csc-training/julia-introduction/
-
-
+at https://julialang.org/learning/. The list includes 
+`Julia Academy <https://juliaacademy.com/>`__ courses, 
+the `Julia manual <https://docs.julialang.org/en/v1/manual/getting-started/>`__,
+the `Julia Youtube channel <https://www.youtube.com/user/JuliaLanguage/playlists>`__, 
+and an assortment of tutorials and books.
 
 Credits
 -------
@@ -163,13 +172,15 @@ The lesson file structure and browsing layout is inspired by and derived from
 <http://opensource.org/licenses/mit-license.html>`_. We have copied and adapted
 most of their license text.
 
-Several examples and formulations are inspired by and derived from other Julia
+Several examples and formulations are inspired by other Julia
 lessons, particularly:
 
-- `Carsten Bauer's 3-day Julia workshop <https://github.com/carstenbauer/JuliaCologne21>`_
-- `The Carpentry lesson Introduction to Julia <https://carpentries-incubator.github.io/julia-novice/>`_
-- `Storopoli, Huijzer and Alonso (2021). Julia Data Science. ISBN: 9798489859165. <https://juliadatascience.io>`_
-  
+- `Introduction to Julia <https://github.com/csc-training/julia-introduction/>`__ provided by CSC and Aalto
+- `Carsten Bauer's 3-day Julia workshop <https://github.com/carstenbauer/JuliaCologne21>`__
+- `The Carpentry lesson Introduction to Julia <https://carpentries-incubator.github.io/julia-novice/>`__
+- `Storopoli, Huijzer and Alonso (2021). Julia Data Science. ISBN: 9798489859165. <https://juliadatascience.io>`__
+
+
 Instructional Material
 ^^^^^^^^^^^^^^^^^^^^^^
 
