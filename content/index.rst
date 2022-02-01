@@ -40,7 +40,7 @@ computing.
    20 min ; :doc:`motivation`
    20 min ; :doc:`overview`
    20 min ; :doc:`development`
-   20 min ; :doc:`data-science`   
+   20 min ; :doc:`scientific-computing`   
    20 min ; :doc:`performant-code`
    20 min ; :doc:`parallelization`
    20 min ; :doc:`GPU`         
@@ -55,7 +55,7 @@ computing.
    motivation
    overview
    development
-   data-science   
+   scientific-computing   
    performant-code
    parallelization
    GPU
