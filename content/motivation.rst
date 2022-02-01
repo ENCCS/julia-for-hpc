@@ -53,7 +53,7 @@ speed. Indeed, Julia is among the few languages in the exclusive
 
 
 The two-language problem
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. exercise:: Combining languages
 
@@ -89,20 +89,90 @@ longer for the first execution of any function.
 Composability
 -------------
 
-Julia is highly `commposable <https://en.wikipedia.org/wiki/Composability>`__,
-but what does that mean in practice?
+Julia is highly `composable <https://en.wikipedia.org/wiki/Composability>`__,
+which means that by writing generic code, 
+components (packages) that have been developed independently can simply be used 
+together and the result is exactly what you would have hoped for.
+
+A well known example is the interplay between 
+`DifferentialEquations.jl <https://diffeq.sciml.ai/stable/>`__,  a package for 
+solving differential equations, and 
+`Measurements.jl <https://github.com/JuliaPhysics/Measurements.jl>`__, a package for 
+working with numbers with uncertainty. Here's an example solving the simple pendulum 
+equation: 
+
+.. math::
+
+   \ddot{\theta} + \frac{g}{L}\theta = 0
+
+
+(adapted from https://tutorials.sciml.ai/)
+
+.. code-block:: julia
+
+   using DifferentialEquations, Measurements, Plots
+   
+   g = 9.79 ± 0.02; # Gravitational constants
+   L = 1.00 ± 0.01; # Length of the pendulum
+   
+   #Initial Conditions
+   u₀ = [0 ± 0, π / 3 ± 0.02] # Initial speed and initial angle
+   tspan = (0.0, 6.3)
+   
+   #Define the problem
+   function simplependulum(du,u,p,t)
+       θ  = u[1]
+       dθ = u[2]
+       du[1] = dθ
+       du[2] = -(g/L) * sin(θ)
+   end
+   
+   #Pass to solvers
+   prob = ODEProblem(simplependulum, u₀, tspan)
+   sol = solve(prob, Tsit5(), reltol = 1e-6)
+   
+   plot(sol.t, getindex.(sol.u, 2), label = "Numerical")
+
+The result is a plot of the solution to the differential 
+equation with error bars!
+
+.. figure:: img/composability.png
 
 
 When not to use Julia
 ---------------------
 
-- time to first plot (TTFP)
+**Time to first plot**: If you open the Julia REPL and type in a plotting command, it 
+will take a few seconds for the plot to appear because 
+Julia needs to *precompile* the fairly large Plots.jl package. This 
+makes Julia unsuitable for small scripts that get called frequently 
+to perform light work. 
 
-  - no running multiple short jobs etc
+- Workaround 1: Use instead long-running REPL sessions
+- Workaround 2: One can use 
+  `PackageCompiler.jl <https://github.com/JuliaLang/PackageCompiler.jl>`__ to 
+  create a precompiled package including Julia's base libraries which 
+  can be run on a different computer.
 
-- large memory consumption
 
-  - huge runtime because of precompilation
+**Ecosystem**: The ecosystem of packages is less mature than e.g. Python and R, 
+so you might not find a package that corresponds exactly with your favorite 
+package in another language.
+
+- Workaround 1: It's straightforward to use external libraries in Python or R
+- Workaround 2: Writing fast Julia code is easier than in most other languages 
+  so you might consider writing your own version!
+
+**Breaking changes**: Although most major packages have stabilized, there are still 
+many packages that go through frequent large changes that can break your code.
+
+- Workaround: Julia comes with a powerful package manager and inbuilt support 
+  for isolated software environments where dependencies can be recorded exactly.
+
+
+**Large memory consumption**: Because of precompilation Julia can have a 
+very large runtime (i.e. uses lots of memory). 
+
 
 
 
@@ -125,13 +195,9 @@ What you will not learn
 - We will only be scratching the surface of the topics we do cover. Make 
   sure to go through the recommended additional reading at the end of each 
   episode if you want to learn more.
-- How to interoperate with other languages. Calling code from Python, R, 
+- How to interoperate with other languages. Calling code in Python, R, 
   C/C++ and Fortran is relatively straightforward but is outside the current scope.
 - Julia has mature packages for scientific computing in many different scientific disciplines.
-  An overview of the package ecosystem will be provided in :doc:`scientific_computing` but we 
+  An overview of the package ecosystem will be provided in :ref:`scientific_computing` but we 
   will not go into any details except for an appetizer on data science and machine learning.
 
-After the workshop
-------------------
-
-- https://julialang.org/learning/
