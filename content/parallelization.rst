@@ -217,6 +217,18 @@ and sometimes that requires code refactorization. Using atomic operations
 adds significant overhead and thus only makes sense if each iteration 
 of the loop takes significant time to compute.
 
+FLoops
+^^^^^^
+
+``FLoops.jl <https://github.com/JuliaFolds/FLoops.jl>``__ is a a more recent  
+package for threading. It provides a macro ``@floop`` which is a superset of ``Threads.@threads``
+and can be used to generate fast generic sequential and parallel iteration over more 
+complex collections than what can be done with ``Threads.@threads``.
+``@floop`` can also do reductions and supports multiple threading backends through 
+`FoldsThreads.jl <FoldsThreads.jl>`_ and even `FoldsCUDA.jl <https://github.com/JuliaFolds/FoldsCUDA.jl>`_
+for running on GPUs.
+
+
 
 Distributed computing
 ---------------------
