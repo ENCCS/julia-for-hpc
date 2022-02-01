@@ -364,6 +364,18 @@ but which one is preferable for a given use case?
   and since dynamic scheduling introduces some overhead it's best to use ``pmap`` 
   for computationally heavy tasks.
 
+It should be emphasized that a common use case of ``pmap`` involves heavy 
+computations inside functions defined in user-imported packages. 
+For example, computing the singular value decomposition of many matrices:
+
+.. code-block:: julia
+
+   @everywhere using LinearAlgebra
+   x=[rand(100,100) for i in 1:10]
+   @btime map(LinearAlgebra.svd, x);
+   @btime pmap(LinearAlgebra.svd, x);
+
+
 SharedArrays
 ^^^^^^^^^^^^
 
