@@ -3,8 +3,8 @@ Special features of Julia
 
 .. questions::
 
-   - What sets Julia apart from other languages?
-   - How can a dynamically-typed language still be based on an elaborate type system?
+   - What are the main characteristics of Julia?
+   - How can a language be both dynamically and statically typed?
    - What is multiple dispatch?
 
 .. objectives::
@@ -13,7 +13,6 @@ Special features of Julia
    - Understand why Julia is fast
    - Learn about multiple dispatch and how it's used
    - Know how Julia code can be introspected to improve performance
-   - Know how scoping in Julia works
 
 Types
 -----
@@ -21,19 +20,20 @@ Types
 Julia is a dynamically typed language and does not require the
 declaration of types. Counterintuitively, it is notetheless due to its
 sophisticated type system that Julia is a high-performance language!
-This is because types are *inferred* and used when Julia is run.
+This is because types are *inferred* and used at runtime.
 
 Julia's type system is also what enables 
 `multiple dispatch <https://en.wikipedia.org/wiki/Multiple_dispatch>`__ 
 on function argument types - this is what sets the language apart from most other
-languages and makes it fast when combined with JIT and LLVM.
+languages and makes it fast when combined with just-in-time (JIT) compilation 
+using the LLVM compiler toolchain.
 
-Since types play a fundamental role in Julia’s design it’s important to
-have a mental model of Julia’s type system. There are two basic kinds of
+Since types play a fundamental role in Julia's design it's important to
+have a mental model of Julia's type system. There are two basic kinds of
 types in Julia: 
 
-- **Abstract types**: Define the kind of a thing, i.e. represent sets of related types. 
-- **Concrete types**: Describe data structures, i.e. concrete implementations that 
+- **Abstract types**: Define the kind of a thing, i.e. represent sets of related types. 
+- **Concrete types**: Describe data structures, i.e. concrete implementations that 
   can be used for variables.
 
 .. code-block:: julia
@@ -64,7 +64,7 @@ classical example:
 
 .. code-block:: julia
 
-    struct Point2D
+    struct Point
         x
         y
     end
@@ -100,24 +100,19 @@ We can now create ``Point`` variables with explicitly different types:
 
 .. code-block:: julia
 
-    x1 = Point(1,2)
+    p1 = Point(1,2)
+    # Point{Int64}(1, 2)
 
+    p2 = Point(1.0, 2.0)
+    # Point{Float64}(1.0, 2.0)
 
-
-.. code-block:: julia
-
-    x2 = Point(1.0, 2.0)
-
-
-Type stability
-^^^^^^^^^^^^^^
 
 
 Functions and methods
 ---------------------
 
 Functions form the backbone of any Julia code. Their syntax is
-straighforward:
+similar to other languages:
 
 .. code-block:: julia
 
@@ -125,57 +120,86 @@ straighforward:
         return x^2 + y^2
     end
 
+For short functions such as this one, it's also possible to use this 
+short-hand form:
 
 .. code-block:: julia
 
-    sumsquare(2.72, 3.83)
+   sumsquare(x,y) = x^2 + y^2
 
-
+We can pass in arguments with all kinds of types:
 
 .. code-block:: julia
 
-    sumsquare(2, 3)
-
-
+   # Int64
+   sumsquare(2, 3)
+   # Float64
+   sumsquare(2.72, 3.83)
+   # Complex{Int64}
+   sumsquare(1+2im, 2-1im)
+   # Complex{Float64}
+   sumsquare(1.2+2.3im, 2.1-1.5im)
 
 Note that our ``sumsquare`` function has no type annotations. The base
 library of Julia has different implementations of ``+`` and ``^`` which
-will be chosen (“dispatched”) at runtime according to the argument
+will be chosen ("dispatched") at runtime according to the argument
 types.
 
-In most cases it’s fine to omit types. The main reasons for adding type
+In most cases it's fine to omit types. The main reasons for adding type
 annotate are: 
 
 - Improve readability 
 - Catch errors 
-- Take advantage of **multiple dispatch** by implementing different meethods to the same function.
+- Take advantage of **multiple dispatch** by implementing different 
+  methods to the same function.
 
-Let’s see how we can add a new **method** to our ``sumsquare``
-**function** and dispatch on our ``Point`` type.
+.. exercise:: Extending sumsquare
 
-.. code-block:: julia
+   What happens if you try to call the ``sumsquare`` function with two 
+   input arguments of type ``Point``? Try it and try to make sense of the output.
 
-    function sumsquare(p1::Point, p2::Point)
-        return Point(p1.x^2 + p2.x^2, p1.y^2 + p2.y^2)
-    end
+   Now add a new **method** to our ``sumsquare`` **function** for the 
+   ``Point`` type. 
+
+   - We decide that the summed square of two points 
+     is ``p1.x^2 + p2.x^2, p1.y^2 + p2.y^2``
+   - You will need to modify both the function signature and body.   
+
+   .. solution::
+
+      Calling the original (un-extended) ``sumsquare`` function with two 
+      ``Point`` variables returns the error 
+      ``MethodError: no method matching ^(::Point{Int64}, ::Int64)``. 
+      This means that Julia doesn't know how to take powers of this type!
+
+      One way to implement the new ``sumsquare`` method for ``Point`` types is:
+
+      .. code-block:: julia
+
+         function sumsquare(p1::Point, p2::Point)
+            return Point(p1.x^2 + p2.x^2, p1.y^2 + p2.y^2)
+         end
 
 
-Note the output, ``sumsquare`` is now a “generic function with 2
-methods”.
+      Note the output, ``sumsquare`` is now a "generic function with 2
+      methods".
+
+If we solved the exercise, we should now be able to call ``sumsquare``
+with ``Point`` types. The element types can still be anything!
 
 .. code-block:: julia
 
     p1 = Point(1, 2)
     p2 = Point(3, 4)
     sumsquare(p1, p2)
-
+    # returns Point{Int64}(10, 20)
 
 .. code-block:: julia
 
     cp1 = Point(1+1im, 2+2im)
     cp2 = Point(3+3im, 4+4im)
     sumsquare(cp1, cp2)
-
+    # returns Point{Complex{Int64}}(0 + 20im, 0 + 40im)
 
 
 We can list all methods defined for a function:
@@ -184,23 +208,71 @@ We can list all methods defined for a function:
 
     methods(sumsquare)
 
+    # 2 methods for generic function "sumsquare":
+    # [1] sumsquare(p1::Point, p2::Point) in Main at REPL[35]:1
+    # [2] sumsquare(x, y) in Main at REPL[14]:1
 
 .. callout:: Methods and functions
 
-   -  A **function** describing the “what” can have multiple **methods**
-      describing the “how”
+   -  A **function** describing the "what" can have multiple **methods**
+      describing the "how"
    -  This differs from object-oriented languages in which objects (not
       functions) have methods
    -  **Multiple dispatch** is when Julia selects the most specialized
       method to run based on the types of all input arguments
    -  **Best practice**: constrain argument types to the widest possible
       level, and introduce constraints only if you know other argument
-      types will fail. \``\`
+      types will fail. 
 
+
+Type stability
+~~~~~~~~~~~~~~
+
+To compile specialized versions of a function for each 
+argument type the compiler needs to be able to infer all the argument 
+and return types of that function. This is called type stability, but 
+unfortunately it's possible to write type-unstable functions:
+
+.. code-block:: julia
+
+   # type-unstable function
+   function relu_unstable(x)
+       if x < 0
+           return 0
+       else 
+           return x
+       end
+   end           
+
+We can pass both integer and floating point arguments to this function, 
+but if we pass in a negative float it will return an integer 0, while 
+positive floats return a float. This can have a dramatically negative effect 
+on performance because the compiler will not be able to specialize!
+
+The solution is to use an inbuilt ``zero`` function to return a zero of the same 
+type as the input argument, so that inputting integers always gives 
+integer output and likewise for floats:
+
+.. code-block:: julia
+
+   # type-stable function
+   function relu_stable(x)
+       if x < 0
+           return zero(0)
+       else 
+           return x
+       end
+   end           
+
+Other convenience functions exist for working with arrays, including: 
+
+- ``eltype`` to determine the type of the array elements
+- ``similar`` to create an uninitialized mutable array with 
+  the given element type and size.
 
 
 Just in time compilation
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 Julia was designed from the beginning for high performance and this is accomplished by 
 compiling Julia programs to efficient native code for multiple platforms
