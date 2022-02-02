@@ -331,6 +331,57 @@ definitions
 Metaprogramming
 ---------------
 
+We saw in the compilation diagram above that after parsing the source code, 
+the Julia compiler generates an *abstract syntax tree* (AST) - a tree-like data 
+structure representing the source code. This is a legacy from the Lisp language.
+Since code is represented by objects that can be created and manipulated from 
+within the language, it is possible for a program to transform and generate its 
+own code.
+
+Let's have a look at the AST of a simple expression:
+
+.. code-block:: julia
+
+   Meta.parse("x + y") |> dump
+
+It returns:
+
+.. code-block:: text
+
+   Expr
+     head: Symbol call
+     args: Array{Any}((3,))
+       1: Symbol +
+       2: Symbol x
+       3: Symbol y
+
+These three symbols +, x and y are leaves of the AST.
+A shorter form to create expressions is ``:(x + y)``.
+We can create an expression and then evaluate it:
+
+.. code-block:: julia
+
+   ex = :(x + y)
+   x = y = 2
+   eval(ex)   # returns 4
+
+A *macro* is like a function, except it accepts expressions as arguments, 
+manipulates the expressions, and returns a new expression - thus modifying 
+the AST.
+
+We can define a silly macro:
+
+.. code-block:: Julia
+
+   macro checkit(ex)
+       return :($ex ? "Looks alright to me" : "Are you sure?")
+   end
+
+   @checkit 1<2    # returns "Looks alright to me"
+   @checkit 1>2   # returns "Are you sure?"
+   
+
+
 Unicode support
 ---------------
 
