@@ -163,16 +163,18 @@ package in another language.
 - Workaround 2: Writing fast Julia code is easier than in most other languages 
   so you might consider writing your own version!
 
-**Breaking changes**: Although most major packages have stabilized, there are still 
+**Rapid package evolution**: Although most major packages have stabilized, there are still 
 many packages that go through frequent large changes that can break your code.
 
 - Workaround: Julia comes with a powerful package manager and inbuilt support 
   for isolated software environments where dependencies can be recorded exactly.
 
+**Large memory footprint**: Because of precompilation of Julia's Base libraries 
+the runtime of a running process can be very large. This can take away valuable 
+memory for actual computation. 
 
-**Large memory consumption**: Because of precompilation Julia can have a 
-very large runtime (i.e. uses lots of memory). 
-
+- Workaround: There are plans to enable building more lightweight runtimes 
+  in future versions of Julia.
 
 
 
