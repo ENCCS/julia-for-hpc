@@ -1,31 +1,87 @@
-.. _scientific-computing:
+.. _scientific_computing:
 
-Scientific computing
-====================
+Scientific computing and data science
+=====================================
 
 .. questions::
 
+   - What libraries are available for scientific computing in Julia?
    - How can I manipulate and wrangle data in Julia?
-   - What packages exist?
+   - Can I use Julia for machine learning?
      
 .. objectives::
 
-   - Learn to efficiently use data frames 
-   - Learn some good practices around tidy data
+   - Get an overview of the Julia ecosystem of scientific libraries
+   - Learn to work with data using data frames 
+   - Know how to set up deep learning networks 
 
 
-Julia is a good language to use for data science problems.
-It will perform well, alleviating the need to translate
-computationally demanding parts to another language, and its 
-ecosystem of libraries for data science and machine learning 
-problems is mature and user friendly.
+Ecosystem of scientific computing packages
+------------------------------------------
 
-In this episode we will learn how to work with data using 
-the DataFrames package and get a flavor for how to set up a 
+Julia has a rich and rapidly expanding ecosystem of packages for scientific computing 
+in many scientific domains. In many cases developers of individual packages join forces 
+to create mutually compatible and supporting packages organized under a common GitHub 
+organization. The following list can be of some help in navigating the ecosystem.
+
+
+Mathematics
+^^^^^^^^^^^
+
+- `JuliaDiff <https://github.com/JuliaDiff/>`_  – Differentiation tools
+- `JuliaGeometry <https://github.com/JuliaGeometry>`_   – Computational Geometry
+- `JuliaGraphs <https://github.com/JuliaGraphs>`_     – Graph Theory and Implementation
+- `JuliaIntervals <https://github.com/JuliaIntervals>`_  - Rigorous numerics with interval arithmetic & applications
+- `JuliaMath <https://github.com/JuliaMath>`_       – Mathematics made easy in Julia
+- `JuliaOpt <https://github.com/JuliaOpt>`_        – Optimization 
+- `JuliaPolyhedra <https://github.com/JuliaPolyhedra>`_  – Polyhedral computation
+- `JuliaSparse <https://github.com/JuliaSparse>`_     – Sparse matrix solvers
+
+
+Scientific domains
+^^^^^^^^^^^^^^^^^^
+
+- `BioJulia <https://github.com/BioJulia>`_ – Biology 
+- `EcoJulia <https://github.com/EcoJulia>`_  – Ecology
+- `JuliaAstro <https://github.com/JuliaAstro>`_  – Astronomy 
+- `JuliaDSP <https://github.com/JuliaDSP>`_  – Digital signal processing
+- `JuliaQuant <https://github.com/JuliaQuant>`_  – Finance
+- `JuliaQuantum <https://github.com/JuliaQuantum>`_  – Julia libraries for quantum science and technology 
+- `QuantumBFS <https://github.com/QuantumBFS/Yao.jl>`_  – Extensible, Efficient Quantum Algorithm Design for Humans
+- `JuliaPhysics <https://github.com/JuliaPhysics>`_  – Physics
+- `JuliaDynamics <https://github.com/JuliaDynamics>`_  - Dynamical systems, nonlinear dynamics and chaos.
+
+
+Data sciences
+^^^^^^^^^^^^^
+
+- `SciML <https://github.com/SciML>`_   – Scientific machine learning 
+- `FluxML <https://github.com/FluxML/>`_ - Machine learning stack
+- `JuliaML <https://github.com/JuliaML>`_  – Machine Learning
+- `JuliaStats <https://github.com/JuliaStats>`_  – Statistics
+- `JuliaImages <https://github.com/JuliaImages>`_  – Image Processing
+- `JuliaText <https://github.com/JuliaText>`_  – Natural Language Processing  (NLP), Computational Linguistics and (textual) Information Retrieval
+- `JuliaDatabases <https://github.com/JuliaDatabases>`_ – Various database drivers for Julia
+- `JuliaData <https://github.com/JuliaData>`_ – Data manipulation, storage, and I/O in Julia
+
+
+Working with data
+-----------------
+
+We will now explore a Julian approach to a use case common to 
+many scientific disciplines: manipulating data, visualization 
+and machine learning.
+Julia is a good language to use for data science problems as
+it will perform well and alleviate the need to translate
+computationally demanding parts to another language.
+
+Here we will learn how to work with data using 
+the DataFrames package, visualize it with the Plots and StatsPlots
+packages and get a flavor for how to set up a 
 deep learning workflow using the Flux package.
 
 Download a dataset
-------------------
+^^^^^^^^^^^^^^^^^^
 
 We start by downloading a dataset containing measurements 
 of characteristic features of different penguin species.
@@ -46,7 +102,7 @@ To obtain the data we simply add the PalmerPenguins package.
 
 
 Dataframes
-----------
+^^^^^^^^^^
 
 The `DataFrames.jl <https://dataframes.juliadata.org/stable/>`_ 
 package is Julia's version of the ``pandas`` library in Python and 
@@ -191,10 +247,8 @@ What the first three features mean is illustrated in the picture below.
 
 
 
-
-
 Plotting
---------
+^^^^^^^^
 
 Let us now look at different ways to visualize this data.
 Many different plotting libraries exist for Julia and which 
@@ -565,7 +619,6 @@ Exercises
 See also
 --------
 
-- `Best Julia Data Manipulation packages combo 2020-09 <https://www.youtube.com/watch?v=q_P2H_ZXVxI>`__
 -  Many interesting datasets are available in Julia through the 
    `RDatasets <https://github.com/JuliaStats/RDatasets.jl>`_ package.
    For instance:
