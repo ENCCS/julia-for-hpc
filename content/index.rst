@@ -37,14 +37,14 @@ computing.
    :widths: auto
    :delim: ;
 
-   20 min ; :doc:`motivation`
-   20 min ; :doc:`overview`
-   20 min ; :doc:`development`
-   20 min ; :doc:`scientific-computing`   
-   20 min ; :doc:`performant-code`
-   20 min ; :doc:`parallelization`
-   20 min ; :doc:`GPU`         
-   20 min ; :doc:`outlook`         
+   10 min ; :doc:`motivation`
+   30 min ; :doc:`overview`
+   40 min ; :doc:`development`
+   60 min ; :doc:`scientific-computing`
+   40 min ; :doc:`performant-code`
+   50 min ; :doc:`parallelization`
+   50 min ; :doc:`GPU`
+   20 min ; :doc:`outlook`
 
 
 .. toctree::
