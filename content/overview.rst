@@ -369,29 +369,81 @@ A *macro* is like a function, except it accepts expressions as arguments,
 manipulates the expressions, and returns a new expression - thus modifying 
 the AST.
 
-We can define a silly macro:
+We can for example define a macro to 
+`repeat an expression N times <https://gist.github.com/MikeInnes/8299575>`_:
 
 .. code-block:: Julia
 
-   macro checkit(ex)
-       return :($ex ? "Looks alright to me" : "Are you sure?")
+   macro dotimes(n, body)
+       quote
+           for i = 1:$(esc(n))
+               $(esc(body))
+           end
+       end
    end
 
-   @checkit 1<2    # returns "Looks alright to me"
-   @checkit 1>2   # returns "Are you sure?"
+   # print hello! 5 times
+   @dotimes 5 println("hello!")
    
+   # square 2 4 times
+   x = 2
+   @dotimes 4 x = x^2
+
+To see what a macro expands to, we can use another macro:
+
+.. code-block:: julia
+
+   @macroexpand @dotimes x -= 13
+
+The output shows that a for loop has been generated:
+
+.. code-block:: text
+
+   quote
+       #= REPL[31]:3 =#
+       for var"#11#i" = 1:5
+           #= REPL[31]:4 =#
+           x -= 13
+       end
+   end
+
+To learn more about metaprogramming and macros in Julia head 
+over to:
+
+- `The docs <https://docs.julialang.org/en/v1/manual/metaprogramming/>`__
+- `This tutorial from JuliaCon21 <https://github.com/dpsanders/Metaprogramming_JuliaCon_2021>`__
 
 
 Unicode support
 ---------------
 
+Julia has full support for Unicode characters. Some are reserved for 
+constants or operators, like π, ∈ and √, while the 
+majority can be used for names of variables, functions etc.
+Unicode characters are entered via tab completion of LaTeX-like abbreviations 
+in the Julia REPL or IDEs with Julia extensions, including VSCode. If you are 
+unsure how to enter a particular character, you can copy-paste it into 
+Julia's help mode to see the LaTeX-like syntax.
+For a full list of supported symbols see 
+`this page in the Julia docs <https://docs.julialang.org/en/v1/manual/unicode-input/>`__.
 
+.. code-block:: julia
 
+   function Σsqrt(Ω)
+       σ = 0  
+       for ω ∈ Ω
+           σ += √ω
+       end
+       σ
+   end
+
+   ω₁, ω₂, ω₃ = 1, 2, 3
+   Ω = [ω₁, ω₂, ω₃]
+   σ = Σsqrt(Ω) 
 
 See also
 --------
 
-- https://slides.com/valentinchuravy/julia-parallelism#/1/1
 - Lin, Wei-Chen, and Simon McIntosh-Smith. 
   `Comparing Julia to Performance Portable Parallel Programming Models for HPC. <https://ieeexplore.ieee.org/abstract/document/9652798>`_, 
   2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.
