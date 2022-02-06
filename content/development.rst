@@ -122,9 +122,9 @@ Revise
 ^^^^^^
 
 Before `Revise.jl <https://timholy.github.io/Revise.jl/stable/>`__  
-was contributed to the Julia community, it was necessary to restart the Julia 
-REPL when developing a package for new changes to take effect in the REPL because 
-calling ``using Example`` JIT-compiles the package.
+was created, it was necessary to restart the Julia 
+REPL when developing a package for new changes to take effect in the REPL. 
+This is because calling ``using Example`` JIT-compiles the package.
 With ``Revise`` loaded this is no longer needed - it cleverly finds what code 
 has been modified and reloads only that.
 
@@ -136,22 +136,21 @@ A caveat when using VSCode is that when developing a script (i.e. not a full pac
 files need to be included in Revise-tracked mode with ``includet("MyPackage")``.
 When developing packages everything works automatically.
 
-Structure of Julia packages
----------------------------
+Structure of a Julia package
+----------------------------
 
 Julia packages contain one top-level module (submodules are allowed), 
 defined in a source file under ``src/`` with the same name as the 
 package itself.
 
 All functions, variables and custom types of a package can be put in one 
-(possibly large) module file, 
-or (more commonly) into multiple files
+module file or (more commonly) into multiple files
 according to the functionality (``core.jl``, ``io.jl``, ``utils.jl``, ...).
 
 .. type-along:: Inspecting a Julia package
    
-   Let us have a look at a representative Julia package to get a 
-   feeling for its structure: https://github.com/JuliaLang/Example.jl
+   Have a look at an example Julia package to get an 
+   overview of its structure: https://github.com/JuliaLang/Example.jl
 
    Pay particular attention to the following aspects:
 
@@ -164,13 +163,13 @@ according to the functionality (``core.jl``, ``io.jl``, ``utils.jl``, ...).
 The package manager
 -------------------
 
-Julia comes with an powerful inbuilt package manager to install 
+Julia comes with a powerful inbuilt package manager to install 
 and remove packages, manage dependencies and create isolated 
 software environments.
    
 - To enter the package manager from a Julia session we 
   can hit the ``]`` character, after which the prompt 
-  changes to ```pkg>```. 
+  changes to ``pkg>``. 
 - To see all available options, type `help`. For example, we see that to 
   install a new package we should type ``pkg> add some-package``.
 - To go back to the REPL, hit backspace or ``^C``.
@@ -221,33 +220,36 @@ projects and avoids dependency clashes. It is also the best way to
 ensure `reproducibility` because the exact same software environment 
 can be easily created on different computers.
 
-We begin by creating a new environment:
+.. type-along:: Creating an environment
 
-.. code-block:: julia
-
-   Pkg.activate("example-project")
-
-The output tells us that a new environment has been created in our 
-current directory - specifically using the ``Project.toml`` file 
-(don't look for it yet, it's only created after we start adding packages).
-
-Alternatively, one can first create the directory, then navigate to 
-that directory and type ``Pkg.activate(".")``.
-
-We now add the `Example` package by
-
-.. code-block:: julia
-
-   Pkg.add("Example")
-   Pkg.status()
-
-The status command shows the version of the `Example` package installed in 
-our new ``Project.toml`` file.  
-What does this file contain? Try printing it through the Julia shell by 
-typing ``;`` followed by ``cat example-project/Project.toml``.
-
-We can also see that there's another file in the ``example-project`` directory
-called ``Manifest.toml``.
+   After navigating to a suitable directory, 
+   we create a new environment by:
+   
+   .. code-block:: julia
+   
+      mkdir("example-project")
+      cd("example-project")
+      Pkg.activate(".")
+   
+   The output tells us that a new environment has been created in our 
+   current directory - specifically using the ``Project.toml`` file 
+   (don't look for it yet, it's only created after we start adding packages).
+      
+   We now add the `Example` package:
+   
+   .. code-block:: julia
+   
+      Pkg.add("Example")
+      Pkg.status()
+   
+   The status command shows the version of the `Example` package installed in 
+   our new ``Project.toml`` file.  
+   What does this file contain? 
+   Try printing it through the Julia shell by 
+   typing ``;`` followed by ``cat example-project/Project.toml``.
+   
+   We can also see that there's another file in the ``example-project`` directory
+   called ``Manifest.toml``.
 
 .. callout:: ``Project.toml`` and ``Manifest.toml``
    
@@ -273,39 +275,54 @@ For example:
 .. code-block:: julia
 
    # first git clone the project (or similar) and enter the package directory
-   using Pkg
+
    # activate the environment
    Pkg.activate(".")
+
    # install packages from Manifest.toml or Project.toml
    Pkg.instantiate()
-
-
 
 
 Creating a new project
 ----------------------
 
+.. type-along:: Create a project
 
+   .. code-block:: julia
 
-Modules
-^^^^^^^
+      Pkg.generate("MyPackage")
+      cd("MyPackage")
 
+   - Inspect the Project.toml file
+   - Inspect src/MyPackage.jl
 
+   Now we activate the environment and add dependencies:
 
-Where can I find existing packages?
------------------------------------
+   .. code-block:: julia
+
+      Pkg.activate(".")
+      Pkg.add("Example")
+
+   We can now use anything from the Example package in our new project.
+
+   Let's add a function to the MyPackage module:
+
+   .. code-block:: julia
+
+      something
 
 
 
 Adding tests
 ------------
 
+**Should be installed in default environment, not in project**.
+VSCode imports it with the julia extension.
+
 - Test
 - ReTest
 - InlineTest
 
-**Should be installed in default environment, not in project**.
-VSCode imports it with the julia extension.
 
 
 
@@ -315,8 +332,8 @@ Exercises
 .. exercise:: Creating a new environment
 
    In preparation for the next section on data science techniques in Julia, 
-   create a new environment named `datascience`, activate it and install 
-   the following packages:
+   create a new environment named `datascience` in a new directory, 
+   activate it and install the following packages:
 
    - `DataFrames <https://github.com/JuliaData/DataFrames.jl>`_
    - `PalmerPenguins <https://github.com/devmotion/PalmerPenguins.jl>`_
@@ -326,9 +343,13 @@ Exercises
 
    .. solution::
 
-      First create a new directory in a preferred location on your machine with
-      ``mkdir datascience`` or through a File Browser.
-      Then, inside a Julia session:
+      First create a new directory in a preferred location:
+      
+      .. code-block:: julia
+         
+         mkdir("datascience")
+
+      Then add the packages:
 
       .. code-block:: julia
 
