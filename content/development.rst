@@ -53,20 +53,18 @@ we can fire up a VSCode session and explore the functionality.
      from a menu, but we can also save it as a ``.jl`` file and VSCode will understand
      it's a Julia file. 
    - Type ``println("hello world!")`` in the file and save it to a new folder (e.g. 
-     a new folder ``julia`` in your home directory).
+     a new folder ``testing/`` under a ``julia/`` folder in your home directory).
    - To execute the file, we can press the *play* button in the top right corner, 
      or open up the command palette search with ``Ctrl+Shift+p`` (``CMD`` on Mac) 
      and type ``Julia: Execute active File in REPL``, or by hitting ``Shift+Enter``
      on the code line like in Jupyter.
    - A REPL should open up below our code file and show the result of the execution.
+   - The `Julia in VSCode <https://www.julia-vscode.org/docs/stable/userguide/runningcode/>`__ 
+     documentation is a useful reference.
 
-
-
-Structure of a Julia package
-----------------------------
 
 Modules
-^^^^^^^
+-------
 
 Code written in Julia is normally encapsulated in modules. Modules 
 have their own global scope (namespace) separate from the global scope of 
@@ -82,7 +80,8 @@ The difference is how variables defined in the module are brought into scope:
 
 .. type-along:: Creating a module
 
-   Let's create a toy module based on the code in the previous section:
+   Let's create a toy module based on the code in the previous section.
+   Save it in a new file ``Points.jl`` under e.g. ``$HOME/julia/testing``.
 
    .. code-block:: julia
 
@@ -101,7 +100,9 @@ The difference is how variables defined in the module are brought into scope:
 
       end
 
-   We can now import and use the module. Since our new module is defined within 
+   We can now import and use the module. First we include it either by 
+   ``include("Points.jl")`` or by hitting ``Shift+Enter`` to evaluate the whole file.
+   Since our new module is defined within 
    the current ``Main`` module, we need to import it with a dot in front.
 
    .. code-block:: julia
@@ -114,8 +115,29 @@ The difference is how variables defined in the module are brought into scope:
       # list all names exported from our module 
       names(Points)
 
-Packages
-^^^^^^^^
+   It should return a list of the three symbols ``:Points``, ``:Point`` 
+   and ``:sumsquare``.
+
+Revise
+^^^^^^
+
+Before `Revise.jl <https://timholy.github.io/Revise.jl/stable/>`__  
+was contributed to the Julia community, it was necessary to restart the Julia 
+REPL when developing a package for new changes to take effect in the REPL because 
+calling ``using Example`` JIT-compiles the package.
+With ``Revise`` loaded this is no longer needed - it cleverly finds what code 
+has been modified and reloads only that.
+
+Revise is automatically loaded in VSCode, but if you are developing in 
+another editor you will need to install ``Revise`` and when developing a 
+package always do ``using Revise`` before ``using MyPackage``.
+
+A caveat when using VSCode is that when developing a script (i.e. not a full package), 
+files need to be included in Revise-tracked mode with ``includet("MyPackage")``.
+When developing packages everything works automatically.
+
+Structure of Julia packages
+---------------------------
 
 Julia packages contain one top-level module (submodules are allowed), 
 defined in a source file under ``src/`` with the same name as the 
@@ -128,15 +150,8 @@ according to the functionality (``core.jl``, ``io.jl``, ``utils.jl``, ...).
 
 .. type-along:: Inspecting a Julia package
    
-   Let us have a look at representative Julia packages. Here are a few examples 
-   of Julia packages of a managable size:
-
-   - https://github.com/JuliaLang/Example.jl
-   - https://github.com/carstenbauer/MonteCarlo.jl
-   - https://github.com/aurelio-amerio/Mandelbrot.jl
-   - https://github.com/lucaferranti/MatrixPolynomials.jl
-   - https://github.com/FluxML/Trebuchet.jl
-   - https://github.com/wikfeldt/miniWeather.jl
+   Let us have a look at a representative Julia package to get a 
+   feeling for its structure: https://github.com/JuliaLang/Example.jl
 
    Pay particular attention to the following aspects:
 
@@ -146,34 +161,19 @@ according to the functionality (``core.jl``, ``io.jl``, ``utils.jl``, ...).
    - The structure of the main module file and the other files under ``src/``
 
 
-
-
-Let us play around in the REPL to get used to the workflow.
-
-.. type-along:: Installing and using a package
-
-   WRITEME
-
-Revise
-------
-
-WRITEME
-
-Julia's package manager
------------------------
+The package manager
+-------------------
 
 Julia comes with an powerful inbuilt package manager to install 
 and remove packages, manage dependencies and create isolated 
 software environments.
-
-.. type-along:: Entering the package manager
    
-   - To enter the package manager from a Julia session we 
-     can hit the ``]`` character, after which the prompt 
-     changes to ```pkg>```. 
-   - To see all available options, type `help`. For example, we see that to 
-     install a new package we should type ``pkg> add some-package``.
-   - To go back to the REPL, hit backspace or ``^C``.
+- To enter the package manager from a Julia session we 
+  can hit the ``]`` character, after which the prompt 
+  changes to ```pkg>```. 
+- To see all available options, type `help`. For example, we see that to 
+  install a new package we should type ``pkg> add some-package``.
+- To go back to the REPL, hit backspace or ``^C``.
 
 .. callout:: Using the ``Pkg`` module
 
@@ -187,8 +187,30 @@ software environments.
       Pkg.add("some-package")
       Pkg.status()
 
-Let us get familiar with the package manager by working with an 
-example package that ships with Julia.
+Let us get familiar with the package manager by working with the 
+Example package that ships with Julia.
+
+.. type-along:: Installing and using a package
+
+   Install ``Example.jl`` using the package manager:
+
+   .. code-block:: julia
+
+      using Pkg
+      Pkg.add("Example")
+      Pkg.status()
+
+   Import and use ``Example``:
+
+   .. code-block:: julia
+
+      using Example
+      names(Example)
+      domath(12)
+      hello("Julia")
+
+
+
 
 Environments
 ^^^^^^^^^^^^
@@ -353,6 +375,7 @@ See also
 --------
 
 - Tutorial on a `Julia coding workflow in VSCode <https://techytok.com/lesson-workflow/>`__
+- Documentation for `Julia in VSCode <https://www.julia-vscode.org/docs/stable/>`__
 - https://docs.julialang.org/en/v1/manual/faq/#Packages-and-Modules
 - https://docs.julialang.org/en/v1/manual/code-loading/#Federation-of-packages
 - https://julialang.github.io/Pkg.jl/v1/creating-packages/  
