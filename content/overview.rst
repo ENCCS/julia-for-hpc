@@ -106,6 +106,66 @@ We can now create ``Point`` variables with explicitly different types:
     p2 = Point(1.0, 2.0)
     # Point{Float64}(1.0, 2.0)
 
+Parametric types introduce a new family of new types, since 
+any specialized version ``Point{T}`` is a subtype of ``Point``:
+
+.. code-block:: julia
+
+    Point{Int64} <: Point   # returns true
+    Point{Float64} <: Point   # returns true
+
+
+Design patterns
+~~~~~~~~~~~~~~~
+
+Julia is a multi-paradigm language that supports multiple types of 
+design patterns, including object-oriented patterns. However, the Julian 
+approach is to build code around the type system and this has a different 
+architecture than object-oriented languages.
+
+Many Julia applications are built around *type hierarchies* involving 
+both abstract and concrete types. Abstract types are used to model 
+real-world data concepts and their behaviour.
+
+For example, we can describe a type hierarchy to model animals:
+
+.. code-block:: julia 
+
+    abstract type AbstractAnimal end
+    abstract type AbstractDog <: AbstractAnimal end
+    abstract type AbstractCat <: AbstractAnimal end
+
+    struct Dog <: AbstractDog
+        name::String
+        friendly::Bool
+    end
+
+    struct Cat <: AbstractCat 
+        name::String
+        huntsmice::Bool
+    end
+
+
+We can then define functions to define the behaviour of these types.
+Key to this approach is that subtypes inherit behaviour of their 
+supertypes:
+
+.. code-block:: julia
+
+   get_name(A::AbstractAnimal) = A.name
+   get_mouse_hunting_ability(A::AbstractCat) = return A.huntsmice ? "$(A.name) hunts mice" : "$(A.name) leaves mice alone"
+
+If we now define a cat object we can use the methods defined for its abstract
+supertypes:
+
+.. code-block:: julia
+
+   billy = Cat("Billy", true)
+   get_name(billy)
+   get_mouse_hunting_ability(billy)
+
+Refer to the "See also" section below for more reading material on 
+code design in Julia.
 
 
 Functions and methods
@@ -447,4 +507,6 @@ See also
 - Lin, Wei-Chen, and Simon McIntosh-Smith. 
   `Comparing Julia to Performance Portable Parallel Programming Models for HPC. <https://ieeexplore.ieee.org/abstract/document/9652798>`_, 
   2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.
-
+- Christopher Rackauckas. 
+  `Type-Dispatch Design: Post Object-Oriented Programming for Julia 
+  <https://www.stochasticlifestyle.com/type-dispatch-design-post-object-oriented-programming-julia/>`__
