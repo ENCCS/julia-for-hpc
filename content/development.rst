@@ -43,10 +43,22 @@ Using VSCode with the Julia extension
 After following the :doc:`setup` instructions to install VSCode and the Julia extension, 
 we can fire up a VSCode session and explore the functionality.
 
-.. type-along:: Exploring VSCode
+.. type-along:: Getting acquainted with VSCode
 
-   - Open up VSCode
-   - WRITEME
+   - Open up VSCode either through a file browser or via the terminal command `code`.
+   - We should see a *Get started* page where we can create a new file, open a 
+     folder or clone a git repository. The same options can be found in the Explorer 
+     menu in the left sidebar.
+   - Let's create a new text file. VSCode will ask for a language, which you can select 
+     from a menu, but we can also save it as a ``.jl`` file and VSCode will understand
+     it's a Julia file. 
+   - Type ``println("hello world!")`` in the file and save it to a new folder (e.g. 
+     a new folder ``julia`` in your home directory).
+   - To execute the file, we can press the *play* button in the top right corner, 
+     or open up the command palette search with ``Ctrl+Shift+p`` (``CMD`` on Mac) 
+     and type ``Julia: Execute active File in REPL``, or by hitting ``Shift+Enter``
+     on the code line like in Jupyter.
+   - A REPL should open up below our code file and show the result of the execution.
 
 
 
@@ -340,6 +352,7 @@ Exercises
 See also
 --------
 
+- Tutorial on a `Julia coding workflow in VSCode <https://techytok.com/lesson-workflow/>`__
 - https://docs.julialang.org/en/v1/manual/faq/#Packages-and-Modules
 - https://docs.julialang.org/en/v1/manual/code-loading/#Federation-of-packages
 - https://julialang.github.io/Pkg.jl/v1/creating-packages/  
