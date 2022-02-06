@@ -501,6 +501,16 @@ Exercises
    - Try increasing the problem size (e.g. ``nx=ny=10_000``) while lowering the 
      number of time steps (e.g. ``nsteps = 20``). Does it scale better?
 
+.. exercise:: Distributed HeatEquation with pmap
+
+   needed:
+   .. code-block::
+
+      # first precompile on master process
+      using HeatEquation
+      # then load on workers
+      @everywhere using HeatEquation
+
 
 .. exercise:: Using SharedArrays with Heatequation
 
@@ -508,21 +518,18 @@ Exercises
    Think about what you should do, and then try doing it.
    After you're done, benchmark a few test runs. 
 
-   .. solution:: 
-
-      Switch to the `SharedArrays` branch of the repository (``git checkout SharedArrays``)
-      and have a look at the code.
-
-.. exercise:: Using DistributedArrays with Heatequation
-
-   Open up the Heatequation.jl package in VSCode and read the "DistributedArrayHint"
-   comments. Think about what you should do, and then try doing it.
-   After you're done, benchmark a few test runs.
+   Note: Both functions and modules need to be made available on all 
+   workers using the ``@everywhere`` macro. In your test script you will thus 
+   need ``@everywhere using HeatEquation``, and your new ``evolve_shared!`` 
+   function will need it too. In addition, when running a Julia program 
+   in an environment one needs to replace the ``--project=.`` flag by 
+   an environment variable visible to all workers:
+   ``JULIA_PROJECT=. julia -p 4 testruns.jl``
 
    .. solution:: 
 
-      Switch to the `DistributedArrays` branch of the repository (``git checkout DistributedArrays``)
-      and have a look at the code.
+      A working solution can be found on the `sharedarrays` branch of the 
+      repository (``git checkout sharedarrays``).
 
 
 
@@ -533,7 +540,7 @@ See also
 - The `Julia Parallel <https://github.com/JuliaParallel>`_ organization collects 
   packages developed for parallel computing in Julia.
 - https://docs.julialang.org/en/v1/manual/multi-threading/
-- https://julialang.org/blog/2019/07/multithreading/
 - https://github.com/JuliaParallel/MPI.jl
 - https://docs.julialang.org/en/v1/manual/distributed-computing/
+- https://slides.com/valentinchuravy/julia-parallelism
 

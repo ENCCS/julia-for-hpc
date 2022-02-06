@@ -36,6 +36,18 @@ types in Julia:
 - **Concrete types**: Describe data structures, i.e. concrete implementations that 
   can be used for variables.
 
+
+.. callout:: Firing up Julia
+
+   If Julia has been installed according to the instructions in 
+   :doc:`setup` it should be possible to open up a Julia session by 
+   typing ``julia`` in a terminal window or by clicking on the Julia 
+   application in a file browser. The result should look something like this:
+
+   .. figure:: img/repl.png
+      :align: center
+      :scale: 40 %
+
 .. code-block:: julia
 
     typeof(1)  # returns Int64
@@ -489,7 +501,7 @@ For a full list of supported symbols see
 
 .. code-block:: julia
 
-   function Σsqrt(Ω)
+   function Σsqrt(Ω...)
        σ = 0  
        for ω ∈ Ω
            σ += √ω
@@ -498,8 +510,7 @@ For a full list of supported symbols see
    end
 
    ω₁, ω₂, ω₃ = 1, 2, 3
-   Ω = [ω₁, ω₂, ω₃]
-   σ = Σsqrt(Ω) 
+   σ = Σsqrt(ω₁, ω₂, ω₃) 
 
 See also
 --------

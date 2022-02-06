@@ -11,8 +11,8 @@ Motivation
    - Get inspired to try Julia!
 
 
-Why Julia?
-----------
+Why was Julia created?
+----------------------
 
 Julia has been designed to be both fast and dynamic.
 In the words of its developers:
@@ -35,7 +35,7 @@ From `Why We Created Julia
 Jeff Bezanson Stefan Karpinski Viral B. Shah Alan Edelman
 
 Speed
-^^^^^
+-----
 
 Many researchers and programmers are drawn to Julia because of its
 speed. Indeed, Julia is among the few languages in the exclusive
@@ -53,7 +53,7 @@ speed. Indeed, Julia is among the few languages in the exclusive
 
 
 The two-language problem
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 .. exercise:: Combining languages
 
