@@ -102,7 +102,9 @@ The difference is how variables defined in the module are brought into scope:
    We can now import and use the module. First we include it either by 
    ``include("Points.jl")`` or by hitting ``Shift+Enter`` to evaluate the whole file.
    Since our new module is defined within 
-   the current ``Main`` module, we need to import it with a dot in front.
+   the current ``Main`` module, we need to import it with a dot in front
+   (an alternative is to add our current path with the Points module to Julia's 
+   LOAD_PATH, ``push!(LOAD_PATH, pwd())``, after which no dot is needed):
 
    .. code-block:: julia
 
@@ -403,6 +405,8 @@ and other packages in the `JuliaTesting organization <https://github.com/JuliaTe
 Exercises
 ---------
 
+.. _datascience_env:
+
 .. exercise:: Creating a new environment
 
    In preparation for the next section on data science techniques in Julia, 
@@ -412,6 +416,7 @@ Exercises
    - `DataFrames <https://github.com/JuliaData/DataFrames.jl>`_
    - `PalmerPenguins <https://github.com/devmotion/PalmerPenguins.jl>`_
    - `Plots <https://github.com/JuliaPlots/Plots.jl>`_
+   - `StatsPlots <https://github.com/JuliaPlots/StatsPlots.jl>`_
    - `Flux <https://github.com/FluxML/Flux.jl>`_
    - `MLJ <https://alan-turing-institute.github.io/MLJ.jl/dev/>`_
 
@@ -433,7 +438,7 @@ Exercises
          # navigate to the datascience directory
          using Pkg
          Pkg.activate(".")
-         Pkg.add(["DataFrames", "PalmerPenguins", "Plots", "Flux", "MLJ"])
+         Pkg.add(["DataFrames", "PalmerPenguins", "Plots", "StatsPlots", "Flux", "MLJ"])
 
 
 

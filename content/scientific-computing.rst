@@ -150,6 +150,11 @@ Here's how you can create a new dataframe:
    PalmerPenguins package uses the `CSV.jl <https://csv.juliadata.org/stable/>`_ 
    package for fast loading of data. Note further that ``DataFrame`` can 
    accept a ``CSV.File`` object and read it into a dataframe!
+
+   We will do this in a new script ``datascience.jl`` in the same directory as 
+   the ``datascience`` environment created in 
+   :ref:`this earlier exercise <datascience_env>`. We can execute the expressions 
+   in the script line-by-line by hitting `Shift-Enter`.
    
    .. code-block:: julia
    
@@ -331,10 +336,12 @@ Multiple subplots can be created by:
 
 .. type-along:: Visualizing the Penguin dataset
 
-   First set the backend to GR:
+   First load ``Plots`` and set the backend to GR (precompilation of Plots 
+   might take some time):
 
    .. code-block::
 
+      using Plots
       gr()
 
    For the Penguin dataset it is more appropriate to use scatter plots, for example:
@@ -403,7 +410,7 @@ Machine learning in Julia
 
 Despite being a relatively new language, Julia already has a strong and rapidly expanding 
 ecosystem of libraries for machine learning and deep learning. A fundamental advantage of Julia for ML 
-that it solves the two-language problem - there is no need for different languages for the 
+is that it solves the two-language problem - there is no need for different languages for the 
 user-facing framework and the backend heavy-lifting (like for most other DL frameworks).
 
 A particular focus in the Julia approach to ML is `"scientific machine learning" (SciML) <https://sciml.ai/>`_ 
@@ -438,7 +445,7 @@ Deep learning
 built in, but also enables the user to write own Julia code for DL components.
 
 - Flux has relatively few explicit APIs for features like regularisation or embeddings. 
-- All of Flux is straightforward Julia code and. It can be worth to inspect it build own parts if needed.
+- All of Flux is straightforward Julia code and it can be worth to inspect and extend it if needed.
 - Flux works well with other Julia libraries, like dataframes, images and differential equation solvers.
   One can build complex data processing pipelines that integrate Flux models.
 
@@ -575,7 +582,7 @@ Exercises
       WRITEME
 
 
-.. exercise::
+.. exercise:: Improve the deep learning model
 
    Improve the performance of the neural network we trained above! 
    The network is not improving much because of the large numerical 
