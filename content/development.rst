@@ -7,7 +7,6 @@ Developing in Julia
    - How do I create a new project?
    - How can I create reprodubible environments?
    - How are tests written in Julia?
-   - How does scoping work?
      
 .. objectives::
 
@@ -53,7 +52,7 @@ we can fire up a VSCode session and explore the functionality.
      from a menu, but we can also save it as a ``.jl`` file and VSCode will understand
      it's a Julia file. 
    - Type ``println("hello world!")`` in the file and save it to a new folder (e.g. 
-     a new folder ``testing/`` under a ``julia/`` folder in your home directory).
+     a new folder ``workshop/`` under a ``julia/`` folder in your home directory).
    - To execute the file, we can press the *play* button in the top right corner, 
      or open up the command palette search with ``Ctrl+Shift+p`` (``CMD`` on Mac) 
      and type ``Julia: Execute active File in REPL``, or by hitting ``Shift+Enter``
@@ -81,7 +80,7 @@ The difference is how variables defined in the module are brought into scope:
 .. type-along:: Creating a module
 
    Let's create a toy module based on the code in the previous section.
-   Save it in a new file ``Points.jl`` under e.g. ``$HOME/julia/testing``.
+   Save it in a new file ``Points.jl`` under e.g. ``$HOME/julia/workshop``.
 
    .. code-block:: julia
 
@@ -144,8 +143,8 @@ defined in a source file under ``src/`` with the same name as the
 package itself.
 
 All functions, variables and custom types of a package can be put in one 
-module file or (more commonly) into multiple files
-according to the functionality (``core.jl``, ``io.jl``, ``utils.jl``, ...).
+module file or (more commonly) into multiple files named 
+according to their functionality.
 
 .. type-along:: Inspecting a Julia package
    
@@ -174,7 +173,7 @@ software environments.
   install a new package we should type ``pkg> add some-package``.
 - To go back to the REPL, hit backspace or ``^C``.
 
-.. callout:: A ``Pkg`` syntax convention
+.. callout:: A syntax convention
 
    Instead of using ``]`` to enter the package manager, this lesson 
    will use the following syntax to manage packages. This way, code blocks
@@ -262,7 +261,7 @@ can be easily created on different computers.
      It should not be modified by hand.
 
 
-.. callout:: Default vs project environments
+.. callout:: Project environments inherit from default environment
 
    A possibly confusing aspect when working with environments is that 
    you have access to packages in the default environment (e.g. ``@v1.7``)
@@ -270,7 +269,7 @@ can be easily created on different computers.
    to add all needed packages to a project environment so that the same environment 
    can be generated on other machines.   
 
-   But this also has benefits since packages like Revise, Test (see below) etc. 
+   But this also has benefits since packages like Revise, Test, BenchmarkTools etc. 
    can be installed in the default environment rather than cluttering a project 
    environment.
 
@@ -302,8 +301,8 @@ For example:
 Creating a new project
 ----------------------
 
-We also use the package manager to start a new project, i.e. a new 
-package.
+We also use the package manager to start a new project, i.e. when we 
+want to develop a new package.
 
 .. type-along:: Create a project
 
@@ -347,7 +346,7 @@ package.
 Testing
 -------
 
-The ``Test`` module in Base Julia provides simple unit testing functionality.
+The ``Test`` package provides simple unit testing functionality.
 We can have a look at the Example package again:
 https://github.com/JuliaLang/Example.jl
 
@@ -375,7 +374,7 @@ or from the command line:
    julia --project=. test/runtests.jl
 
 Usually, one needs to perform more than one test per function or module, 
-and usually this is accomplished by collecting related tests in a ``@testset``
+and usually this is done by collecting related tests in a ``@testset``
 block:
 
 .. code-block:: julia
@@ -386,7 +385,7 @@ block:
       @test domath(2+2im) ≈ 7 + 2im
    end
 
-The ``@test_throws`` macro can be used to make sure that a particular error 
+The ``@test_throws`` macro can be used to make sure that an expected error 
 is raised:
 
 .. code-block:: julia
@@ -394,7 +393,7 @@ is raised:
    @test_throws MethodError domath("abc")
 
 The ``@test``, ``@test_throws`` and ``@testset`` macros are highly useful and can be 
-sufficient for many use cases, but large software projects sometimes need more advanced 
+sufficient for many projects, but large projects sometimes need more advanced 
 functionality. This is provided in `ReTest <https://github.com/JuliaTesting/ReTest.jl>`__
 and other packages in the `JuliaTesting organization <https://github.com/JuliaTesting>`__.
 
@@ -416,6 +415,9 @@ Exercises
    - `Flux <https://github.com/FluxML/Flux.jl>`_
    - `MLJ <https://alan-turing-institute.github.io/MLJ.jl/dev/>`_
 
+   **Suggestion**: run this in a new VSCode window (*File* > *New Window*)
+   because it will take some time and you can then continue working in your first window.
+
    .. solution::
 
       First create a new directory in a preferred location:
@@ -431,11 +433,11 @@ Exercises
          # navigate to the datascience directory
          using Pkg
          Pkg.activate(".")
-         Pkg add DataFrames, PalmerPenguins, Plots, Flux, MLJ
+         Pkg.add(["DataFrames", "PalmerPenguins", "Plots", "Flux", "MLJ"])
 
 
 
-.. exercise:: Create a Points package
+.. exercise:: Create a package out of the Points module
 
    Make the Points module we created above into a Julia package!
 
@@ -478,7 +480,7 @@ Exercises
 .. exercise:: Write a test
 
    Write a few tests for the ``sumsquare`` function in the `Points` package you 
-   created above. Run the tests and see if they pass!
+   created in the previous exercise. Run the tests and see if they pass!
 
    .. solution::
 
@@ -518,11 +520,5 @@ See also
 - Tutorial on a `Julia coding workflow in VSCode <https://techytok.com/lesson-workflow/>`__
 - Documentation for `Julia in VSCode <https://www.julia-vscode.org/docs/stable/>`__
 - `JuliaTesting organization <https://github.com/JuliaTesting>`__.
-- https://docs.julialang.org/en/v1/manual/faq/#Packages-and-Modules
-- https://docs.julialang.org/en/v1/manual/code-loading/#Federation-of-packages
-- https://julialang.github.io/Pkg.jl/v1/creating-packages/  
-- https://juliahub.com/ui/Home
-- https://discourse.julialang.org/t/experimental-reproducibility-julia-vs-the-rest/46769/6
-- https://julialang.github.io/Pkg.jl/v1/environments/
-- https://docs.julialang.org/en/v1.0/stdlib/Pkg/
+- `Pkg documentation <https://pkgdocs.julialang.org/v1/>`__
      
