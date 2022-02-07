@@ -174,7 +174,7 @@ software environments.
   install a new package we should type ``pkg> add some-package``.
 - To go back to the REPL, hit backspace or ``^C``.
 
-.. callout:: Using the ``Pkg`` module
+.. callout:: A ``Pkg`` syntax convention
 
    Instead of using ``]`` to enter the package manager, this lesson 
    will use the following syntax to manage packages. This way, code blocks
@@ -233,7 +233,7 @@ can be easily created on different computers.
    
    The output tells us that a new environment has been created in our 
    current directory - specifically using the ``Project.toml`` file 
-   (don't look for it yet, it's only created after we start adding packages).
+   (don't look for it yet as it's only created after we add the first package).
       
    We now add the `Example` package:
    
@@ -261,14 +261,30 @@ can be easily created on different computers.
      can be used to create identical Julia environments on different computers.
      It should not be modified by hand.
 
+
+.. callout:: Default vs project environments
+
+   A possibly confusing aspect when working with environments is that 
+   you have access to packages in the default environment (e.g. ``@v1.7``)
+   even if you have activated a project environment. One thus has to be careful 
+   to add all needed packages to a project environment so that the same environment 
+   can be generated on other machines.   
+
+   But this also has benefits since packages like Revise, Test (see below) etc. 
+   can be installed in the default environment rather than cluttering a project 
+   environment.
+
+
 Creating environments for other projects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To create a new environment based on another project you only need a 
-`Project.toml` or `Manifest.toml` file. Using `Project.toml` will install 
-the required dependencies but not necessarily with the same package versions, 
-while using `Manifest.toml` will install the packages in the **same state** that 
-is given by the manifest file.
+`Project.toml` or `Manifest.toml` file. 
+
+- Using `Project.toml` will install the required dependencies but not 
+  necessarily with the same package versions.
+- Using `Manifest.toml` will install the packages in the **same state** that 
+  is given by the manifest file.
 
 For example:
 
@@ -286,15 +302,21 @@ For example:
 Creating a new project
 ----------------------
 
+We also use the package manager to start a new project, i.e. a new 
+package.
+
 .. type-along:: Create a project
+
+   First we navigate to where we want to create the package, and then:
 
    .. code-block:: julia
 
       Pkg.generate("MyPackage")
       cd("MyPackage")
 
-   - Inspect the Project.toml file
-   - Inspect src/MyPackage.jl
+   ``Pkg.generate`` creates both a Project.toml file which has package metadata and 
+   is where our dependencies will go, and a basic src/MyPackage.jl template.
+   Inspect both!
 
    Now we activate the environment and add dependencies:
 
@@ -303,25 +325,78 @@ Creating a new project
       Pkg.activate(".")
       Pkg.add("Example")
 
-   We can now use anything from the Example package in our new project.
+   We can now use anything from the Example package in our new project:
 
-   Let's add a function to the MyPackage module:
+   Let's import the Example package and add a function to the MyPackage module:
 
    .. code-block:: julia
 
-      something
+      module MyPackage
+
+      using Example
+      export greet, x
+
+      greet() = print("Hello World!")
+
+      x = domath(10)
+
+      end # module
 
 
 
-Adding tests
-------------
+Testing
+-------
 
-**Should be installed in default environment, not in project**.
-VSCode imports it with the julia extension.
+The ``Test`` module in Base Julia provides simple unit testing functionality.
+We can have a look at the Example package again:
+https://github.com/JuliaLang/Example.jl
 
-- Test
-- ReTest
-- InlineTest
+In the ``test/`` subdirectory we find a script called (following convention)
+``runtests.jl``:
+
+.. code-block:: Julia
+
+   using Test, Example
+
+   @test hello("Julia") == "Hello, Julia"
+   @test domath(2.0) ≈ 7.0
+
+Running these tests can either be done from inside the package manager:
+
+.. code-block:: julia
+
+   cd("MyPackage")
+   Pkg.test("Example")
+
+or from the command line:
+
+.. code-block:: bash
+
+   julia --project=. test/runtests.jl
+
+Usually, one needs to perform more than one test per function or module, 
+and usually this is accomplished by collecting related tests in a ``@testset``
+block:
+
+.. code-block:: julia
+
+   @testset "Testing domath" begin
+      @test domath(2.0) ≈ 7.0
+      @test domath(2) ≈ 7
+      @test domath(2+2im) ≈ 7 + 2im
+   end
+
+The ``@test_throws`` macro can be used to make sure that a particular error 
+is raised:
+
+.. code-block:: julia
+
+   @test_throws MethodError domath("abc")
+
+The ``@test``, ``@test_throws`` and ``@testset`` macros are highly useful and can be 
+sufficient for many use cases, but large software projects sometimes need more advanced 
+functionality. This is provided in `ReTest <https://github.com/JuliaTesting/ReTest.jl>`__
+and other packages in the `JuliaTesting organization <https://github.com/JuliaTesting>`__.
 
 
 
@@ -360,22 +435,59 @@ Exercises
 
 
 
-.. exercise:: Writing a test
+.. exercise:: Create a Points package
 
-   Write a test for the ``sumsquare`` function in the `Points` module we wrote above!
-
-   - Create a new file `testPoints.jl` in the same directory as your `Points.jl` file.
-   - Include the module by ``include("Points.jl")`` and load it with ``using .Points`` 
-     (because the module is included in ``Main``).
-   - Write your tests using the ``@testset`` and ``@test`` macros. 
-   - Run the tests and see if they pass.
+   Make the Points module we created above into a Julia package!
 
    .. solution::
+
+      Navigate to a suitable directory, and then:
+
+      .. code-block:: julia
+
+         Pkg.generate("Points")
+         cd("Points")
+
+      Then edit the ``Points.jl`` file under ``src/``:
+
+      .. code-block:: julia
+
+         module Points
+
+         export Point, sumsquare
+         
+         struct Point{T}
+             x::T
+             y::T
+         end
+         
+         function sumsquare(p1::Point, p2::Point)
+             return Point(p1.x^2 + p2.x^2, p1.y^2 + p2.y^2)
+         end
+         
+         end
+
+      To start using it:
+
+      .. code-block:: julia
+
+         Pkg.activate(".")
+         using Points
+         
+
+.. exercise:: Write a test
+
+   Write a few tests for the ``sumsquare`` function in the `Points` package you 
+   created above. Run the tests and see if they pass!
+
+   .. solution::
+
+      Create a file ``runtests.jl`` under ``test/``:
 
       .. code-block:: julia
 
          using Test
-         using .Points
+         using Points
          
          @testset begin
              # test floats
@@ -389,14 +501,23 @@ Exercises
              # test that strings fail
              s1 = Point("a", "b")
              s2 = Point("c", "d")
-             @test_throws MethodError sumsquare(s1, s2) == Point(1, 13)    
+             @test_throws MethodError sumsquare(s1, s2)
          end
+
+      Run the tests with:
+
+      .. code-block:: julia
+
+         Pkg.test("Points")
+
+
 
 See also
 --------
 
 - Tutorial on a `Julia coding workflow in VSCode <https://techytok.com/lesson-workflow/>`__
 - Documentation for `Julia in VSCode <https://www.julia-vscode.org/docs/stable/>`__
+- `JuliaTesting organization <https://github.com/JuliaTesting>`__.
 - https://docs.julialang.org/en/v1/manual/faq/#Packages-and-Modules
 - https://docs.julialang.org/en/v1/manual/code-loading/#Federation-of-packages
 - https://julialang.github.io/Pkg.jl/v1/creating-packages/  
