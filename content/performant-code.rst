@@ -228,7 +228,29 @@ well as memory consumption were reduced by 50\%.
 StaticArrays
 ^^^^^^^^^^^^
 
-WRITEME?
+For applications involving *many small arrays*, significant performance can 
+be gained by using `StaticArrays <https://github.com/JuliaArrays/StaticArrays.jl>`__
+instead of normal Arrays. The package provides a range of built-in ``StaticArray``
+types, including mutable and immutable arrays, with a *static size known at 
+compile time*.
+
+Example:
+
+.. code-block:: julia
+
+   m1 = rand(10,10)
+   m2 = @SArray rand(10,10)
+
+   @btime m1*m1
+   # 311.808 ns (1 allocation: 896 bytes)
+
+   @btime m2*m2
+   # 99.902 ns (1 allocation: 816 bytes)
+
+``StaticArrays`` provide 
+`many additional features <https://juliaarrays.github.io/StaticArrays.jl/stable/pages/quickstart/>`__,
+but unfortunately they can only be used for vectors, matrices and arrays with up 
+to around 100 elements.
 
 
 Other performance considerations
@@ -239,10 +261,15 @@ Julia's official documentation has an important page on
 Before embarking on any research software project in Julia you 
 should carefully read this page!
 
+Summary
+-------
+
+- Optimize your serial code before you parallelize! There's a lot to think about.
+
+
   
 See also
 --------
 
 - https://slides.com/valentinchuravy/julia-parallelism#/1/1
-- https://docs.julialang.org/en/v1/manual/performance-tips/
-     
+- https://docs.julialang.org/en/v1/manual/performance-tips/     
