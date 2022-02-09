@@ -12,16 +12,6 @@ GPU programming
    - Get an idea on how to write GPU kernels in Julia
 
 
-
-- Low-level (C kernel) based operations OpenCL.jl and CUDAdrv.jl which are respectively an OpenCL interface and a CUDA wrapper.
-- Low-level (Julia Kernel) interfaces like CUDAnative.jl which is a Julia native CUDA implementation.
-- High-level vendor-specific abstractions like CuArrays.jl and CLArrays.jl
-- High-level libraries like ArrayFire.jl and GPUArrays.jl
-- https://github.com/JuliaGPU/AMDGPU.jl
-- https://github.com/JuliaGPU  
-- https://github.com/JuliaGPU/ArrayFire.jl
-- 
-
 Julia has first-class support for GPU programming through the following 
 packages that target GPUs from all three major vendors:
 
@@ -65,21 +55,25 @@ to an NVIDIA GPU and the necessary software stack. Access to a HPC system with
 GPUs and a Julia installation will work. Another option is to use 
 `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from 
 `Julia Computing <https://juliacomputing.com/>`_ with 
-access to all of Julia and GPUs. Or one can use 
+access to Julia's ecosystem of packages and GPU hardware. Or one can use 
 `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
 account and a manual Julia installation, but using simple NVIDIA GPUs is free.
 
-A quick way to get started is to use this 
-`Colab Julia notebook template 
-<https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_Colab_Notebook_Template.ipynb>`_.
-If you have a Google account and agree to using it here, follow these steps:
+.. callout:: Google Colab with Julia and a GPU
 
-- Open the notebook, save it to your Drive and optionally rename it
-- Click on `Runtime` > `Change runtime type` and select GPU under `Hardware accelerator`
-- Execute the first code cell (starting with ``%%shell``) to install Julia
-- Reload the page
-- Execute the second code cell (``versioninfo()``) with `SHIFT-ENTER` to see if it works
-- Press "b" to create a new code cell below and start typing along.
+   Google Colab does not support Julia, but a
+   `helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
+   has created a Colab notebook that can be reused for Julia computing on Colab.
+   If you have a Google account and agree to using it here, follow these steps:
+
+   - Open this `Colab Julia notebook template <https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_Colab_Notebook_Template.ipynb>`__.
+   - Save it to your Drive and optionally rename it
+   - Click on `Runtime` > `Change runtime type` and select GPU under `Hardware accelerator`
+   - Modify the first code cell (starting with ``%%shell``): remove ``Plots`` from ``JULIA_PACKAGES``
+   - Execute the first code cell to install Julia
+   - Reload the page
+   - Execute the second code cell (``versioninfo()``) with `SHIFT-ENTER` to see if it works
+   - Press "b" to create a new code cell below and start typing along.
 
 
 GPUs vs CPUs
@@ -102,7 +96,7 @@ Some key aspects of GPUs that need to be kept in mind:
 - GPUs have their own memory. This means that data needs to be transfered to 
   and from the GPU during the execution of a program.
 - Cores in a GPU are arranged into a particular structure. At the highest level 
-  they are divided into "streaming multiprocessors". Some of these details are 
+  they are divided into "streaming multiprocessors" (SMs). Some of these details are 
   important when writing own GPU kernels.
 
 
@@ -121,8 +115,15 @@ the GPU:
 
    using CUDA
 
-   a = CuArray([1,2,3,4])
-   a += 1
+   A_d = CuArray([1,2,3,4])
+   A_d .+= 1
+
+Moving an array back from the GPU to the CPU is simple:
+
+.. code-block:: julia
+   
+   A = Array(A_d)
+
 
 However, the overhead of copying data to the GPU makes such simple calculations 
 very slow.
@@ -135,13 +136,16 @@ performance:
 
    using BenchmarkTools
 
-   A_cpu = rand(2^13, 2^13)
-   A_gpu = CUDA.rand(2^13, 2^13)
+   A = rand(2^13, 2^13)
+   A_d = CUDA.rand(2^13, 2^13)
 
-   @btime A_cpu * A_cpu
-   @btime A_gpu * A_gpu
+   @btime A * A
+   @btime A_d * A_d
 
 There should be a dramatic speedup!
+
+Vendor libraries
+^^^^^^^^^^^^^^^^
 
 The NVIDIA libraries contain precompiled kernels for common 
 operations like matrix multiplication (`cuBLAS`), fast Fourier transforms 
@@ -165,22 +169,167 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
    using AbstractFFTs
    fft(b)
 
-To move an array back from the GPU to the CPU, we can simply do ``Array(b)``.
+
+Higher-order abstractions
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A powerful way to program GPUs with arrays is through Julia's higher-order array 
+abstractions. The simple element-wise addition we saw above, ``a .+= 1``, is 
+an example of this, but more general constructs can be created with 
+``broadcast``, ``map``, ``reduce``, ``accumulate`` etc:
+
+.. tabs:: 
+
+   .. tab:: broadcast
+
+      .. code-block:: julia
+
+         broadcast(a) do x
+             x += 1
+         end
+
+   .. tab:: map
+
+      .. code-block:: julia
+
+         map(a) do x
+             x + 1
+         end
+
+   .. tab:: reduce
+
+      .. code-block:: julia
+
+         reduce(+, a)
+
+   .. tab:: accumulate
+
+      .. code-block:: julia
+
+         accumulate(+, a)
+
+Let's see if we can GPU-port the ``sqrt_sum`` function we saw in an earlier 
+episode using these methods.
+
+.. code-block:: julia
+
+   function sqrt_sum(A)
+       s = zero(eltype(A))
+       for i in eachindex(A)
+           @inbounds s += sqrt(A[i])
+       end
+       return s
+   end
+
+First the square root should be taken of each element of the array, 
+which we can do with ``map(sqrt,A)``. Next we perform a reduction with the ``+``
+operator. Combining these steps:
+
+.. code-block:: julia
+
+   A = CuArray([1 2 3; 4 5 6; 7 8 9])
+
+   reduce(+, map(sqrt,A))
+
+GPU porting complete!
 
 
 Writing your own kernels
 ------------------------
 
 Not all algorithms can be made to work with the higher-level abstractions 
-in ``CUDA.jl``. In such cases it's necessary to write our own GPU kernel.
-We will now do this for the ``evolve!`` function in ``HeatEquation.jl``.
+in ``CUDA.jl``. In such cases it's necessary to explicitly write our own GPU kernel.
+
+Let's take a simple example, adding two vectors:
+
+.. code-block:: julia
+
+   function vadd!(c, a, b)
+       for i in 1:length(a)
+           @inbounds c[i] = a[i] + b[i]
+       end
+   end
+
+   a = zeros(10) .+ 5.0
+   b = ones(10)
+   c = similar(b)
+   vadd!(c, a, b)
+
+We can already run this on the GPU with the ``@cuda`` macro, which 
+will compile ``vadd!`` into a GPU kernel and launch it:
+
+.. code-block:: julia
+
+   A_d = CuArray(a)
+   B_d = CuArray(b)
+   C_d = similar(B_d)
+
+   @cuda vadd!(C_d, A_d, B_d)
+
+But the performance would be terrible because each thread on the GPU 
+would be performing the same loop. So we have to remove the loop over all 
+elements and instead use the special ``threadIdx`` and ``blockDim`` functions,  
+analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
+
+.. figure:: img/MappingBlocksToSMs.png
+   :align: center
+
+We split work between the GPU threads like this:   
+
+.. code-block:: julia
+
+   function vadd!(c, a, b)
+       index = threadIdx().x   # linear indexing, so only use `x`
+       stride = blockDim().x   
+       for i = index:stride:length(a)
+           c[i] = a[i] + b[i]
+       end
+       return
+   end
+
+   # run using 256 threads
+   @cuda threads=256 vadd!(C_d, A_d, B_d)
+
+But we can parallelize even further. GPUs have a limited number of threads they 
+can run on a single SM, but they also have multiple SMs. 
+To take advantage of them all, we need to run a kernel with multiple blocks. 
+
+.. code-block:: julia
+
+   function vadd!(c, a, b)
+       index = (blockIdx().x - 1) * blockDim().x + threadIdx().x       
+       stride = blockDim().x   
+       for i = index:stride:length(a)
+           c[i] = a[i] + b[i]
+       end
+       return
+   end
+
+   numblocks = ceil(Int, length(A_d)/256)
+
+   # run using 256 threads
+   @cuda threads=256 blocks=numblocks vadd!(C_d, A_d, B_d)
 
 
+We have been using 256 GPU threads, but this might not be optimal. The more 
+threads we use the better is the performance, but the maximum number depends 
+both on the GPU and the nature of the kernel. To optimize this choice, we can 
+first create the kernel without launching it, query it for the number of threads 
+supported, and then launch the compiled kernel:
 
-.. exercise:: Write a kernel for HeatEquation.evolve! 
+.. code-block:: julia
 
-   step-by-step guide to write the kernel
+   # compile kernel
+   kernel = @cuda launch=false vadd!(C_d, A_d, B_d)
+   # extract configuration via occupancy API
+   config = launch_configuration(kernel.fun)
+   # number of threads should not exceed size of array
+   threads = min(length(a), config.threads)
+   # smallest integer smaller than or equal to length(a)/threads
+   blocks = cld(length(a), threads)
 
+   # launch kernel with specific configuration
+   kernel(C_d, A_d, B_d; threads, blocks)
 
 
 Profiling
@@ -197,9 +346,13 @@ To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
 
 .. code-block:: julia
 
+   using CUDA
+   A_d = CuArray(zeros(10) .+ 5.0)
+   B_d = CuArray(ones(10))
+   C_d = CuArray(similar(B_d))
    # first run it once to force compilation
-   my_function(y_d, x_d)  
-   CUDA.@profile my_function(y_d, x_d)
+   vadd!(C_d, A_d, B_d)  
+   CUDA.@profile vadd!(C_d, A_d, B_d)
 
 When we quit the REPL again, the profiler process will print information about 
 the executed kernels and API calls.
@@ -209,6 +362,15 @@ Neural networks on the GPU
 --------------------------
 
 - show how to leverage Flux's inbuilt GPU support for penguin training
+
+
+Exercises
+---------
+
+.. exercise:: Port HeatEquation.jl to GPU
+
+  Write a kernel for the ``evolve!`` function!
+
 
 
 See also
