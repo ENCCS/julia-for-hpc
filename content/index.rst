@@ -176,6 +176,7 @@ Several examples and formulations are inspired by other Julia
 lessons, particularly:
 
 - `Introduction to Julia <https://github.com/csc-training/julia-introduction/>`__ provided by CSC and Aalto
+- `Tim Besard's JuliaCon 2021 GPU tutorial <https://github.com/maleadt/juliacon21-gpu_workshop>`__
 - `Carsten Bauer's 3-day Julia workshop <https://github.com/carstenbauer/JuliaCologne21>`__
 - `The Carpentry lesson Introduction to Julia <https://carpentries-incubator.github.io/julia-novice/>`__
 - `Storopoli, Huijzer and Alonso (2021). Julia Data Science. ISBN: 9798489859165. <https://juliadatascience.io>`__
