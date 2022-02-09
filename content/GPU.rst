@@ -274,7 +274,7 @@ analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
 .. figure:: img/MappingBlocksToSMs.png
    :align: center
 
-We split work between the GPU threads like this:   
+We can split work between the GPU threads like this:   
 
 .. code-block:: julia
 
@@ -292,20 +292,20 @@ We split work between the GPU threads like this:
 
 But we can parallelize even further. GPUs have a limited number of threads they 
 can run on a single SM, but they also have multiple SMs. 
-To take advantage of them all, we need to run a kernel with multiple blocks. 
+To take advantage of them all, we need to run a kernel with multiple blocks: 
 
 .. code-block:: julia
 
    function vadd!(c, a, b)
-       index = (blockIdx().x - 1) * blockDim().x + threadIdx().x       
-       stride = blockDim().x   
-       for i = index:stride:length(a)
+       i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
+       if i <= length(a)
            c[i] = a[i] + b[i]
        end
        return
    end
 
-   numblocks = ceil(Int, length(A_d)/256)
+   # smallest integer larger than or equal to length(A_d)/threads
+   numblocks = cld(length(A_d)/256)
 
    # run using 256 threads
    @cuda threads=256 blocks=numblocks vadd!(C_d, A_d, B_d)
@@ -325,7 +325,7 @@ supported, and then launch the compiled kernel:
    config = launch_configuration(kernel.fun)
    # number of threads should not exceed size of array
    threads = min(length(a), config.threads)
-   # smallest integer smaller than or equal to length(a)/threads
+   # smallest integer larger than or equal to length(a)/threads
    blocks = cld(length(a), threads)
 
    # launch kernel with specific configuration
@@ -369,11 +369,47 @@ Exercises
 
 .. exercise:: Port HeatEquation.jl to GPU
 
-  Write a kernel for the ``evolve!`` function!
+   Write a kernel for the ``evolve!`` function!
 
+   1. Create a new ``evolve_gpu!`` function 
+    
+      - It should accept arrays rather than ``Field`` structs, i.e. pass in 
+        ``curr.data`` and ``prev.data``. 
+      - It also needs to accept ``curr.dx`` and ``curr.dy``. 
+      - ``curr.nx`` and ``curr.ny`` can be obtained from the dimensions of 
+        ``curr.data``, but remember that the field should only be updated 
+        at ``2:curr.nx+1`` and ``2:curr.ny+1``
+
+   2. The arrays are two-dimensional, so you will need both the ``.x`` and ``.y`` 
+      parts of ``threadIdx``, ``blockDim`` and ``blockIdx``.
+
+      - Does it matter how you match the ``x`` and ``y`` dimensions of the 
+        threads and blocks to the dimensions of the data (i.e. rows and columns)? 
+
+   3. In the loop over time steps in ``simulate!``, use something like 
+      ``if typeof(curr.data) <: CuArray ...`` to decide whether to run ``evolve!``
+      or ``evolve_gpu!``.
+
+   4. As the problem is two-dimensional, you need to specify tuples 
+      for the number of threads and blocks in the ``x`` and ``y`` dimensions, 
+      e.g. ``threads = (32, 32)``.
+
+   5. After testing your implementation with given numbers of threads, 
+      try using the occupancy API to obtain an optimal configuration.
+
+   6. Compare your Julia code with the 
+      `corresponding CUDA version <https://github.com/cschpc/heat-equation/blob/main/cuda/core_cuda.cu>`__
+      to appreciate the (relative) simplicity of Julia!
+
+   .. solution:: 
+
+      One possible solution can be found in the ``gpu`` branch of the 
+      `HeatEquation.jl <https://github.com/ENCCS/HeatEquation.jl>`__ repository.
 
 
 See also
 --------
 
 - https://juliagpu.org/
+- https://cuda.juliagpu.org/stable/
+- https://github.com/maleadt/juliacon21-gpu_workshop
