@@ -361,7 +361,6 @@ the executed kernels and API calls.
 Neural networks on the GPU
 --------------------------
 
-- show how to leverage Flux's inbuilt GPU support for penguin training
 
 
 Exercises
@@ -379,6 +378,9 @@ Exercises
       - ``curr.nx`` and ``curr.ny`` can be obtained from the dimensions of 
         ``curr.data``, but remember that the field should only be updated 
         at ``2:curr.nx+1`` and ``2:curr.ny+1``
+      - Arguments other than the CuArrays can be converted to a GPU-friendly 
+        format (typically Float32) with the ``cu`` convenience function,
+        e.g. ``cu(curr.dx)``.
 
    2. The arrays are two-dimensional, so you will need both the ``.x`` and ``.y`` 
       parts of ``threadIdx``, ``blockDim`` and ``blockIdx``.
@@ -392,14 +394,32 @@ Exercises
 
    4. As the problem is two-dimensional, you need to specify tuples 
       for the number of threads and blocks in the ``x`` and ``y`` dimensions, 
-      e.g. ``threads = (32, 32)``.
+      e.g. ``threads = (32, 32)`` and similarly for ``blocks`` (using ``cld``).
 
-   5. After testing your implementation with given numbers of threads, 
+   5. To check correctness, test that ``evolve!`` and ``evolve_gpu!`` 
+      give (approximately) the same results, for example:
+
+      .. code-block:: julia
+
+         curr, prev = initialize(ncols, nrows)
+         a = 0.5
+         dt = curr.dx^2 * curr.dy^2 / (2.0 * a * (curr.dx^2 + curr.dy^2))
+         HeatEquation.evolve!(curr, prev, a, dt)
+
+         curr_d, prev_d = initialize(ncols, nrows, CuArray)
+         HeatEquation.evolve_gpu!(curr_d.data, prev_d.data, dx, dy, a, dt)
+
+         curr.data ≈ Array(curr_d.data)
+   
+   6. After testing your implementation with given numbers of threads, 
       try using the occupancy API to obtain an optimal configuration.
 
-   6. Compare your Julia code with the 
+   7. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
+      functions for arrays of various sizes.
+   
+   8. Compare your Julia code with the 
       `corresponding CUDA version <https://github.com/cschpc/heat-equation/blob/main/cuda/core_cuda.cu>`__
-      to appreciate the (relative) simplicity of Julia!
+      to enjoy the (relative) simplicity of Julia!
 
    .. solution:: 
 
