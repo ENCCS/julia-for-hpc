@@ -155,7 +155,7 @@ correct result and speedup.
              for i in eachindex(A)
                  @inbounds s += sqrt(A[i])
              end
-             s
+             return s
          end
 
 
