@@ -459,7 +459,7 @@ Exceptions can be created explicitly with `throw`:
 	      if x>=0
 	          return exp(-x)
 	      else
-                  throw(DomainError(x, "argument must be non-negative"))
+            throw(DomainError(x, "argument must be non-negative"))
 	      end
 	  end
 

@@ -92,7 +92,7 @@ Composability
 Julia is highly `composable <https://en.wikipedia.org/wiki/Composability>`__,
 which means that by writing generic code, 
 components (packages) that have been developed independently can simply be used 
-together and the result is exactly what you would have hoped for.
+together and the result is exactly what you would have dreamed about.
 
 A well known example is the interplay between 
 `DifferentialEquations.jl <https://diffeq.sciml.ai/stable/>`__,  a package for 

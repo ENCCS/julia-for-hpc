@@ -48,6 +48,7 @@ types in Julia:
       :align: center
       :scale: 40 %
 
+
 .. code-block:: julia
 
     typeof(1)  # returns Int64
@@ -66,6 +67,10 @@ types.
 
 .. figure:: img/Type-hierarchy-for-julia-numbers.png
 
+   From `Wikimedia <https://commons.wikimedia.org/wiki/File:Type-hierarchy-for-julia-numbers.png>`__,
+   licensed under `CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/deed.en>`__.
+
+
 Derived types
 ~~~~~~~~~~~~~
 
@@ -76,7 +81,7 @@ classical example:
 
 .. code-block:: julia
 
-    struct Point
+    struct Point2D
         x
         y
     end
@@ -85,7 +90,7 @@ A new ``Point`` object can be defined by
 
 .. code-block:: julia
 
-    p = Point(1.1, 2.2)
+    p = Point2D(1.1, 2.2)
 
 
 and its elements accessed by
@@ -287,11 +292,11 @@ We can list all methods defined for a function:
 .. callout:: Methods and functions
 
    -  A **function** describing the "what" can have multiple **methods**
-      describing the "how"
+      describing the "how".
    -  This differs from object-oriented languages in which objects (not
-      functions) have methods
+      functions) have methods.
    -  **Multiple dispatch** is when Julia selects the most specialized
-      method to run based on the types of all input arguments
+      method to run based on the types of all input arguments.
    -  **Best practice**: constrain argument types to the widest possible
       level, and introduce constraints only if you know other argument
       types will fail. 
@@ -336,7 +341,7 @@ integer output and likewise for floats:
        end
    end           
 
-Other convenience functions exist for working with arrays, including: 
+Other convenience functions exist to make types consistent, including: 
 
 - ``eltype`` to determine the type of the array elements
 - ``similar`` to create an uninitialized mutable array with 
@@ -465,7 +470,7 @@ To see what a macro expands to, we can use another macro:
 
 .. code-block:: julia
 
-   @macroexpand @dotimes x -= 13
+   @macroexpand @dotimes 4 x -= 13
 
 The output shows that a for loop has been generated:
 
@@ -473,17 +478,12 @@ The output shows that a for loop has been generated:
 
    quote
        #= REPL[31]:3 =#
-       for var"#11#i" = 1:5
+       for var"#11#i" = 1:4
            #= REPL[31]:4 =#
            x -= 13
        end
    end
 
-To learn more about metaprogramming and macros in Julia head 
-over to:
-
-- `The docs <https://docs.julialang.org/en/v1/manual/metaprogramming/>`__
-- `This tutorial from JuliaCon21 <https://github.com/dpsanders/Metaprogramming_JuliaCon_2021>`__
 
 
 Unicode support
@@ -496,8 +496,6 @@ Unicode characters are entered via tab completion of LaTeX-like abbreviations
 in the Julia REPL or IDEs with Julia extensions, including VSCode. If you are 
 unsure how to enter a particular character, you can copy-paste it into 
 Julia's help mode to see the LaTeX-like syntax.
-For a full list of supported symbols see 
-`this page in the Julia docs <https://docs.julialang.org/en/v1/manual/unicode-input/>`__.
 
 .. code-block:: julia
 
@@ -565,9 +563,12 @@ Exercises
 See also
 --------
 
-- Lin, Wei-Chen, and Simon McIntosh-Smith. 
-  `Comparing Julia to Performance Portable Parallel Programming Models for HPC. <https://ieeexplore.ieee.org/abstract/document/9652798>`_, 
-  2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.
+- Aaron Christianson.
+  `Object Orientation and Polymorphism in Julia <https://github.com/ninjaaron/oo-and-polymorphism-in-julia>`__
 - Christopher Rackauckas. 
   `Type-Dispatch Design: Post Object-Oriented Programming for Julia 
   <https://www.stochasticlifestyle.com/type-dispatch-design-post-object-oriented-programming-julia/>`__
+- `Documentation on metaprogramming <https://docs.julialang.org/en/v1/manual/metaprogramming/>`__
+- `Metaprogramming tutorial from JuliaCon21 <https://github.com/dpsanders/Metaprogramming_JuliaCon_2021>`__
+- `Full list of supported unicode symbols 
+  <https://docs.julialang.org/en/v1/manual/unicode-input/>`__.
