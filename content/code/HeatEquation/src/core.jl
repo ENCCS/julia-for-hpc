@@ -15,6 +15,19 @@ function evolve!(curr::Field, prev::Field, a, dt)
     end
 end
 
+
+
+"""
+    swap_fields!(curr::Field, prev::Field)
+
+Swap the data of two fields curr and prev.    
+"""    
+function swap_fields!(curr::Field, prev::Field)
+    tmp = curr.data
+    curr.data = prev.data
+    prev.data = tmp
+end
+
 """ 
     average_temperature(f::Field)
 
@@ -35,7 +48,7 @@ function simulate!(curr::Field, prev::Field, nsteps)
     a = 0.5
     # Largest stable time step
     dt = curr.dx^2 * curr.dy^2 / (2.0 * a * (curr.dx^2 + curr.dy^2))
-
+    
     # display a nice progress bar
     p = Progress(nsteps)
 
@@ -44,9 +57,7 @@ function simulate!(curr::Field, prev::Field, nsteps)
         evolve!(curr, prev, a, dt)
 
         # swap current and previous fields
-        tmp = curr.data
-        curr.data = prev.data
-        prev.data = tmp
+        swap_fields!(curr, prev)
 
         # increment the progress bar
         next!(p)

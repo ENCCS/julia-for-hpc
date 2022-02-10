@@ -40,7 +40,7 @@ We can write Julia code in various ways:
      ``(@v1.5) pkg>`` (if you have Julia version 1.5). Here you can add
      packages with ``add``, update packages with ``update`` etc. To see
      all options type ``?``.
-   - To exit any non-Julian mode, hit Escape key.
+   - To exit any non-Julian mode, hit Backspace key.
 
 2. `Jupyter <https://jupyter.org/>`_:
    Jupyter notebooks are familiar to many Python and R users. 

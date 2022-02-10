@@ -3,6 +3,7 @@ Developing in Julia
 
 .. questions::
 
+   - What IDE is best to use for Julia?
    - How do modules work in Julia?
    - How do I create a new project?
    - How can I create reprodubible environments?
@@ -10,10 +11,10 @@ Developing in Julia
      
 .. objectives::
 
-   - Get familiar with the package manager
-   - Learn to use, extend and write packages in Julia
+   - Get familiar with VSCode
+   - Learn to use the package manager
    - Learn how to create reproducible environments and add tests to your code
-   - Understand scoping in Julia
+   - Learn to write own packages
      
 
 Tooling
@@ -44,7 +45,7 @@ we can fire up a VSCode session and explore the functionality.
 
 .. type-along:: Getting acquainted with VSCode
 
-   - Open up VSCode either through a file browser or via the terminal command `code`.
+   - Open up VSCode either through a file browser or via the terminal command ``code``.
    - We should see a *Get started* page where we can create a new file, open a 
      folder or clone a git repository. The same options can be found in the Explorer 
      menu in the left sidebar.
@@ -102,7 +103,7 @@ The difference is how variables defined in the module are brought into scope:
    We can now import and use the module. First we include it either by 
    ``include("Points.jl")`` or by hitting ``Shift+Enter`` to evaluate the whole file.
    Since our new module is defined within 
-   the current ``Main`` module, we need to import it with a dot in front
+   the current ``Main`` module, we need to import it with a dot in front, ``using .Points`` 
    (an alternative is to add our current path with the Points module to Julia's 
    LOAD_PATH, ``push!(LOAD_PATH, pwd())``, after which no dot is needed):
 
@@ -134,7 +135,7 @@ another editor you will need to install ``Revise`` and when developing a
 package always do ``using Revise`` before ``using MyPackage``.
 
 A caveat when using VSCode is that when developing a script (i.e. not a full package), 
-files need to be included in Revise-tracked mode with ``includet("MyPackage")``.
+files need to be included in Revise-tracked mode with ``includet("MyScript")``.
 When developing packages everything works automatically.
 
 Structure of a Julia package
@@ -178,8 +179,8 @@ software environments.
 .. callout:: A syntax convention
 
    Instead of using ``]`` to enter the package manager, this lesson 
-   will use the following syntax to manage packages. This way, code blocks
-   can be copied directly into the REPL and executed:
+   will use the following syntax to manage packages through the ``Pkg`` API. 
+   This way, code blocks can be copied directly into the REPL and executed:
 
    .. code-block:: julia
 
@@ -247,7 +248,8 @@ can be easily created on different computers.
    our new ``Project.toml`` file.  
    What does this file contain? 
    Try printing it through the Julia shell by 
-   typing ``;`` followed by ``cat example-project/Project.toml``.
+   typing ``;`` followed by ``cat Project.toml`` 
+   (or ``println(String(read("Project.toml")))`` in Julia mode).
    
    We can also see that there's another file in the ``example-project`` directory
    called ``Manifest.toml``.
@@ -348,7 +350,7 @@ want to develop a new package.
 Testing
 -------
 
-The ``Test`` package provides simple unit testing functionality.
+The ``Test`` package provides unit testing functionality.
 We can have a look at the Example package again:
 https://github.com/JuliaLang/Example.jl
 

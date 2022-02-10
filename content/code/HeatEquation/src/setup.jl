@@ -2,22 +2,22 @@
 """
     Field(nx::Int64, ny::Int64, dx::Float64, dy::Float64, data::Matrix{Float64})
 
-Temperature field type.
+Temperature field type. nx and ny are the dimensions of the field. 
+The array data contains also ghost layers, so it will have dimensions 
+[nx+2, ny+2]
 """
-mutable struct Field
-    # nx and ny are the dimensions of the field. The array data
-    # contains also ghost layers, so it will have dimensions nx+2 x ny+2
+mutable struct Field{T<:AbstractArray}
     nx::Int64
     ny::Int64
     # Size of the grid cells
     dx::Float64
     dy::Float64
     # The temperature values in the 2D grid
-    data::Matrix{Float64}
+    data::T
 end
 
 # outer constructor with default cell sizes and initialized data
-Field(nx, ny) = Field(nx, ny, 0.01, 0.01, zeros(nx+2, ny+2))
+Field(nx::Int64, ny::Int64, data) = Field{typeof(data)}(nx, ny, 0.01, 0.01, data)
 
 # extend deepcopy to new type
 Base.deepcopy(f::Field) = Field(f.nx, f.ny, f.dx, f.dy, deepcopy(f.data))
@@ -28,9 +28,10 @@ Base.deepcopy(f::Field) = Field(f.nx, f.ny, f.dx, f.dy, deepcopy(f.data))
 Initialize two temperature field with (nrows, ncols) number of 
 rows and columns.
 """
-function initialize(nrows = 1000, ncols = 1000)
+function initialize(nrows = 1000, ncols = 1000, arraytype = Matrix)
 
-    previous = Field(nrows, ncols)
+    data = arraytype(zeros(nrows+2, ncols+2))
+    previous = Field(nrows, ncols, data)
 
     # generate a specific field with boundary conditions
     generate_field!(previous)

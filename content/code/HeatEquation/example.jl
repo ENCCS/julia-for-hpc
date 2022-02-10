@@ -10,7 +10,7 @@ curr, prev = initialize(ncols, nrows)
 visualize_field(curr)
 
 # simulate temperature evolution for nsteps
-simulate!(curr prev, nsteps)
+simulate!(curr, prev, nsteps)
 
 # visualize final field
 visualize_field(curr)

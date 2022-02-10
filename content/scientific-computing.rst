@@ -449,6 +449,12 @@ built in, but also enables the user to write own Julia code for DL components.
 - Flux works well with other Julia libraries, like dataframes, images and differential equation solvers.
   One can build complex data processing pipelines that integrate Flux models.
 
+To install Flux:
+
+.. code-block:: julia
+
+   using Pkg
+   Pkg.add("Flux")
 
 
 .. type-along:: Training a deep neural network to classify penguins

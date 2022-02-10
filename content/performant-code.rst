@@ -20,7 +20,7 @@ For this purpose we will use a minimal heat equation solver, inspired by
 `this educational repository containing C/C++ versions with different 
 parallelization strategies <https://github.com/cschpc/heat-equation>`_ (credits to 
 CSC Finland). The Julia version of this package can be found at 
-https://github.com/enccs/heatequation.jl but the source files are also displayed 
+https://github.com/enccs/HeatEquation.jl but the source files are also displayed 
 below.
 
 .. tabs:: 
@@ -84,20 +84,31 @@ unpack a zip archive) to a new folder:
       git clone https://github.com/enccs/HeatEquation.jl
       cd HeatEquation
 
+   If you don't have Git installed, you can also 
+   `download a zipfile <https://github.com/ENCCS/HeatEquation.jl/archive/refs/heads/main.zip>`__.
    Next open a new VSCode window and navigate to the new directory. 
    Open up a Julia REPL and activate the `HeatEquation` environment.
 
-   When everything has been set up, we can import `HeatEquation` and start 
-   benchmarking. We should also not forget to import `Revise`!
+   When everything has been set up, we can import `HeatEquation` and begin by 
+   testing the package: 
 
    .. code-block:: julia
 
       using HeatEquation
-      using Revise
       using BenchmarkTools
 
       ncols, nrows, nsteps = 1000, 1000, 500
       curr, prev = initialize(ncols, nrows)
+      visualize(curr)
+
+      simulate!(curr, prev, nsteps)
+
+      visualize(curr)
+
+
+   To perform benchmarking on the ``simulate!`` function, simply insert ``@benchmark``:
+
+   .. code-block:: julia
 
       @benchmark simulate!(curr, prev, nsteps)
 
@@ -264,8 +275,9 @@ should carefully read this page!
 Summary
 -------
 
-- Optimize your serial code before you parallelize! There's a lot to think about.
-
+- Always benchmark and profile before optimizing!
+- Optimize bottlenecks in your serial code before you parallelize! 
+- `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`__.
 
   
 See also
