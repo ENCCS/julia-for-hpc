@@ -118,8 +118,8 @@ Basic syntax
 |                  | - ``splice!(a,2:3, 5:7)``           Rm & add items at given inds  |
 +------------------+-------------------------------------------------------------------+
 | Multidimensional | - ``Array{T}(undef, dims)``         New undef array type T        |
-| arrays           | - ``mat = [1 2; 3 4]``              Zero 4×4×4×4 Array{Float64, 4}|
-|                  | - ``zeros(4,4,4,4)``                Random 12×4 Matrix{Float64}   |
+| arrays           | - ``mat = [1 2; 3 4]``              2×2 Matrix{Int64}             |
+|                  | - ``zeros(4,4,4,4)``                Zero 4×4×4×4 Array{Float64,4} |
 |                  | - ``rand(12,4)``                    Random 12×4 Matrix{Float64}   |
 +------------------+-------------------------------------------------------------------+
 | Inspecting       | - ``length(a)``                                                   |
@@ -235,6 +235,7 @@ Some useful functions to work with files:
 +========================+===========================================================+
 | - ``cd(path)``         | - Change directory                                        |
 | - ``readdir(path)``    | - Return list of current directory                        |
+| - ``mkdir(path)``      | - Create directory                                        |
 | - ``abspath(path)``    | - Add current dir to filename                             |
 | - ``joinpath(p1, p2)`` | - Join two paths                                          |
 | - ``isdir(path)``      | - Check if path is a directory                            |         
