@@ -537,7 +537,7 @@ Exercises
    - The overhead in managing the workers will probably far outweigh the 
      parallelization benefit because the computation in the inner loop is 
      very simple and fast.
-   - Try adding ``sleep(0.001)`` to the othermost loop to simulate the effect 
+   - Try adding ``sleep(0.001)`` to the **outermost** loop to simulate the effect 
      of a more demanding calculation, and rerun the benchmarking. Can you see a 
      speedup now?
 
@@ -596,7 +596,87 @@ Exercises
          #   578.060 ms (722 allocations: 32.72 KiB)
 
 
+.. exercise:: Parallel mapping
 
+   .. figure:: img/pi_with_darts.png
+      :scale: 7 %
+      :align: right
+
+   Consider the following function which estimates π by "throwing darts", 
+   i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking 
+   if they fall within the unit circle.
+
+   .. code-block:: julia
+
+      function estimate_pi(num_points)
+          hits = 0
+          for _ in 1:num_points
+              x, y = rand(), rand()
+              if x^2 + y^2 < 1.0
+                  hits += 1
+              end
+          end
+          fraction = hits / num_points
+          return 4 * fraction
+      end
+
+      num_points = 100_000_000
+      estimate_pi(num_points)  # 3.14147572...
+
+   - Rewrite the function to accept a UnitRange (``1:10`` is a UnitRange{Int64})
+     and decorate it with ``@everywhere``.
+   - Use a list comprehension to split up ``num_points`` into evenly sized chunks
+     (Hint: ``[(___:___) .+ ___ for ___ in ___:___:___]``).
+   - Add worker processes as needed.
+   - Use ``mean(pmap(___, ___))`` to get the mean from a parallel mapping 
+     distributed among the workers.
+   - Do some benchmarking, and try varying the chunk size from small (each process 
+     gets a small task and there's more communication) to large (larger amount of work 
+     for each worker and smaller communication).
+
+     .. solution::
+
+        .. code-block:: julia
+
+           using Distributed
+           using BenchmarkTools
+   
+           function estimate_pi(num_points)
+               hits = 0
+               for _ in 1:num_points
+                   x, y = rand(), rand()
+                   if x^2 + y^2 < 1.0
+                       hits += 1
+                   end
+               end
+               fraction = hits / num_points
+               return 4 * fraction
+           end
+           
+           @everywhere function estimate_pi(range::UnitRange)
+               hits = 0
+               for _ in range
+                   x, y = rand(), rand()
+                   if x^2 + y^2 < 1.0
+                       hits += 1
+                   end
+               end
+               fraction = hits / length(range)
+               return 4 * fraction
+           end
+           
+           
+           num_points = 100_000_000
+           @btime estimate_pi(num_points)
+           # 366.751 ms (1 allocation: 16 bytes)
+           
+           # splitting into ~10-50 chunks seems to be close to a sweet spot for 4 workers
+           # chunk = 100_000  # too much communication overhead
+           chunk = 10_000_000
+           ranges = [(1:chunk) .+ offset for offset in 0:chunk:num_points-1]
+           
+           @btime mean(pmap(estimate_pi, ranges))
+           # 151.578 ms (572 allocations: 20.61 KiB)
 
 See also
 --------
