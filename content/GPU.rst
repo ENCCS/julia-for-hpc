@@ -18,7 +18,7 @@ packages that target GPUs from all three major vendors:
 ``CUDA.jl`` is the most mature, ``AMDGPU.jl`` is somewhat behind but still 
 ready for general use, while ``oneAPI.jl`` is still under heavy development.
 
-NVIDIA GPUs still dominate the HPC accelerator market and we will focus here 
+NVIDIA still dominates the HPC accelerator market and we will focus here 
 on using ``CUDA.jl`` - the API of ``AMDGPU.jl`` is however completely analogous
 and translation between the two is straightforward.
 
@@ -55,21 +55,11 @@ access to Julia's ecosystem of packages and GPU hardware. Or one can use
 `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
 account and a manual Julia installation, but using simple NVIDIA GPUs is free.
 
-.. callout:: Google Colab with Julia and a GPU
-
-   Google Colab does not support Julia, but a
-   `helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
-   has created a Colab notebook that can be reused for Julia computing on Colab.
-   If you have a Google account and agree to using it here, follow these steps:
-
-   - Open this `Colab Julia notebook template <https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_Colab_Notebook_Template.ipynb>`__.
-   - Save it to your Drive and optionally rename it
-   - Click on `Runtime` > `Change runtime type` and select GPU under `Hardware accelerator`
-   - Modify the first code cell (starting with ``%%shell``): remove ``Plots`` from ``JULIA_PACKAGES``
-   - Execute the first code cell to install Julia
-   - Reload the page
-   - Execute the second code cell (``versioninfo()``) with `SHIFT-ENTER` to see if it works
-   - Press "b" to create a new code cell below and start typing along.
+Google Colab does not support Julia, but a
+`helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
+has created a Colab notebook that can be reused for Julia computing on Colab.
+If you have a Google account and agree to using it here, follow the link above 
+and go through the instructions found in the colab notebook.
 
 
 GPUs vs CPUs
