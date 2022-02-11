@@ -4,12 +4,8 @@ Writing performant Julia code
 .. questions::
 
    - How should performance be measured?
-   - How can I profile my code?
+   - How can I profile my Julia code?
    - Are there any performance pitfalls in Julia?
-
-.. objectives::
-
-   - Learn several methods for writing fast Julia code
 
 
 Introducing Heatequation
@@ -64,7 +60,7 @@ framework, which provides convenient macros to perform benchmarking:
 
 As with `Revise.jl` and `Test.jl`, `BenchmarkTools.jl` should be installed in the base environment:
 
-.. code-block::
+.. code-block:: julia
 
    Pkg.activate()
    Pkg.add("BenchmarkTools")
@@ -283,5 +279,4 @@ Summary
 See also
 --------
 
-- https://slides.com/valentinchuravy/julia-parallelism#/1/1
 - https://docs.julialang.org/en/v1/manual/performance-tips/     

@@ -4,15 +4,9 @@ Parallelization
 .. questions::
 
    - What parallelization options exist in Julia?
-   - What are the canonical ways of parallelizing on shared and distributed memory systems?
-
-.. objectives::
-
-   - Get an overview of parallelization in Julia
-   - Learn to use the Threads module
-   - Learn to use the Distributed package
-   - Know when you can use ``@distributed`` and ``pmap``
-   - Learn to work with SharedArrays and Distributed arrays
+   - How is multithreading used?
+   - How is multiprocessing used?
+   - What are SharedArrays?
 
 Overview
 --------
@@ -497,7 +491,7 @@ Exercises
    - Try increasing the problem size (e.g. ``nx=ny=10_000``) while lowering the 
      number of time steps (e.g. ``nsteps = 20``). Does it scale better?
    - Try "simulating" a heavier computation in the inner loop by adding a 
-     ``sleep(0.001)`` and use smaller dimensions for the fields (e.g. nx=ny=100).
+     ``sleep(0.001)`` inside the outermost loop but outside the innermost loop. 
      Does the parallel scaling change?
 
 

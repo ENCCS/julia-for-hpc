@@ -95,7 +95,7 @@ Sweden (ENCCS) <https://enccs.se/>`_ and taught in ENCCS workshops. It is aimed
 at researchers and developers who want to learn a modern, high-level, high-performace 
 programming language suitable for scientific computing, data science, machine learning
 and high-performance computing on CPUs or GPUs.
-Each lesson episode has clearly defined learning objectives and includes
+Each lesson episode has clearly defined questions that will be addressed and includes
 multiple exercises along with solutions, and is therefore also useful for
 self-learning.
 The lesson material is licensed under `CC-BY-4.0

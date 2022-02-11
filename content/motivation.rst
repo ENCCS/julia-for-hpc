@@ -3,12 +3,10 @@ Motivation
 
 .. questions::
 
-   - Why use Julia?
+   - What is the two-language problem?
    - How performant is Julia?
-
-.. objectives::
-
-   - Get inspired to try Julia!
+   - What is composability?
+   - What will we learn and not learn in this lesson?
 
 
 Why was Julia created?
@@ -17,7 +15,7 @@ Why was Julia created?
 Julia has been designed to be both fast and dynamic.
 In the words of its developers:
 
-.. callout:: The vision
+.. discussion:: The vision
 
    *We want a language that's open source, with a liberal license. We
    want the speed of C with the dynamism of Ruby. We want a language
@@ -55,7 +53,7 @@ speed. Indeed, Julia is among the few languages in the exclusive
 The two-language problem
 ------------------------
 
-.. exercise:: Combining languages
+.. discussion:: Combining languages
 
    Have you ever written and prototyped code in a high-level language and then 
    found it necessary to rewrite it or port to a different language for performance?

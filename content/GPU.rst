@@ -3,13 +3,9 @@ GPU programming
 
 .. questions::
 
-   - How can Julia be run on GPUs?
-
-.. objectives::
-
-   - Understand the difference between array and kernel GPU programming in Julia
-   - Learn to use CuArrays in Julia
-   - Get an idea on how to write GPU kernels in Julia
+   - What are the high-level and low-level methods for GPU programming in Julia?
+   - How do CuArrays work?
+   - How are GPU kernels written?
 
 
 Julia has first-class support for GPU programming through the following 
@@ -361,7 +357,8 @@ the executed kernels and API calls.
 Neural networks on the GPU
 --------------------------
 
-
+Flux has `inbuilt support for running on GPUs 
+<https://fluxml.ai/Flux.jl/stable/gpu/>`__. 
 
 Exercises
 ---------

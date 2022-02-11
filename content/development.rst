@@ -3,19 +3,11 @@ Developing in Julia
 
 .. questions::
 
-   - What IDE is best to use for Julia?
-   - How do modules work in Julia?
-   - How do I create a new project?
-   - How can I create reprodubible environments?
+   - What development tools exist for Julia?
+   - How can I write modules and packages in Julia?
+   - How can are reprodubible environments created?
    - How are tests written in Julia?
-     
-.. objectives::
-
-   - Get familiar with VSCode
-   - Learn to use the package manager
-   - Learn how to create reproducible environments and add tests to your code
-   - Learn to write own packages
-     
+          
 
 Tooling
 -------

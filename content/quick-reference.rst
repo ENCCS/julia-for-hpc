@@ -275,7 +275,7 @@ around like any other value (functions in Julia are `first-class objects`):
 
 Functions can be combined by composition:
 
-.. code-block::
+.. code-block:: julia
 
    f(x) = x^2
    g(x) = sqrt(x)
@@ -488,17 +488,17 @@ and called by:
 Many useful macros are already predefined in base Julia or in various 
 packages. For example:
 
-.. code-block::
+.. code-block:: julia
 
 	# time an expression
 	@time sum(rand(1000,1000))
 
-.. code-block::
+.. code-block:: julia
 
 	# which function method will be used for specified args
 	@which(sin(2.0))
 
-.. code-block::
+.. code-block:: julia
 
 	# print generated LLVM bitcode for given type
 	@code_llvm sin(2.0)

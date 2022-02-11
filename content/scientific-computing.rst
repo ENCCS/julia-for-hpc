@@ -9,11 +9,6 @@ Scientific computing and data science
    - How can I manipulate and wrangle data in Julia?
    - Can I use Julia for machine learning?
      
-.. objectives::
-
-   - Get an overview of the Julia ecosystem of scientific libraries
-   - Learn to work with data using data frames 
-   - Know how to set up deep learning networks 
 
 
 Ecosystem of scientific computing packages
@@ -109,7 +104,7 @@ package is Julia's version of the ``pandas`` library in Python and
 the ``data.frame()`` function in R. We will use it here to 
 analyze the penguins dataset, but first we need to install it:
 
-.. code-block:: 
+.. code-block:: julia
 
    Pkg.add("DataFrames")
    using DataFrames
@@ -339,7 +334,7 @@ Multiple subplots can be created by:
    First load ``Plots`` and set the backend to GR (precompilation of Plots 
    might take some time):
 
-   .. code-block::
+   .. code-block:: julia
 
       using Plots
       gr()
@@ -433,7 +428,7 @@ Julia has packages for traditional (non-deep) machine learning:
 We will use a few utility functions from ``MLJ.jl`` in our deep learning 
 exercise below, so we will need to add it to our environment:
 
-.. code-block::
+.. code-block:: julia
 
    using Pkg
    Pkg.add("MLJ")

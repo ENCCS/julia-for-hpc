@@ -3,16 +3,12 @@ Special features of Julia
 
 .. questions::
 
-   - What are the main characteristics of Julia?
+   - How does the type system in Julia work?
    - How can a language be both dynamically and statically typed?
    - What is multiple dispatch?
+   - What is code introspection?
+   - What is metaprogramming?
 
-.. objectives::
-
-   - Get an overview of Julia's type system and how it underpins the language
-   - Understand why Julia is fast
-   - Learn about multiple dispatch and how it's used
-   - Know how Julia code can be introspected to improve performance
 
 Types
 -----
