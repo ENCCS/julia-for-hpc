@@ -220,13 +220,13 @@ of the loop takes significant time to compute.
 FLoops
 ^^^^^^
 
-``FLoops.jl <https://github.com/JuliaFolds/FLoops.jl>``__ is a a more recent  
+`FLoops.jl <https://github.com/JuliaFolds/FLoops.jl>`__ is a a more recent  
 package for threading. It provides a macro ``@floop`` which is a superset of ``Threads.@threads``
 and can be used to generate fast generic sequential and parallel iteration over more 
 complex collections than what can be done with ``Threads.@threads``.
 ``@floop`` can also do reductions and supports multiple threading backends through 
-`FoldsThreads.jl <FoldsThreads.jl>`_ and even `FoldsCUDA.jl <https://github.com/JuliaFolds/FoldsCUDA.jl>`_
-for running on GPUs.
+`FoldsThreads.jl <FoldsThreads.jl>`_ and even `FoldsCUDA.jl 
+<https://github.com/JuliaFolds/FoldsCUDA.jl>`__ for running on GPUs.
 
 
 
@@ -252,9 +252,10 @@ But we can also dynamically add processes in a running Julia session:
    using Distributed
    
    println(nprocs())
-   addprocs(4)
-   println(nprocs())
-   println(nworkers())
+   addprocs(4)         # add 4 workers
+   println(nprocs())   # total number of processes
+   println(nworkers()) # only worker processes
+   rmprocs(workers())  # remove worker processes
 
 
 Note what happens here: there is one `master` process which can create 
@@ -332,7 +333,7 @@ techniques:
 
    .. tab:: @spawnat
 
-      .. code-block:: 
+      .. code-block::  julia
       
          futures = Array{Future}(undef, nworkers())
       
@@ -404,7 +405,7 @@ SharedArrays which has the required ``@distributed`` and ``@sync`` macros
 
       .. code-block:: julia
 
-         @everywhere function sqrt_array!(A::SharedArray)
+         function sqrt_array!(A::SharedArray)
              @sync @distributed for i in eachindex(A)
                  @inbounds A[i] = sqrt(A[i])
              end
@@ -415,7 +416,7 @@ Remember that Julia always selects the most specialized method for
 dispatch based on the argument type. We can now time these two methods 
 using ``@time`` instead of ``@btime``, this time: 
 
-.. code-block::
+.. code-block:: julia
 
    A = rand(100_000_000);
    @time sqrt_array!(A)
@@ -442,8 +443,8 @@ set of workers. Each worker can read and write from its local portion of the
 array and each worker has read-only access to the portions of the array held 
 by other workers.
 
-Currently, using ``DArrays`` requires significant book-keeping of array indices 
-and we will not go into it here.
+Currently, distributed arrays do not have much functionality 
+and they requires significant book-keeping of array indices. 
 
 
 MPI
@@ -469,11 +470,6 @@ time and memory parameters of your problem
   behaviors on a single machine.
 
 
-
-
-
-
-
 Exercises
 ---------
 
@@ -487,9 +483,9 @@ Exercises
      note that ``@threads`` currently only works on outermost loops!
    - Measure its effects with ``@benchmark``.
      Since it's cumbersome to change the "Julia: Num Threads" option 
-     in VSCode and relaunch the Julia REPL over and over, use the 
-     `example.jl` script instead: comment out the visualization and 
-     insert something like:
+     in VSCode and relaunch the Julia REPL over and over, create a script instead 
+     which imports `HeatEquation` and `BenchmarkTools` and prints benchmark 
+     results:      
 
      .. code-block:: julia
 
@@ -500,36 +496,110 @@ Exercises
      ``julia --project=. -t N example.jl`` and observe the scaling.
    - Try increasing the problem size (e.g. ``nx=ny=10_000``) while lowering the 
      number of time steps (e.g. ``nsteps = 20``). Does it scale better?
-
-.. exercise:: Distributed HeatEquation with pmap
-
-   needed:
-   .. code-block::
-
-      # first precompile on master process
-      using HeatEquation
-      # then load on workers
-      @everywhere using HeatEquation
+   - Try "simulating" a heavier computation in the inner loop by adding a 
+     ``sleep(0.001)`` and use smaller dimensions for the fields (e.g. nx=ny=100).
+     Does the parallel scaling change?
 
 
-.. exercise:: Using SharedArrays with Heatequation
 
-   Look again at the double for loop in the ``evolve!`` function. 
-   Think about what you should do, and then try doing it.
-   After you're done, benchmark a few test runs. 
+.. exercise:: Using SharedArrays with HeatEquation
 
-   Note: Both functions and modules need to be made available on all 
-   workers using the ``@everywhere`` macro. In your test script you will thus 
-   need ``@everywhere using HeatEquation``, and your new ``evolve_shared!`` 
-   function will need it too. In addition, when running a Julia program 
-   in an environment one needs to replace the ``--project=.`` flag by 
-   an environment variable visible to all workers:
-   ``JULIA_PROJECT=. julia -p 4 testruns.jl``
+   Look again at the double for loop in the ``evolve!`` function 
+   and think about how you could use SharedArrays.
+
+   The best approach might be to start by refactoring the package a bit and change 
+   the ``evolve!`` function to accept arrays instead of ``Field`` structs, like this:
+
+   .. code-block:: julia
+
+      function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
+          nx, ny = size(currdata) .- 2
+          for j = 2:ny+1
+              for i = 2:nx+1
+                  @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
+                  @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
+                  @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+              end 
+          end
+      end 
+
+   - Create a new script where you import ``Distributed``, ``SharedArrays`` and 
+     ``BenchmarkTools`` and define the ``evolve!`` function above.
+   - Benchmark the original version:
+
+   .. code-block:: julia
+
+      dx = dy = 0.01
+      a = 0.5
+      dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
+      M1 = rand(1000, 1000);
+      M2 = rand(1000, 1000);
+      @btime evolve!(M1, M2, dx, dy, a, dt)
+
+   - Now create a new method for this function which accepts SharedArrays. 
+   - Add worker processes with ``addprocs`` and benchmark your new method 
+     when passing in SharedArrays. Is there any performance gain? 
+
+   - The overhead in managing the workers will probably far outweigh the 
+     parallelization benefit because the computation in the inner loop is 
+     very simple and fast.
+   - Try adding ``sleep(0.001)`` to the othermost loop to simulate the effect 
+     of a more demanding calculation, and rerun the benchmarking. Can you see a 
+     speedup now?
+
 
    .. solution:: 
 
-      A working solution can be found on the `sharedarrays` branch of the 
-      repository (``git checkout sharedarrays``).
+      .. code-block:: Julia
+
+         using BenchmarkTools
+         using Distributed
+         using SharedArrays
+
+         function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
+             nx, ny = size(currdata) .- 2
+             for j = 2:ny+1
+                 for i = 2:nx+1
+                     @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
+                     @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
+                     @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+                 end 
+                 sleep(0.001)
+             end
+         end
+
+         function evolve!(currdata::SharedArray, prevdata::SharedArray, dx, dy, a, dt)
+             nx, ny = size(currdata) .- 2
+             @sync @distributed for j = 2:ny+1
+                 for i = 2:nx+1
+                     @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
+                     @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
+                     @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+                 end 
+                 sleep(0.001)
+             end
+         end
+
+         dx = dy = 0.01
+         a = 0.5
+         dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
+         M1 = rand(1000, 1000);
+         M2 = rand(1000, 1000);
+         S1 = SharedArray(M1);
+         S2 = SharedArray(M2);
+
+         # test for correctness:
+         evolve!(M1, M2, dx, dy, a, dt) 
+         evolve!(S1, S2, dx, dy, a, dt) 
+         # element-wise comparison, should give "true"
+         all(M1 .≈ S1)
+
+         # benchmark
+         @btime evolve!(M1, M2, dx, dy, a, dt) 
+         #   2.379 s (5031 allocations: 152.52 KiB)
+
+         @btime evolve!(S1, S2, dx, dy, a, dt)
+         #   578.060 ms (722 allocations: 32.72 KiB)
 
 
 
@@ -539,8 +609,9 @@ See also
 
 - The `Julia Parallel <https://github.com/JuliaParallel>`_ organization collects 
   packages developed for parallel computing in Julia.
-- https://docs.julialang.org/en/v1/manual/multi-threading/
-- https://github.com/JuliaParallel/MPI.jl
-- https://docs.julialang.org/en/v1/manual/distributed-computing/
-- https://slides.com/valentinchuravy/julia-parallelism
+- `Multi-threading docs <https://docs.julialang.org/en/v1/manual/multi-threading/>`__
+- `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`__
+- `Distributed computing in Julia docs <https://docs.julialang.org/en/v1/manual/distributed-computing/>`__
+- `Distributed API <https://docs.julialang.org/en/v1/stdlib/Distributed/>`__
+- Valentin Churavy, `Levels of Parallelism <https://slides.com/valentinchuravy/julia-parallelism>`__
 
