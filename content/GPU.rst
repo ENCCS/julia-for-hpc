@@ -418,23 +418,10 @@ Exercises
    
    6. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
       functions for arrays of various sizes and with different choices 
-      of ``nthreads``. You will need to wrap the 
-      kernel execution in a function and add the ``CUDA.@sync`` macro 
+      of ``nthreads``. You will need to prefix the 
+      kernel execution with the ``CUDA.@sync`` macro 
       to let the CPU wait for the GPU kernel to finish (otherwise you 
       would be measuring the time it takes to only launch the kernel):
-
-      .. code-block:: julia
-
-         # replace the underscores
-         function bench_evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
-             nthreads = _____
-             nblocks = _____
-             CUDA.@sync begin
-                 @cuda threads = ____ blocks = ____ evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
-             end
-         end
-         # use $ to interpolate into the benchmarking to avoid benchmarking globals 
-         @btime bench_evolve_gpu!($A1, $A2, $dx, $dy, $a, $dt)
 
    
    7. Compare your Julia code with the 
@@ -471,27 +458,26 @@ Exercises
          M1 = rand(nx, ny);
          M2 = rand(nx, ny);
 
+         # copy to GPU and convert to Float32
          M1_d = CuArray(cu(M1))
          M2_d = CuArray(cu(M2))
 
-         evolve!(M1, M2, dx, dy, a, dt)
-         @cuda threads=(16, 16) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
+         # set number of threads and blocks
+         nthreads = 16
+         numblocks = cld(nx, nthreads)
 
-         M1 .≈ Array(M1_d)
+         # call cpu and gpu versions
+         evolve!(M1, M2, dx, dy, a, dt)
+         @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
+
+         # element-wise comparison
+         all(M1 .≈ Array(M1_d))
 
       To benchmark:
 
       .. code-block:: julia
 
-         function bench_evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
-             nthreads = 16
-             numblocks = cld(nx,nthreads)
-             CUDA.@sync begin
-                 @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu2!(A1_d, A2_d, dx, dy, a, dt)
-             end
-         end
-
-         @btime bench_evolve_gpu!($M1_d, $M2_d, $dx, $dy, $a, $dt)
+         @time CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
 
 
 See also
