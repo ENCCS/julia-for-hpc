@@ -441,9 +441,9 @@ Exercises
              j = (blockIdx().y - 1) * blockDim().y + threadIdx().y
              #@cuprintln("threads $i $j") #only for debugging!
              if i > 1 && j > 1 && i < nx+2 && j < ny+2
-                 xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx2
-                 yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy2
-                 currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+                 @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx2
+                 @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy2
+                 @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
              end
              return nothing
          end
