@@ -403,7 +403,7 @@ Exercises
 
          dx = dy = 0.01
          a = 0.5
-         nx = ny = 1000
+         nx = ny = 10000
          dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
          A1 = rand(nx, ny);
          A2 = rand(nx, ny);
@@ -414,7 +414,7 @@ Exercises
 
          evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
 
-         A1 .≈ Array(A1_d)
+         all(A1 .≈ Array(A1_d))
    
    6. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
       functions for arrays of various sizes and with different choices 
@@ -436,9 +436,10 @@ Exercises
 
          function evolve_gpu!(currdata, prevdata, dx2, dy2, a, dt)
              nx, ny = size(currdata) .- 2   
-             j = (blockIdx().x - 1) * blockDim().x + threadIdx().x
-             i = (blockIdx().y - 1) * blockDim().y + threadIdx().y
-             #@cuprintln("threads $i $j")
+             # which index (i or j) you assign to x and y matters enormously!
+             i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+             j = (blockIdx().y - 1) * blockDim().y + threadIdx().y
+             #@cuprintln("threads $i $j") #only for debugging!
              if i > 1 && j > 1 && i < nx+2 && j < ny+2
                  xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx2
                  yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy2
@@ -477,7 +478,9 @@ Exercises
 
       .. code-block:: julia
 
-         @time CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
+         using BenchmarkTools
+         @btime evolve!(M1, M2, dx, dy, a, dt)
+         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
 
 
 See also

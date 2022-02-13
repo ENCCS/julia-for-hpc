@@ -8,8 +8,8 @@ Writing performant Julia code
    - Are there any performance pitfalls in Julia?
 
 
-Introducing Heatequation
-------------------------
+Introducing HeatEquation.jl
+---------------------------
 
 We will need a realistic Julia package to work on from now on.
 For this purpose we will use a minimal heat equation solver, inspired by 
