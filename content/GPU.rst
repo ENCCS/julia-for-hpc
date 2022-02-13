@@ -173,7 +173,7 @@ an example of this, but more general constructs can be created with
 
       .. code-block:: julia
 
-         broadcast(a) do x
+         broadcast(A) do x
              x += 1
          end
 
@@ -181,7 +181,7 @@ an example of this, but more general constructs can be created with
 
       .. code-block:: julia
 
-         map(a) do x
+         map(A) do x
              x + 1
          end
 
@@ -189,13 +189,13 @@ an example of this, but more general constructs can be created with
 
       .. code-block:: julia
 
-         reduce(+, a)
+         reduce(+, A)
 
    .. tab:: accumulate
 
       .. code-block:: julia
 
-         accumulate(+, a)
+         accumulate(+, A)
 
 Let's see if we can GPU-port the ``sqrt_sum`` function we saw in an earlier 
 episode using these methods.
@@ -249,8 +249,8 @@ will compile ``vadd!`` into a GPU kernel and launch it:
 
 .. code-block:: julia
 
-   A_d = CuArray(a)
-   B_d = CuArray(b)
+   A_d = CuArray(A)
+   B_d = CuArray(B)
    C_d = similar(B_d)
 
    @cuda vadd!(C_d, A_d, B_d)
@@ -294,7 +294,7 @@ To take advantage of them all, we need to run a kernel with multiple blocks:
    end
 
    # smallest integer larger than or equal to length(A_d)/threads
-   numblocks = cld(length(A_d)/256)
+   numblocks = cld(length(A_d), 256)
 
    # run using 256 threads
    @cuda threads=256 blocks=numblocks vadd!(C_d, A_d, B_d)
@@ -313,9 +313,9 @@ supported, and then launch the compiled kernel:
    # extract configuration via occupancy API
    config = launch_configuration(kernel.fun)
    # number of threads should not exceed size of array
-   threads = min(length(a), config.threads)
-   # smallest integer larger than or equal to length(a)/threads
-   blocks = cld(length(a), threads)
+   threads = min(length(A), config.threads)
+   # smallest integer larger than or equal to length(A)/threads
+   blocks = cld(length(A), threads)
 
    # launch kernel with specific configuration
    kernel(C_d, A_d, B_d; threads, blocks)
@@ -360,77 +360,138 @@ Exercises
 
    Write a kernel for the ``evolve!`` function!
 
-   1. Create a new ``evolve_gpu!`` function 
-    
-      - It should accept arrays rather than ``Field`` structs, i.e. pass in 
-        ``curr.data`` and ``prev.data``. 
-      - It also needs to accept ``curr.dx`` and ``curr.dy``. 
-      - ``curr.nx`` and ``curr.ny`` can be obtained from the dimensions of 
-        ``curr.data``, but remember that the field should only be updated 
-        at ``2:curr.nx+1`` and ``2:curr.ny+1``
-      - Arguments other than the CuArrays can be converted to a GPU-friendly 
-        format (typically Float32) with the ``cu`` convenience function,
-        e.g. ``cu(curr.dx)``.
+   Start with this refactored function which accepts arrays:
+
+   .. code-block:: julia
+
+      function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
+          nx, ny = size(currdata) .- 2
+          for j = 2:ny+1
+              for i = 2:nx+1
+                  @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
+                  @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
+                  @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+              end 
+          end
+      end
+
+   Now start implementing a GPU kernel version ``evolve_gpu!``.
+
+   1. The kernel function needs to end with ``return`` or ``return nothing``.
 
    2. The arrays are two-dimensional, so you will need both the ``.x`` and ``.y`` 
-      parts of ``threadIdx``, ``blockDim`` and ``blockIdx``.
+      parts of ``threadIdx()``, ``blockDim()`` and ``blockIdx()``.
 
       - Does it matter how you match the ``x`` and ``y`` dimensions of the 
         threads and blocks to the dimensions of the data (i.e. rows and columns)? 
 
-   3. In the loop over time steps in ``simulate!``, use something like 
-      ``if typeof(curr.data) <: CuArray ...`` to decide whether to run ``evolve!``
-      or ``evolve_gpu!``.
-
-   4. As the problem is two-dimensional, you need to specify tuples 
+   3. You also need to specify tuples 
       for the number of threads and blocks in the ``x`` and ``y`` dimensions, 
       e.g. ``threads = (32, 32)`` and similarly for ``blocks`` (using ``cld``).
 
-   5. To check correctness, test that ``evolve!`` and ``evolve_gpu!`` 
+      - Note the hardware limitations: the product of x and y threads cannot 
+        exceed it.
+
+   4. For debugging, you can print from inside a kernel using ``@cuprintln`` 
+      (e.g. to print thread numbers). It will only print during the first 
+      execution - redefine the function again to print again.
+
+   5. Check correctness of your results! To test that ``evolve!`` and ``evolve_gpu!`` 
       give (approximately) the same results, for example:
 
       .. code-block:: julia
 
-         curr, prev = initialize(ncols, nrows)
+         dx = dy = 0.01
          a = 0.5
-         dt = curr.dx^2 * curr.dy^2 / (2.0 * a * (curr.dx^2 + curr.dy^2))
-         HeatEquation.evolve!(curr, prev, a, dt)
+         nx = ny = 1000
+         dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
+         A1 = rand(nx, ny);
+         A2 = rand(nx, ny);
+         A1_d = CuArray(A1)
+         A2_d = CuArray(A2)
 
-         curr_d, prev_d = initialize(ncols, nrows, CuArray)
-         HeatEquation.evolve_gpu!(curr_d.data, prev_d.data, dx, dy, a, dt)
+         evolve!(A1, A2, dx, dy, a, dt)
 
-         curr.data ≈ Array(curr_d.data)
+         evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
+
+         A1 .≈ Array(A1_d)
    
-   6. After testing your implementation with given numbers of threads, 
-      try using the occupancy API to obtain an optimal configuration.
+   6. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
+      functions for arrays of various sizes and with different choices 
+      of ``nthreads``. You will need to wrap the 
+      kernel execution in a function and add the ``CUDA.@sync`` macro 
+      to let the CPU wait for the GPU kernel to finish (otherwise you 
+      would be measuring the time it takes to only launch the kernel):
 
-   7. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
-      functions for arrays of various sizes.
+      .. code-block:: julia
+
+         # replace the underscores
+         function bench_evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
+             nthreads = _____
+             nblocks = _____
+             CUDA.@sync begin
+                 @cuda threads = ____ blocks = ____ evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
+             end
+         end
+         # use $ to interpolate into the benchmarking to avoid benchmarking globals 
+         @btime bench_evolve_gpu!($A1, $A2, $dx, $dy, $a, $dt)
+
    
-   8. Compare your Julia code with the 
+   7. Compare your Julia code with the 
       `corresponding CUDA version <https://github.com/cschpc/heat-equation/blob/main/cuda/core_cuda.cu>`__
       to enjoy the (relative) simplicity of Julia!
 
    .. solution:: 
 
-      One possible solution can be found in the ``gpu`` branch of the 
-      `HeatEquation.jl <https://github.com/ENCCS/HeatEquation.jl>`__ repository.
-
-      This is the GPU kernel version of ``evolve!``:
+      This is one possible GPU kernel version of ``evolve!``:
 
       .. code-block:: julia
 
          function evolve_gpu!(currdata, prevdata, dx2, dy2, a, dt)
              nx, ny = size(currdata) .- 2   
-             j = (blockIdx.x - 1) * blockDim.x + threadIdx.x
-             i = (blockIdx.y - 1) * blockDim.y + threadIdx.y
-         
+             j = (blockIdx().x - 1) * blockDim().x + threadIdx().x
+             i = (blockIdx().y - 1) * blockDim().y + threadIdx().y
+             #@cuprintln("threads $i $j")
              if i > 1 && j > 1 && i < nx+2 && j < ny+2
                  xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx2
                  yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy2
                  currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
              end
+             return nothing
          end
+
+      To test it:
+
+      .. code-block:: julia
+
+         dx = dy = 0.01
+         a = 0.5
+         nx = ny = 1000
+         dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
+         M1 = rand(nx, ny);
+         M2 = rand(nx, ny);
+
+         M1_d = CuArray(cu(M1))
+         M2_d = CuArray(cu(M2))
+
+         evolve!(M1, M2, dx, dy, a, dt)
+         @cuda threads=(16, 16) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
+
+         M1 .≈ Array(M1_d)
+
+      To benchmark:
+
+      .. code-block:: julia
+
+         function bench_evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
+             nthreads = 16
+             numblocks = cld(nx,nthreads)
+             CUDA.@sync begin
+                 @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu2!(A1_d, A2_d, dx, dy, a, dt)
+             end
+         end
+
+         @btime bench_evolve_gpu!($M1_d, $M2_d, $dx, $dy, $a, $dt)
 
 
 See also
