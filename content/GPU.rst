@@ -351,7 +351,29 @@ Neural networks on the GPU
 --------------------------
 
 Flux has `inbuilt support for running on GPUs 
-<https://fluxml.ai/Flux.jl/stable/gpu/>`__. 
+<https://fluxml.ai/Flux.jl/stable/gpu/>`__ and 
+provides simple macros and convenience functions 
+to transfer data and models to the GPU.
+For example:
+
+.. code-block:: julia
+
+   (xtrain, xtest), (ytrain, ytest) = partition((X, Y), 0.8, shuffle=true, rng=123, multi=true)
+   xtrain, xtest = Float32.(Array(xtrain)'), Float32.(Array(xtest)')    |> gpu
+   ytrain = Flux.onehotbatch(ytrain, ["Adelie", "Gentoo", "Chinstrap"]) |> gpu
+   ytest = Flux.onehotbatch(ytest, ["Adelie", "Gentoo", "Chinstrap"])   |> gpu
+      
+   n_features, n_classes, n_neurons = 4, 3, 10
+   model = Chain(
+           Dense(n_features, n_neurons),
+           BatchNorm(n_neurons, relu),
+           Dense(n_neurons, n_classes),
+           softmax)  |> gpu
+
+
+
+
+
 
 Exercises
 ---------

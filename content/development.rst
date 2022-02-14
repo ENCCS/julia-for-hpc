@@ -5,7 +5,7 @@ Developing in Julia
 
    - What development tools exist for Julia?
    - How can I write modules and packages in Julia?
-   - How can are reprodubible environments created?
+   - How can reprodubible environments be created?
    - How are tests written in Julia?
           
 
@@ -193,12 +193,18 @@ Example package that ships with Julia.
       Pkg.add("Example")
       Pkg.status()
 
-   Import and use ``Example``:
+   Import and inspect it:
 
    .. code-block:: julia
 
       using Example
       names(Example)
+
+   Look at the help page of the functions:
+
+   .. code-block:: julia
+
+      # type ?domath and ?hello to see the documentation
       domath(12)
       hello("Julia")
 
@@ -221,6 +227,7 @@ can be easily created on different computers.
    
    .. code-block:: julia
    
+      pwd()
       mkdir("example-project")
       cd("example-project")
       Pkg.activate(".")

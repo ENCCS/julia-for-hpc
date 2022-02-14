@@ -233,6 +233,7 @@ Some useful functions to work with files:
 +------------------------+-----------------------------------------------------------+
 | Function               |  What it does                                             |
 +========================+===========================================================+
+| - ``pwd()``            | - Show current directory                                  |
 | - ``cd(path)``         | - Change directory                                        |
 | - ``readdir(path)``    | - Return list of current directory                        |
 | - ``mkdir(path)``      | - Create directory                                        |

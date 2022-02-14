@@ -268,12 +268,12 @@ Julia's official documentation has an important page on
 Before embarking on any research software project in Julia you 
 should carefully read this page!
 
-Summary
--------
 
-- Always benchmark and profile before optimizing!
-- Optimize bottlenecks in your serial code before you parallelize! 
-- `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`__.
+.. keypoints::
+
+   - Always benchmark and profile before optimizing!
+   - Optimize bottlenecks in your serial code before you parallelize! 
+   - `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`__.
 
   
 See also

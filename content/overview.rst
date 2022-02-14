@@ -235,7 +235,7 @@ annotate are:
    ``Point`` type. 
 
    - We decide that the summed square of two points 
-     is ``p1.x^2 + p2.x^2, p1.y^2 + p2.y^2``
+     is a new Point: ``Point(p1.x^2 + p2.x^2, p1.y^2 + p2.y^2)``
    - You will need to modify both the function signature and body.   
 
    .. solution::
@@ -375,7 +375,7 @@ type signatures.
  
 .. code-block:: julia
 
-    # LLVM lowered form (IR)
+    # LLVM lowered form
     @code_lowered sumsquare(1, 2)
     @code_lowered sumsquare(p1, p2)
 
@@ -517,15 +517,102 @@ Exercises
    
    - ``@code_typed`` shows the types of our code inferred by the compiler.
    - ``@code_warntype`` shows type warnings and can be used to detect type instabilities.
-   - ``@code_llvm`` and ``@code_lowered`` can be used to see the size of the resulting 
+   - ``@code_llvm`` and ``@code_native`` can be used to see the size of the resulting 
      low-level code (the fewer instructions the faster).
 
    Use these macros to inspect the ``relu_unstable`` and ``relu_stable`` functions!
 
    - Observe how ``@code_warntype`` warns about the type instability when passing 
-     a floating point number
+     a floating point number: Julia is forced to use a ``Union{Float64, Int64}`` type 
+     in the function body.
    - What is the difference in the low-level code between the two functions when 
      passing integers or floats?
+
+   .. solution::
+
+      The type-unstable function gives us a warning 
+      (``Body::Union{Float64, Int64}`` is in red in the REPL):
+
+      .. code-block:: julia
+
+         @code_warntype relu_unstable(1.0)
+
+      .. code-block:: text
+
+         MethodInstance for relu_unstable(::Float64)
+           from relu_unstable(x) in Main at REPL[40]:2
+         Arguments
+           #self#::Core.Const(relu_unstable)
+           x::Float64
+         Body::Union{Float64, Int64}
+         1 ─ %1 = (x < 0)::Bool
+         └──      goto #3 if not %1
+         2 ─      return 0
+         3 ─      return x
+
+      The warning is gone in the type-stable function:
+
+      .. code-block:: julia
+
+         @code_warntype relu_stable(1.0)
+
+      .. code-block:: text
+
+         MethodInstance for relu_stable(::Float64)
+           from relu_stable(x) in Main at REPL[83]:2
+         Arguments
+           #self#::Core.Const(relu_stable)
+           x::Float64
+         Body::Float64
+         1 ─ %1 = (x < 0)::Bool
+         └──      goto #3 if not %1
+         2 ─ %3 = Main.zero(x)::Core.Const(0.0)
+         └──      return %3
+         3 ─      return x
+
+      There's a big difference in the amount of low-level code generated 
+      for the type-stable and unstable functions:
+
+       .. tabs::
+
+          .. tab:: @code_llvm relu_stable(1.0)
+            
+             .. code-block:: text
+
+                ;  @ REPL[83]:2 within `relu_stable`
+                define double @julia_relu_stable_841(double %0) #0 {
+                top:
+                ;  @ REPL[83]:3 within `relu_stable`
+                  %.inv = fcmp olt double %0, 0.000000e+00
+                  %1 = select i1 %.inv, double 0.000000e+00, double %0
+                ;  @ REPL[83]:4 within `relu_stable`
+                  ret double %1
+                }
+
+          .. tab:: @code_llvm relu_unstable(1.0)
+
+             .. code-block:: text
+
+                ;  @ REPL[40]:2 within `relu_unstable`
+                define { {}*, i8 } @julia_relu_unstable_845([8 x i8]* noalias nocapture align 8 dereferenceable(8) %0, double %1) #0 {
+                top:
+                ;  @ REPL[40]:3 within `relu_unstable`
+                ; ┌ @ float.jl:499 within `<` @ float.jl:444
+                   %2 = fcmp uge double %1, 0.000000e+00
+                ; └
+                  br i1 %2, label %L8, label %L7
+                
+                L7:                                               ; preds = %L8, %top
+                  %merge = phi { {}*, i8 } [ { {}* inttoptr (i64 4337979424 to {}*), i8 -126 }, %top ], [ { {}* null, i8 1 }, %L8 ]
+                ;  @ REPL[40]:4 within `relu_unstable`
+                  ret { {}*, i8 } %merge
+                
+                L8:                                               ; preds = %top
+                ;  @ REPL[40]:6 within `relu_unstable`
+                  %.0..sroa_cast = bitcast [8 x i8]* %0 to double*
+                  store double %1, double* %.0..sroa_cast, align 8
+                  br label %L7
+                }
 
 .. exercise:: Inspect a few macros
 

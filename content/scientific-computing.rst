@@ -31,7 +31,7 @@ Mathematics
 - `JuliaOpt <https://github.com/JuliaOpt>`_        – Optimization 
 - `JuliaPolyhedra <https://github.com/JuliaPolyhedra>`_  – Polyhedral computation
 - `JuliaSparse <https://github.com/JuliaSparse>`_     – Sparse matrix solvers
-
+- `JuMP-dev <https://github.com/jump-dev>`__          - Modeling language for mathematical optimization
 
 Scientific domains
 ^^^^^^^^^^^^^^^^^^
@@ -59,6 +59,11 @@ Data sciences
 - `JuliaDatabases <https://github.com/JuliaDatabases>`_ – Various database drivers for Julia
 - `JuliaData <https://github.com/JuliaData>`_ – Data manipulation, storage, and I/O in Julia
 
+
+.. discussion:: Scientific computing libraries
+
+   - Which, if any, libraries and packages do you use for scientific computing?
+   - Do you see something interesting in the list above?
 
 Working with data
 -----------------
@@ -108,7 +113,6 @@ analyze the penguins dataset, but first we need to install it:
 
    Pkg.add("DataFrames")
    using DataFrames
-
 
 
 A dataframe is a 2-dimensional table of rows and columns, much 
@@ -199,9 +203,6 @@ Here's how you can create a new dataframe:
    
       # find unique species
       unique(df.species)
-   
-      # names of columns
-      names(df)
    
    
    Summary statistics can be displayed with the ``describe`` function:
@@ -323,10 +324,10 @@ Multiple subplots can be created by:
 
    y = rand(10, 4)
 
-   p1 = plot(x, y) # Make a line plot
-   p2 = scatter(x, y) # Make a scatter plot
-   p3 = plot(x, y, xlabel = "This one is labelled", lw = 3, title = "Subtitle")
-   p4 = histogram(x, y) # Four histograms each with 10 points? Why not!
+   p1 = plot(x, y); # Make a line plot
+   p2 = scatter(x, y); # Make a scatter plot
+   p3 = plot(x, y, xlabel = "This one is labelled", lw = 3, title = "Subtitle");
+   p4 = histogram(x, y); # Four histograms each with 10 points? Why not!
    plot(p1, p2, p3, p4, layout = (2, 2), legend = false)
 
 
@@ -389,6 +390,8 @@ Multiple subplots can be created by:
    for ``scatter`` and other plot functions):
 
    .. code-block:: julia
+
+      using StatsPlots        
 
       @df df density(:flipper_length_mm,
                      xlabel = "flipper length (mm)",
@@ -470,8 +473,9 @@ To install Flux:
 
       using Flux
       using MLJ: partition, ConfusionMatrix
-
+      using DataFrames
       using PalmerPenguins
+
       table = PalmerPenguins.load()
       df = DataFrame(table)
       dropmissing!(df)
@@ -586,7 +590,32 @@ Exercises
 
    .. solution::
 
-      WRITEME
+      .. code-block:: julia
+
+         function create_scatterplot(df, col1, col2, groupby)
+             xmin, xmax = minimum(df[:, col1]), maximum(df[:, col1])
+             # markers and colors to use for the groups
+             markers = [:circle :ltriangle :star5 :rect :diamond :hexagon]
+             colors = [:magenta :springgreen :blue :coral2 :gold3 :purple]
+             # number of unique groups can't be larger than the number of colors/markers
+             ngroups = length(unique(df[:, groupby]))
+             @assert ngroups <= length(colors)
+         
+             scatter(df[!, col1],
+                     df[!, col2],
+                     xlabel = col1,
+                     ylabel = col2,
+                     xlim = (xmin, xmax),
+                     group = df[!, groupby],
+                     marker = markers[:, 1:ngroups],
+                     color = colors[:, 1:ngroups],
+                     markersize = 5,
+                     alpha = 0.8
+                     )
+         end    
+
+         create_scatterplot(df, :bill_length_mm, :body_mass_g, :sex)
+         create_scatterplot(df, :flipper_length_mm, :body_mass_g, :island)  
 
 
 .. exercise:: Improve the deep learning model
@@ -692,3 +721,4 @@ See also
       neuro = dataset("boot", "neuro")
 
 - `"The Future of Machine Learning and why it looks a lot like Julia" by Logan Kilpatrick <https://towardsdatascience.com/the-future-of-machine-learning-and-why-it-looks-a-lot-like-julia-a0e26b51f6a6>`_
+- `Deep Learning with Flux - A 60 Minute Blitz <https://fluxml.ai/tutorials/2020/09/15/deep-learning-flux.html>`__
