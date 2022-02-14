@@ -153,6 +153,7 @@ Here's how you can create a new dataframe:
    
    .. code-block:: julia
    
+      using PalmerPenguins
       table = PalmerPenguins.load()
       df = DataFrame(table)
    
@@ -463,12 +464,17 @@ To install Flux:
    - The definition of a model and access to its trainable parameters.
    - An optimiser that will update the model parameters appropriately.
 
-   First we import the required modules:
+   First we import the required modules and load the data:
 
    .. code-block:: julia
 
       using Flux
       using MLJ: partition, ConfusionMatrix
+
+      using PalmerPenguins
+      table = PalmerPenguins.load()
+      df = DataFrame(table)
+      dropmissing!(df)
 
    We can now preprocess our dataset to make it suitable for training a network:
 
@@ -609,6 +615,8 @@ Exercises
 
    .. code-block:: julia
 
+      using StatsBase: sample
+
       function create_minibatches(xtrain, ytrain, batch_size=32, n_batch=10)
           minibatches = Tuple[]
           for i in 1:n_batch
@@ -623,6 +631,50 @@ Exercises
    You will not need to manually loop over the minibatches, simply pass 
    the ``minibatches`` vector of tuples to the ``Flux.train!`` function. 
    Does this make a difference?
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         function create_minibatches(xtrain, ytrain, batch_size=32, n_batch=10)
+             minibatches = Tuple[]
+             for i in 1:n_batch
+                 randinds = sample(1:size(xtrain, 2), batch_size)
+                 push!(minibatches, (xtrain[:, randinds], ytrain[:,randinds]))
+             end
+             return minibatches
+         end
+   
+         n_features, n_classes, n_neurons = 4, 3, 10
+         model = Chain(
+                 Dense(n_features, n_neurons),
+                 BatchNorm(n_neurons, relu),
+                 Dense(n_neurons, n_classes),
+                 softmax)
+   
+         callback = () -> @show(loss(xtrain, ytrain))
+         opt = ADAM()
+         θ = Flux.params(model)
+   
+         minibatches = create_minibatches(xtrain, ytrain)
+         for i in 1:100
+             # train on minibatches
+             Flux.train!(loss, θ, minibatches, opt, cb = Flux.throttle(callback, 1));
+         end
+   
+         accuracy(xtrain, ytrain)
+         # 0.9849624060150376
+         accuracy(xtest, ytest)
+         # 0.9850746268656716
+   
+         predicted_species = Flux.onecold(model(xtest), ["Adelie", "Gentoo", "Chinstrap"])
+         true_species = Flux.onecold(ytest, ["Adelie", "Gentoo", "Chinstrap"])
+         ConfusionMatrix()(predicted_species, true_species)
+   
+      .. figure:: img/confusion_matrix.png
+         :scale: 40 %
+
+      Much better!
 
 See also
 --------
