@@ -395,6 +395,9 @@ Exercises
    4. For debugging, you can print from inside a kernel using ``@cuprintln`` 
       (e.g. to print thread numbers). It will only print during the first 
       execution - redefine the function again to print again.
+      If you get warnings or errors relating to types, you can use the code 
+      introspection macro ``@device_code_warntype`` to see the types inferred 
+      by the compiler.
 
    5. Check correctness of your results! To test that ``evolve!`` and ``evolve_gpu!`` 
       give (approximately) the same results, for example:
