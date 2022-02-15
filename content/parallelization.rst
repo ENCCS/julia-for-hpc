@@ -492,7 +492,6 @@ Exercises
                      @inbounds yderiv = (prev.data[i, j-1] - 2.0 * prev.data[i, j] + prev.data[i, j+1]) / curr.dy^2
                      @inbounds curr.data[i, j] = prev.data[i, j] + a * dt * (xderiv + yderiv)
                  end 
-                 sleep(0.001)
              end
          end
 
