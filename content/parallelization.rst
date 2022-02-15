@@ -58,12 +58,13 @@ Julia can be started with a given number of threads in two ways:
    julia -t 4  
    julia -t auto
    # or (can also set the env-var in e.g. .bashrc)
-   JULIA_NUM_THREADS = 4 julia
+   JULIA_NUM_THREADS=4 julia
 
 This is not possible to do inside VSCode. Instead, we open up the 
 "Extension Settings" for the Julia VSCode extension and set the 
 "Julia: Num Threads" setting to the number of CPU cores we have on 
 our machines (if you're unsure, just try setting it to 2).
+After updating the number of threads we need to restart the VSCode REPL.
 We can make sure we have access to the correct number of threads 
 with the ``Threads.nthreads()`` function.
 
@@ -112,12 +113,12 @@ We can now compare the performance:
 
 .. code-block:: julia
 
-   a = rand(1000, 1000)
-   @btime sqrt_array(a);
-   @btime threaded_sqrt_array(a);
+   A = rand(1000, 1000)
+   @btime sqrt_array(A);
+   @btime threaded_sqrt_array(A);
 
    # make sure we're getting the correct value
-   sqrt_array(a) ≈ threaded_sqrt_array(a)
+   sqrt_array(A) ≈ threaded_sqrt_array(A)
 
 With 4 threads, the speedup could be between a factor 2 or 3.   
 
@@ -449,19 +450,6 @@ the Message Passing Interface, which has been the standard workhorse of
 parallel computing for decades. If you know how to parallelize a program 
 with MPI in any other languages, you know how to do it in Julia!
 
-Summary
--------
-
-One should choose a distributed mechanism that fits with the 
-time and memory parameters of your problem
-
-- ``Threads`` is as easy as decorating for loops with ``@threads``, but data 
-  dependencies (race conditions) need to be avoided.
-- ``@distributed`` is good for reductions and fast inner loops with limited 
-  data transfer.
-- ``pmap`` is good for expensive inner loops that return a value.
-- ``SharedArrays`` can be an easier drop-in replacement for threading-like 
-  behaviors on a single machine.
 
 
 Exercises
@@ -689,3 +677,14 @@ See also
 - `Distributed API <https://docs.julialang.org/en/v1/stdlib/Distributed/>`__
 - Valentin Churavy, `Levels of Parallelism <https://slides.com/valentinchuravy/julia-parallelism>`__
 
+.. keypoints::
+
+   - One should choose a distributed mechanism that fits with the 
+     time and memory parameters of your problem   
+   - ``Threads`` is as easy as decorating for loops with ``@threads``, but data 
+     dependencies (race conditions) need to be avoided.
+   - ``@distributed`` is good for reductions and fast inner loops with limited 
+     data transfer.
+   - ``pmap`` is good for expensive inner loops that return a value.
+   - ``SharedArrays`` can be an easier drop-in replacement for threading-like 
+     behaviors on a single machine.

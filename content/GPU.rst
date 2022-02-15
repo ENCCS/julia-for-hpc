@@ -51,15 +51,17 @@ to an NVIDIA GPU and the necessary software stack. Access to a HPC system with
 GPUs and a Julia installation will work. Another option is to use 
 `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from 
 `Julia Computing <https://juliacomputing.com/>`_ with 
-access to Julia's ecosystem of packages and GPU hardware. Or one can use 
+access to Julia's ecosystem of packages and GPU hardware. 
+
+.. figure:: img/juliahub-logo-vector.jpeg
+   :target: https://juliahub.com/lp/
+
+Or one can use 
 `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
 account and a manual Julia installation, but using simple NVIDIA GPUs is free.
-
 Google Colab does not support Julia, but a
 `helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
 has created a Colab notebook that can be reused for Julia computing on Colab.
-If you have a Google account and agree to using it here, follow the link above 
-and go through the instructions found in the colab notebook.
 
 
 GPUs vs CPUs

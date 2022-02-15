@@ -268,15 +268,22 @@ Julia's official documentation has an important page on
 Before embarking on any research software project in Julia you 
 should carefully read this page!
 
+Exercises
+---------
 
-.. keypoints::
+.. exercise:: Eliminates array bounds checking 
 
-   - Always benchmark and profile before optimizing!
-   - Optimize bottlenecks in your serial code before you parallelize! 
-   - `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`__.
+   Insert the ``@inbounds`` macro in the ``evolve!`` function and 
+   benchmark it. How large is the speedup?
 
   
 See also
 --------
 
 - https://docs.julialang.org/en/v1/manual/performance-tips/     
+
+.. keypoints::
+
+   - Always benchmark and profile before optimizing!
+   - Optimize bottlenecks in your serial code before you parallelize! 
+   - `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`__.
