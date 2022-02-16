@@ -175,6 +175,7 @@ most of their license text.
 Several examples and formulations are inspired by other Julia
 lessons, particularly:
 
+- `Educational prallelization/GPU-porting repository with C/C++/Fortran examples <https://github.com/cschpc/heat-equation>`__ developed by CSC
 - `Introduction to Julia <https://github.com/csc-training/julia-introduction/>`__ provided by CSC and Aalto
 - `Tim Besard's JuliaCon 2021 GPU tutorial <https://github.com/maleadt/juliacon21-gpu_workshop>`__
 - `Carsten Bauer's 3-day Julia workshop <https://github.com/carstenbauer/JuliaCologne21>`__

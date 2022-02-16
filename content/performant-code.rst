@@ -13,7 +13,7 @@ Introducing HeatEquation.jl
 
 We will need a realistic Julia package to work on from now on.
 For this purpose we will use a minimal heat equation solver, inspired by 
-`this educational repository containing C/C++ versions with different 
+`this educational repository containing C/C++/Fortran versions with different 
 parallelization strategies <https://github.com/cschpc/heat-equation>`_ (credits to 
 CSC Finland). The Julia version of this package can be found at 
 https://github.com/enccs/HeatEquation.jl but the source files are also displayed 
