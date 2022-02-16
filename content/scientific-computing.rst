@@ -618,6 +618,8 @@ Exercises
          create_scatterplot(df, :flipper_length_mm, :body_mass_g, :island)  
 
 
+.. _DLexercise:
+
 .. exercise:: Improve the deep learning model
 
    Improve the performance of the neural network we trained above! 

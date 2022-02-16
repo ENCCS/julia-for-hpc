@@ -510,9 +510,20 @@ Exercises
          @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
 
 
+.. exercise:: Port a neural network to the GPU
+
+   Take the neural network model that you trained in the  
+   :ref:`Deep learning exercise <DLexercise>` and GPU-port it!
+
+   Additional reading material that might help:
+
+   - https://fluxml.ai/Flux.jl/stable/gpu/
+   - https://fluxml.ai/tutorials/2020/09/15/deep-learning-flux.html
+
 See also
 --------
 
 - https://juliagpu.org/
 - https://cuda.juliagpu.org/stable/
 - https://github.com/maleadt/juliacon21-gpu_workshop
+- https://fluxml.ai/tutorials/2020/09/15/deep-learning-flux.html
