@@ -9,6 +9,11 @@ Special features of Julia
    - What is code introspection?
    - What is metaprogramming?
 
+.. instructor-note::
+
+   - 20 min teaching
+   - 20 min exercises
+
 
 Types
 -----

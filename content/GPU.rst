@@ -7,6 +7,11 @@ GPU programming
    - How do CuArrays work?
    - How are GPU kernels written?
 
+.. instructor-note::
+
+   - 30 min teaching
+   - 40 min exercises
+
 
 Julia has first-class support for GPU programming through the following 
 packages that target GPUs from all three major vendors:

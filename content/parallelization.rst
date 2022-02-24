@@ -8,6 +8,11 @@ Parallelization
    - How is multiprocessing used?
    - What are SharedArrays?
 
+.. instructor-note::
+
+   - 30 min teaching
+   - 40 min exercises
+
 Overview
 --------
 

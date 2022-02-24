@@ -8,6 +8,11 @@ Developing in Julia
    - How can reprodubible environments be created?
    - How are tests written in Julia?
           
+.. instructor-note::
+
+   - 30 min teaching
+   - 30 min exercises
+
 
 Tooling
 -------

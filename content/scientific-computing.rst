@@ -9,6 +9,10 @@ Scientific computing and data science
    - How can I manipulate and wrangle data in Julia?
    - Can I use Julia for machine learning?
      
+.. instructor-note::
+
+   - 30 min teaching
+   - 30 min exercises
 
 
 Ecosystem of scientific computing packages

@@ -8,6 +8,9 @@ Motivation
    - What is composability?
    - What will we learn and not learn in this lesson?
 
+.. instructor-note::
+
+   - 15 min teaching
 
 Why was Julia created?
 ----------------------

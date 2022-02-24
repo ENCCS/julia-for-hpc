@@ -5,6 +5,10 @@ Outlook
 
    - Where should I go from here?
 
+.. instructor-note::
+
+   - 10 min teaching
+
 
 Where to go from here
 ---------------------

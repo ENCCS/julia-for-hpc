@@ -7,6 +7,11 @@ Writing performant Julia code
    - How can I profile my Julia code?
    - Are there any performance pitfalls in Julia?
 
+.. instructor-note::
+
+   - 30 min teaching
+   - 10 min exercises
+
 
 Introducing HeatEquation.jl
 ---------------------------
