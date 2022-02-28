@@ -1,7 +1,7 @@
-Quick Reference
-===============
+Julia primer
+============
 
-This page provides a condensed overview of Julia's main syntax and features.
+This episodes provides a condensed overview of Julia's main syntax and features.
 
 .. callout:: Preparing for a workshop
 
@@ -460,7 +460,7 @@ Exceptions can be created explicitly with `throw`:
 	      if x>=0
 	          return exp(-x)
 	      else
-            throw(DomainError(x, "argument must be non-negative"))
+              throw(DomainError(x, "argument must be non-negative"))
 	      end
 	  end
 
