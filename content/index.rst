@@ -29,7 +29,7 @@ computing.
      and programming graphical processing units (GPUs). No direct experience 
      is required.
    - Willingness to prepare for the workshop by going through the 
-     :doc:`quick-reference` guide.
+     :doc:`prerequisites`.
 
 
 
@@ -37,6 +37,7 @@ computing.
    :widths: auto
    :delim: ;
 
+   0 min ; :doc:`prerequisites`
    15 min ; :doc:`motivation`
    40 min ; :doc:`overview`
    60 min ; :doc:`development`
@@ -46,6 +47,13 @@ computing.
    70 min ; :doc:`GPU`
    10 min ; :doc:`outlook`
 
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Prerequisites
+
+   prerequisites	     
 
 .. toctree::
    :hidden:
@@ -66,7 +74,6 @@ computing.
    :caption: Reference
 
    setup
-   quick-reference
    guide
 
 
