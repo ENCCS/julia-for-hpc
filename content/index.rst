@@ -87,7 +87,7 @@ This lesson material is targeted towards students, researchers and developers
 who:
 
  - are already familiar with one or more programming languages (Python, R, C/C++, Fortran, Matlab, ...)
- - want to add a new exciting high-level yet performant language to their reportoar
+ - want to add a new exciting high-level yet performant language to their repertoire
  - might be mixing a high-level and a low-level language for performance reasons but want to make their life easier
  - need to analyze big data or perform computationally demanding modeling, analysis or simulations
  - want to develop high-performance parallelized and/or GPU code but prefer to stay within a
