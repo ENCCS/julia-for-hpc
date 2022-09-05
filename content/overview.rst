@@ -19,8 +19,8 @@ Types
 -----
 
 Julia is a dynamically typed language and does not require the
-declaration of types. Counterintuitively, it is notetheless due to its
-sophisticated type system that Julia is a high-performance language!
+declaration of types, but its
+sophisticated type system helps optimise Julia's performance.
 This is because types are *inferred* and used at runtime.
 
 Julia's type system is also what enables 
