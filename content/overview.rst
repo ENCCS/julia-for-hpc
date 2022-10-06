@@ -511,6 +511,21 @@ Julia's help mode to see the LaTeX-like syntax.
    ω₁, ω₂, ω₃ = 1, 2, 3
    σ = Σsqrt(ω₁, ω₂, ω₃) 
 
+It's also reassuring to know that Julia can solve the chicken-and-egg dilemma:
+
+.. code-block:: julia
+
+   problem = [:🥚, :🐔]
+   # 2-element Vector{Symbol}:
+   #  :🥚
+   #  :🐔
+
+   sort(problem)
+   # 2-element Vector{Symbol}:
+   #  :🐔
+   #  :🥚
+
+
 Exercises
 ---------
 
