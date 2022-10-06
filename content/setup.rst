@@ -1,9 +1,31 @@
 Setup
 =====
 
+Please follow the instructions on this page to install both **Julia** and **VS Code** with the Julia 
+plugin on your machine.
 
 Installing Julia
 ----------------
+
+There are two ways to install Julia:
+
+1. Downloading an `installer <https://julialang.org/downloads/#current_stable_release>`__ 
+   for your operating system for the latest stable Julia version.
+2. Using `Juliaup <https://github.com/JuliaLang/juliaup>`__, the Julia version manager.
+
+Option 2 is (as of October 2022) the recommended installation method on Windows, and while 
+`juliaup` is marked as a pre-release on MacOS and Linux it already works smoothly there too.
+
+The benefit of `juliaup` is that it allows users to install specific Julia versions, it alerts 
+users when new Julia versions are released and it provides a convenient Julia release channel 
+abstraction.
+
+Both installation methods are documented here. If you are on Windows we recommend using 
+`juliaup`. If you are on MacOS or Linux, choose the installation method you feel most 
+comfortable with.
+
+1. Using the Julia installer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 First download the latest stable release of Julia for your operating system 
 `from the julialang.org website <https://julialang.org/downloads/#current_stable_release>`_.
@@ -22,7 +44,22 @@ we recommend to install the
 `Windows Terminal from the Microsoft Store <https://www.microsoft.com/sv-se/p/windows-terminal/9n0dx20hk701?rtc=1&activetab=pivot:overviewtab>`_.
 
 
-After these steps, please ensure that you can open the Julia REPL by
+2. Using Juliaup      
+^^^^^^^^^^^^^^^^
+
+Full instructions can be found at https://github.com/JuliaLang/juliaup.
+
+In short:
+- On Windows you can install Julia and Juliaup either through the 
+  `Windows store <https://www.microsoft.com/store/apps/9NJNWW8PVKMN>`__ or on a command line 
+  by executing `winget install julia -s msstore`.
+- On MacOS or Linux, type `curl -fsSL https://install.julialang.org | sh` on a command line 
+  and follow the instructions.  
+
+Checking your installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Regardless of how you installed Julia, please ensure that you can open the Julia REPL by
 typing ``julia`` on the command line in a terminal, or by clicking the Julia 
 icon on your Desktop or Applications folder. You should
 see something like in the image below (nevermind the version number).
@@ -31,7 +68,6 @@ see something like in the image below (nevermind the version number).
    :align: center
 
 To exit the REPL again, hit ``CTRL-d`` or type ``exit()``.
-	   
 
 Installing Visual Studio Code
 -----------------------------

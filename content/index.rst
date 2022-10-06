@@ -53,6 +53,7 @@ computing.
    :maxdepth: 1
    :caption: Prerequisites
 
+   setup
    prerequisites	     
 
 .. toctree::
@@ -73,7 +74,6 @@ computing.
    :maxdepth: 1
    :caption: Reference
 
-   setup
    guide
 
 
