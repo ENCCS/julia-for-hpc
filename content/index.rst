@@ -12,7 +12,7 @@ Julia has a rich ecosystem of libraries aimed
 towards scientific computing and a powerful in-built package manager
 to install and manage their dependencies. Julia is also gaining ground
 in HPC as it supports both threading and distributed-memory
-parallelization as well as GPU computing.
+parallelisation as well as GPU computing.
 
 This lesson starts with the basics of Julia, its syntax,
 multiple-dispatch paradigm, package development and best practices. It
@@ -50,6 +50,7 @@ computing.
    multithreading
    distributed
    GPU
+   exercises
    outlook
 
 .. toctree::

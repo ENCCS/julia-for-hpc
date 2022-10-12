@@ -50,6 +50,7 @@ we recommend to install the
 Full instructions can be found at https://github.com/JuliaLang/juliaup.
 
 In short:
+
 - On Windows you can install Julia and Juliaup either through the 
   `Windows store <https://www.microsoft.com/store/apps/9NJNWW8PVKMN>`__ or on a command line 
   by executing `winget install julia -s msstore`.

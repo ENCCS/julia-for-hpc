@@ -230,9 +230,9 @@ complex collections than what can be done with ``Threads.@threads``.
 Exercises
 ---------
 
-.. exercise:: Multithreading HeatEquation.jl
+.. exercise:: Multithreading the Laplace function
 
-   Consider the double for loop in the ``evolve!`` function. 
+   Consider the double for loop in the ``lap2d!`` function. 
    Can it safely be threaded, i.e. is there any risk of race 
    conditions?
 
@@ -241,62 +241,16 @@ Exercises
    - Measure its effects with ``@benchmark``.
      Since it's cumbersome to change the "Julia: Num Threads" option 
      in VSCode and relaunch the Julia REPL over and over, create a script instead 
-     which imports `HeatEquation` and `BenchmarkTools` and prints benchmark 
-     results:      
+     which imports `BenchmarkTools` and prints benchmark results:      
 
      .. code-block:: julia
 
-        bench_results = @benchmark simulate!(curr, prev, nsteps)
+        bench_results = @benchmark lap2d!(u, unew)
         println(minimum(bench_results.times))
 
    - Now run with different number of threads from a terminal using 
-     ``julia --project=. -t <N> benchmarking.jl`` and observe the scaling.
-   - Try increasing the problem size (e.g. ``nx=ny=10_000``) while lowering the 
-     number of time steps (e.g. ``nsteps = 20``). Does it scale better?
-
-   .. solution::
-
-      Threaded version of ``evolve!``:
-
-      .. code-block:: julia
-
-         function evolve!(curr::Field, prev::Field, a, dt)
-             Threads.@threads for j = 2:curr.ny+1
-                 for i = 2:curr.nx+1
-                     @inbounds xderiv = (prev.data[i-1, j] - 2.0 * prev.data[i, j] + prev.data[i+1, j]) / curr.dx^2
-                     @inbounds yderiv = (prev.data[i, j-1] - 2.0 * prev.data[i, j] + prev.data[i, j+1]) / curr.dy^2
-                     @inbounds curr.data[i, j] = prev.data[i, j] + a * dt * (xderiv + yderiv)
-                 end 
-             end
-         end
-
-      Script to run benchmarking:
-
-      .. code-block:: julia
- 
-         using HeatEquation
-         using BenchmarkTools
-         
-         ncols, nrows, nsteps = 10_000, 10_000, 20
-         curr, prev = initialize(ncols, nrows)
-         
-         bench_results = @benchmark simulate!(curr, prev, nsteps)
-         # minimum runtime in seconds
-         println(minimum(bench_results.times)/1e9)
-
-      Running benchmarking from terminal:
-
-      .. code-block:: bash
-
-         $ julia --project -t 1 run_benchmarking.jl
-         # 5.314849396
-         $ julia --project -t 2 run_benchmarking.jl
-         # 3.236433742
-         $ julia --project -t 4 run_benchmarking.jl
-         # 3.311189835
-       
-      The scaling isn't very good because the loops in ``evolve!`` are very cheap, 
-      but it seems to scale better with larger arrays.
+     ``julia -t <N> laplace.jl`` and observe the scaling.
+   - Try increasing the problem size (e.g. ``M=N=8192``). Does it scale better?
 
 
 See also

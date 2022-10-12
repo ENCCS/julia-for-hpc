@@ -242,39 +242,19 @@ with MPI in any other languages, you know how to do it in Julia!
 Exercises
 ---------
 
-.. exercise:: Using SharedArrays with HeatEquation
+.. exercise:: Using SharedArrays with the Laplace function
 
-   Look again at the double for loop in the ``evolve!`` function 
+   Look again at the double for loop in the ``lap2d!`` function 
    and think about how you could use SharedArrays.
 
-   The best approach might be to start by refactoring the package a bit and change 
-   the ``evolve!`` function to accept arrays instead of ``Field`` structs, like this:
-
-   .. code-block:: julia
-
-      function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
-          nx, ny = size(currdata) .- 2
-          for j = 2:ny+1
-              for i = 2:nx+1
-                  @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                  @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                  @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
-              end 
-          end
-      end 
-
    - Create a new script where you import ``Distributed``, ``SharedArrays`` and 
-     ``BenchmarkTools`` and define the ``evolve!`` function above.
+     ``BenchmarkTools`` and define the ``lap2d!`` function.
    - Benchmark the original version:
 
    .. code-block:: julia
 
-      dx = dy = 0.01
-      a = 0.5
-      dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
-      M1 = rand(1000, 1000);
-      M2 = rand(1000, 1000);
-      @btime evolve!(M1, M2, dx, dy, a, dt)
+      u, unew = setup()
+      @btime lap2d!(u, unew)
 
    - Now create a new method for this function which accepts SharedArrays. 
    - Add worker processes with ``addprocs`` and benchmark your new method 
@@ -296,51 +276,42 @@ Exercises
          using BenchmarkTools
          using Distributed
          using SharedArrays
-
-         function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
-             nx, ny = size(currdata) .- 2
-             for j = 2:ny+1
-                 for i = 2:nx+1
-                     @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                     @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                     @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+         
+         function lap2d!(u, unew)
+             M, N = size(u)
+             for j in 2:N-1
+                 for i in 2:M-1
+                     @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
                  end 
-                 sleep(0.001)
+             end
+         end
+         
+         function lap2d!(u::SharedArray, unew::SharedArray)
+             M, N = size(u)
+             @sync @distributed for j in 2:N-1
+                 for i in 2:M-1
+                     @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+                 end 
              end
          end
 
-         function evolve!(currdata::SharedArray, prevdata::SharedArray, dx, dy, a, dt)
-             nx, ny = size(currdata) .- 2
-             @sync @distributed for j = 2:ny+1
-                 for i = 2:nx+1
-                     @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                     @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                     @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
-                 end 
-                 sleep(0.001)
-             end
-         end
 
-         dx = dy = 0.01
-         a = 0.5
-         dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
-         M1 = rand(1000, 1000);
-         M2 = rand(1000, 1000);
-         S1 = SharedArray(M1);
-         S2 = SharedArray(M2);
+         u, unew = setup()
+         u_s = SharedArray(u);
+         unew_s = SharedArray(unew);
 
          # test for correctness:
-         evolve!(M1, M2, dx, dy, a, dt) 
-         evolve!(S1, S2, dx, dy, a, dt) 
+         lap2d!(u, unew) 
+         lap2d!(u_s, unew_s) 
          # element-wise comparison, should give "true"
-         all(M1 .≈ S1)
+         all(u .≈ u_s)
 
          # benchmark
-         @btime evolve!(M1, M2, dx, dy, a, dt) 
-         #   2.379 s (5031 allocations: 152.52 KiB)
+         @btime lap2d!(u, unew) 
+         #   WRITEME
 
-         @btime evolve!(S1, S2, dx, dy, a, dt)
-         #   578.060 ms (722 allocations: 32.72 KiB)
+         @btime lap2d!(u_s, unew_s)
+         #   WRITEME
 
 
 .. exercise:: Parallel mapping

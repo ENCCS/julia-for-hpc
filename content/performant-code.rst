@@ -12,44 +12,64 @@ Writing performant Julia code
    - 30 min teaching
    - 10 min exercises
 
+Introducing a toy example
+-------------------------
 
-Introducing HeatEquation.jl
----------------------------
+As an example numerical problem, we will consider the discretized Laplace operator which is 
+used widely in applications including numerical analysis, many physical problems, image processing 
+and even machine learning. Here we will consider a simple two-dimensional implementation with a 
+finite-difference formula, which reads:
 
-We will need a realistic Julia package to work on from now on.
-For this purpose we will use a minimal heat equation solver, inspired by 
-`this educational repository containing C/C++/Fortran versions with different 
-parallelization strategies <https://github.com/cschpc/heat-equation>`_ (credits to 
-CSC Finland). The Julia version of this package can be found at 
-https://github.com/enccs/HeatEquation.jl but the source files are also displayed 
-below.
+.. math::
 
-.. tabs:: 
+   u_{out}(i,j) = 0.25 [u(i−1,j) + u(i+1,j) + u(i,j−1) + u(i,j+1)]
 
-   .. tab:: HeatEquation.jl
+In Julia, this can be implemented as:
 
-      .. literalinclude:: code/HeatEquation/src/HeatEquation.jl
-         :language: julia
+.. code-block:: julia
 
-   .. tab:: setup.jl
+   function lap2d!(u, unew)
+       M, N = size(u)
+       for j in 2:N-1
+           for i in 2:M-1
+               unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+           end 
+       end
+   end
 
-      .. literalinclude:: code/HeatEquation/src/setup.jl
-         :language: julia
+Note that we follow the Julia convention of appending an exclamation mark to functions that 
+mutate their arguments.
 
-   .. tab:: io.jl
+We now start by initializing the two 64-bit floating point arrays :math:`u` and :math:`unew`, 
+and arbitrarily set the boundaries to 10.0 to have something interesting to simulate:
 
-      .. literalinclude:: code/HeatEquation/src/io.jl
-         :language: julia
+.. code-block:: julia
 
-   .. tab:: core.jl
+   function setup(N=4096, M=4096)
+       u = zeros(M, N)
+       # set boundary conditions
+       u[1,:] = u[end,:] = u[:,1] = u[:,end] .= 10.0
+       unew = copy(u);
+       return u, unew
+   end
 
-      .. literalinclude:: code/HeatEquation/src/core.jl
-         :language: julia
+To simulate something that resembles e.g. the evolution of temperature in a 2D heat conductor 
+(although we've completely ignored physical constants and time-stepping involved in solving the 
+heat equation), we could run a loop of say 1000 "time" steps and visualize the results with the 
+:meth:`heatmap` method of the Plots package:
 
-   .. tab:: Project.toml
+.. code-block:: julia
 
-      .. literalinclude:: code/HeatEquation/Project.toml
-         :language: julia         
+   u, unew = setup()
+
+   for i in 1:50_000
+       lap2d!(u, unew)
+       # copy new computed field to old array
+       u = copy(unew)
+   end
+
+   using Plots
+   heatmap(u)
 
 
 Benchmarking
@@ -79,45 +99,17 @@ unpack a zip archive) to a new folder:
 
 .. type-along:: Benchmarking
 
-   .. code-block:: shell
-
-      cd $HOME/julia
-      git clone https://github.com/enccs/HeatEquation.jl
-      cd HeatEquation
-
-   If you don't have Git installed, you can also 
-   `download a zipfile <https://github.com/ENCCS/HeatEquation.jl/archive/refs/heads/main.zip>`__.
-   Next open a new VSCode window and navigate to the new directory. 
-   Open up a Julia REPL and activate the `HeatEquation` environment.
-
-   When everything has been set up, we can import `HeatEquation` and begin by 
-   testing the package: 
+   To perform benchmarking on the ``lap2d!`` function, simply insert ``@benchmark``:
 
    .. code-block:: julia
 
-      using HeatEquation
-      using BenchmarkTools
-
-      ncols, nrows, nsteps = 1000, 1000, 500
-      curr, prev = initialize(ncols, nrows)
-      visualize(curr)
-
-      simulate!(curr, prev, nsteps)
-
-      visualize(curr)
-
-
-   To perform benchmarking on the ``simulate!`` function, simply insert ``@benchmark``:
-
-   .. code-block:: julia
-
-      @benchmark simulate!(curr, prev, nsteps)
+      @benchmark lap2d!(u, unew)
 
    We can also capture the output of ``@benchmark``:
 
    .. code-block:: julia
 
-      bench_results = @benchmark simulate!(curr, prev, nsteps)
+      bench_results = @benchmark lap2d!(u, unew)
       typeof(bench_results)
       println(minimum(bench_results.times))
 
@@ -132,11 +124,11 @@ and thus gathering statistical information on where time is spent.
 Profiling is particularly useful for identifying bottlenecks in code - 
 we should remember that "premature optimization is the root of all evil" (Donald Knuth).
 
-Let's go ahead and profile the `HeatEquation` code:
+Let's go ahead and profile the `lap2d!` function:
 
 .. type-along:: Profiling
 
-   This is how we can profile the ``simulate!`` function and 
+   This is how we can profile the ``lap2d!`` function and 
    print its results in a tree structure:
 
    .. code-block:: julia
@@ -144,8 +136,7 @@ Let's go ahead and profile the `HeatEquation` code:
       using Profile
 
       Profile.clear() # clear backtraces from earlier runs
-      curr, prev = initialize(1000, 1000)
-      @profile simulate!(curr, prev, 500)
+      @profile lap2d!(u, unew)
       Profile.print()
 
    The information shown is not that easily digestible. Fortunately, the Julia extension 
@@ -153,7 +144,7 @@ Let's go ahead and profile the `HeatEquation` code:
 
    .. code-block:: julia
 
-      @profview simulate!(curr, prev, 500)
+      @profview lap2d!(u, unew)
 
    We can also look at the same information in a flamegraph by clicking the little fire 
    button next to the search area. 
@@ -191,20 +182,18 @@ measure the performance:
 
 .. code-block:: julia
 
-   function evolve!(curr::Field, prev::Field, a, dt)
-       for i = 2:curr.nx+1
-           for j = 2:curr.ny+1
-               xderiv = (prev.data[i-1, j] - 2.0 * prev.data[i, j] + prev.data[i+1, j]) / curr.dx^2
-               yderiv = (prev.data[i, j-1] - 2.0 * prev.data[i, j] + prev.data[i, j+1]) / curr.dy^2
-               curr.data[i, j] = prev.data[i, j] + a * dt * (xderiv + yderiv)
-         end 
-      end
+   function lap2d!(u, unew)
+       M, N = size(u)
+       for i in 2:M-1
+           for j in 2:N-1
+               unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+           end 
+       end
    end
 
 .. code-block:: julia
 
-   curr, prev = initialize(1000, 1000)
-   @benchmark simulate!(curr, prev, 500)
+   @benchmark lap2d!(u, unew)
 
 In a set of tests this more than doubled the execution time!   
 
@@ -215,23 +204,23 @@ The ``@inbounds`` macro eliminates array bounds checking within expressions whic
 can save considerable time. This should only be used if you are sure that no out-of-bounds 
 indices are used!
 
-Let us add ``@inbounds`` to the three lines in the inner loop in ``evolve!`` 
-and benchmark it:
+Let us add ``@inbounds`` to the inner loop in ``lap2d!`` and benchmark it:
 
 .. code-block:: julia
 
-   for j = 2:curr.ny+1
-       for i = 2:curr.nx+1
-           @inbounds xderiv = (prev.data[i-1, j] - 2.0 * prev.data[i, j] + prev.data[i+1, j]) / curr.dx^2
-           @inbounds yderiv = (prev.data[i, j-1] - 2.0 * prev.data[i, j] + prev.data[i, j+1]) / curr.dy^2
-           @inbounds curr.data[i, j] = prev.data[i, j] + a * dt * (xderiv + yderiv)
-       end 
-    end
+   function lap2d!(u, unew)
+       M, N = size(u)
+       for j in 2:N-1
+           for i in 2:M-1
+               @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+           end 
+       end
+   end
+
 
 .. code-block:: julia
 
-   curr, prev = initialize(1000, 1000)
-   @benchmark simulate!(curr, prev, 500)
+   @benchmark lap2d!(u, unew)
 
 Significant speedup should be seen! In a set of tests the execution time as  
 well as memory consumption were reduced by 50\%.
@@ -276,9 +265,9 @@ should carefully read this page!
 Exercises
 ---------
 
-.. exercise:: Eliminates array bounds checking 
+.. exercise:: Eliminate array bounds checking 
 
-   Insert the ``@inbounds`` macro in the ``evolve!`` function and 
+   Insert the ``@inbounds`` macro in the ``lap2d!`` function and 
    benchmark it. How large is the speedup?
 
   
