@@ -1,5 +1,5 @@
-Julia primer
-============
+Introduction to Julia syntax
+============================
 
 This episodes provides a condensed overview of Julia's main syntax and features.
 
@@ -11,14 +11,18 @@ This episodes provides a condensed overview of Julia's main syntax and features.
    a Jupyter or Pluto notebook, or in VSCode (refer to :doc:`setup` for 
    installation and configuration instructions).
 
-As an alternative to going through this page, you can also watch 
-`this video <https://www.youtube.com/watch?v=sE67bP2PnOo&t=28s>`_ 
-which covers "a 300 page book on Julia in one hour".
+.. callout:: Video alternative
 
-If you are coming from MATLAB, R, Python, C/C++ or Common Lisp, 
-you should also have a look at `this page 
-<https://docs.julialang.org/en/v1/manual/noteworthy-differences/>`_
-which lists the respective differences in Julia.
+  As an alternative to going through this page, learners can also watch 
+  `this video <https://www.youtube.com/watch?v=sE67bP2PnOo&t=28s>`_ 
+  which covers "a 300 page book on Julia in one hour".
+
+.. callout:: Coming from other languages
+
+  If you are coming from MATLAB, R, Python, C/C++ or Common Lisp, 
+  you should also have a look at `this page 
+  <https://docs.julialang.org/en/v1/manual/noteworthy-differences/>`_
+  which lists the respective differences in Julia.
 
 Running Julia
 -------------

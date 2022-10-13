@@ -12,7 +12,7 @@ Julia has a rich ecosystem of libraries aimed
 towards scientific computing and a powerful in-built package manager
 to install and manage their dependencies. Julia is also gaining ground
 in HPC as it supports both threading and distributed-memory
-parallelization as well as GPU computing.
+parallelisation as well as GPU computing.
 
 This lesson starts with the basics of Julia, its syntax,
 multiple-dispatch paradigm, package development and best practices. It
@@ -28,25 +28,6 @@ computing.
      (including parallelization by threading or multiprocessing) 
      and programming graphical processing units (GPUs). No direct experience 
      is required.
-   - Willingness to prepare for the workshop by going through the 
-     :doc:`prerequisites`.
-
-
-
-.. csv-table::
-   :widths: auto
-   :delim: ;
-
-   0 min ; :doc:`prerequisites`
-   15 min ; :doc:`motivation`
-   40 min ; :doc:`overview`
-   60 min ; :doc:`development`
-   60 min ; :doc:`scientific-computing`
-   40 min ; :doc:`performant-code`
-   70 min ; :doc:`parallelization`
-   70 min ; :doc:`GPU`
-   10 min ; :doc:`outlook`
-
 
 .. toctree::
    :hidden:
@@ -54,7 +35,6 @@ computing.
    :caption: Prerequisites
 
    setup
-   prerequisites	     
 
 .. toctree::
    :hidden:
@@ -62,12 +42,15 @@ computing.
    :caption: The lesson
 
    motivation
+   syntax-intro
    overview
    development
    scientific-computing   
    performant-code
-   parallelization
+   multithreading
+   distributed
    GPU
+   exercises
    outlook
 
 .. toctree::
