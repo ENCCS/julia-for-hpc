@@ -447,7 +447,7 @@ Exercises
          end
 
          for i in 1:1000
-             lap2d!(u_d, unew_d)
+             @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
              u_d = copy(unew_d)
          end
 
@@ -471,7 +471,7 @@ Exercises
              i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
              j = (blockIdx().y - 1) * blockDim().y + threadIdx().y
              #@cuprintln("threads $i $j") #only for debugging!
-             if i > 1 && j > 1 && i < nx+2 && j < ny+2
+             if i > 1 && j > 1 && i < M && j < N
                  @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
              end
              return nothing
