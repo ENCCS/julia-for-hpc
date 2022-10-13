@@ -385,26 +385,24 @@ For example:
 Exercises
 ---------
 
-.. exercise:: Port HeatEquation.jl to GPU
+.. exercise:: Port Laplace function to GPU
 
-   Write a kernel for the ``evolve!`` function!
+   Write a kernel for the ``lap2d!`` function!
 
-   Start with this refactored function which accepts arrays:
+   Start with the regular version with ``@inbounds`` added:
 
    .. code-block:: julia
 
-      function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
-          nx, ny = size(currdata) .- 2
-          for j = 2:ny+1
-              for i = 2:nx+1
-                  @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                  @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                  @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+      function lap2d!(u, unew)
+          M, N = size(u)
+          for j in 2:N-1
+              for i in 2:M-1
+                  @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
               end 
           end
       end
 
-   Now start implementing a GPU kernel version ``evolve_gpu!``.
+   Now start implementing a GPU kernel version.
 
    1. The kernel function needs to end with ``return`` or ``return nothing``.
 
@@ -428,54 +426,53 @@ Exercises
       introspection macro ``@device_code_warntype`` to see the types inferred 
       by the compiler.
 
-   5. Check correctness of your results! To test that ``evolve!`` and ``evolve_gpu!`` 
+   5. Check correctness of your results! To test that the CPU and GPU versions 
       give (approximately) the same results, for example:
 
       .. code-block:: julia
 
-         dx = dy = 0.01
-         a = 0.5
-         nx = ny = 10000
-         dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
-         A1 = rand(nx, ny);
-         A2 = rand(nx, ny);
-         A1_d = CuArray(A1)
-         A2_d = CuArray(A2)
+         M = 4096
+         N = 4096
+         u = zeros(M, N);
+         # set boundary conditions
+         u[1,:] = u[end,:] = u[:,1] = u[:,end] .= 10.0;
+         unew = copy(u);
 
-         evolve!(A1, A2, dx, dy, a, dt)
+         # copy to GPU and convert to Float32
+         u_d, unew_d = CuArray(cu(u)), CuArray(cu(unew))
 
-         evolve_gpu!(A1_d, A2_d, dx, dy, a, dt)
+         for i in 1:1000
+             lap2d!(u, unew)
+             u = copy(unew)
+         end
 
-         all(A1 .≈ Array(A1_d))
+         for i in 1:1000
+             lap2d!(u_d, unew_d)
+             u_d = copy(unew_d)
+         end
+
+         all(u .≈ Array(u_d))
    
-   6. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
-      functions for arrays of various sizes and with different choices 
+   6. Perform some benchmarking of the CPU and GPU methods of the 
+      function for arrays of various sizes and with different choices 
       of ``nthreads``. You will need to prefix the 
       kernel execution with the ``CUDA.@sync`` macro 
       to let the CPU wait for the GPU kernel to finish (otherwise you 
       would be measuring the time it takes to only launch the kernel):
 
-   
-   7. Compare your Julia code with the 
-      `corresponding CUDA version <https://github.com/cschpc/heat-equation/blob/main/cuda/core_cuda.cu>`__
-      to enjoy the (relative) simplicity of Julia!
-
    .. solution:: 
 
-      This is one possible GPU kernel version of ``evolve!``:
+      This is one possible GPU kernel version of ``lap2d!``:
 
       .. code-block:: julia
 
-         function evolve_gpu!(currdata, prevdata, dx2, dy2, a, dt)
-             nx, ny = size(currdata) .- 2   
-             # which index (i or j) you assign to x and y matters enormously!
+         function lap2d!(u::CuArray, unew::CuArray)
+             M, N = size(u)
              i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
              j = (blockIdx().y - 1) * blockDim().y + threadIdx().y
              #@cuprintln("threads $i $j") #only for debugging!
              if i > 1 && j > 1 && i < nx+2 && j < ny+2
-                 @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx2
-                 @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy2
-                 @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+                 @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
              end
              return nothing
          end
@@ -484,35 +481,29 @@ Exercises
 
       .. code-block:: julia
 
-         dx = dy = 0.01
-         a = 0.5
-         nx = ny = 1000
-         dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
-         M1 = rand(nx, ny);
-         M2 = rand(nx, ny);
-
-         # copy to GPU and convert to Float32
-         M1_d = CuArray(cu(M1))
-         M2_d = CuArray(cu(M2))
-
          # set number of threads and blocks
          nthreads = 16
          numblocks = cld(nx, nthreads)
 
-         # call cpu and gpu versions
-         evolve!(M1, M2, dx, dy, a, dt)
-         @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
+         for i in 1:1000
+            # call cpu and gpu versions
+            lap2d!(u, unew)
+            u = copy(unew)
+
+            @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
+            u_d = copy(unew_d)
+         end
 
          # element-wise comparison
-         all(M1 .≈ Array(M1_d))
+         all(u .≈ Array(u_d))
 
       To benchmark:
 
       .. code-block:: julia
 
          using BenchmarkTools
-         @btime evolve!(M1, M2, dx, dy, a, dt)
-         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
+         @btime lap2d!(u, unew)
+         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
 
 
 .. exercise:: Port a neural network to the GPU
