@@ -450,40 +450,121 @@ analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
 
 We can split work between the GPU threads like this:   
 
-.. code-block:: julia
+.. tabs:: 
 
-   function vadd!(c, a, b)
-       index = threadIdx().x   # linear indexing, so only use `x`
-       stride = blockDim().x   
-       for i = index:stride:length(a)
-           c[i] = a[i] + b[i]
-       end
-       return
-   end
+   .. group-tab:: NVIDIA
 
-   # run using 256 threads
-   @cuda threads=256 vadd!(C_d, A_d, B_d)
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             index = threadIdx().x   # linear indexing, so only use `x`
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+
+         @cuda threads=length(A_d) vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = workitemIdx().x
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+      
+         @roc groupsize=length(A_d) vadd!(C_d, A_d, B_d)   
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = get_global_id()
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+      
+         @oneapi items=length(A_d) vadd!(C_d, A_d, B_d)         
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = thread_position_in_grid_1d()
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+      
+         @metal threads=length(A_d) vadd(C_d, A_d, B_d)
 
 But we can parallelize even further. GPUs have a limited number of threads they 
 can run on a single SM, but they also have multiple SMs. 
 To take advantage of them all, we need to run a kernel with multiple blocks: 
 
-.. code-block:: julia
+.. tabs::
 
-   function vadd!(c, a, b)
-       i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
-       if i <= length(a)
-           c[i] = a[i] + b[i]
-       end
-       return
-   end
+   .. group-tab:: NVIDIA
 
-   # smallest integer larger than or equal to length(A_d)/threads
-   numblocks = cld(length(A_d), 256)
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
+             if i <= length(a)
+                 @inbounds c[i] = a[i] + b[i]
+             end
+             return
+         end
 
-   # run using 256 threads
-   @cuda threads=256 blocks=numblocks vadd!(C_d, A_d, B_d)
+         # smallest integer larger than or equal to length(A_d)/threads
+         numblocks = cld(length(A_d), 256)
 
+         # run using 256 threads
+         @cuda threads=size(A_d) blocks=numblocks vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         # WARNING: this is still untested on AMD GPUs
+         function vadd!(c, a, b)
+             i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x * 
+             if i <= length(a)
+                 @inbounds c[i] = a[i] + b[i]
+             end
+             return
+         end
+      
+         # smallest integer larger than or equal to length(A_d)/threads
+         numblocks = cld(length(A_d), 256)
+      
+         # run using 256 threads
+         @roc groupsize=256 blocks=numblocks vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: Intel
+
+      WRITEME
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         # WARNING: this is still untested on Apple GPUs
+         function vadd!(c, a, b)
+             i = thread_position_in_grid_1d()
+             if i <= length(a)
+                 @inbounds c[i] = a[i] + b[i]
+             end
+             return
+         end
+      
+         # smallest integer larger than or equal to length(A_d)/threads
+         numblocks = cld(length(A_d), 256)
+      
+         # run using 256 threads
+         @metal threads=256 grid=numblocks vadd!(C_d, A_d, B_d)                  
 
 We have been using 256 GPU threads, but this might not be optimal. The more 
 threads we use the better is the performance, but the maximum number depends 
@@ -491,19 +572,51 @@ both on the GPU and the nature of the kernel. To optimize this choice, we can
 first create the kernel without launching it, query it for the number of threads 
 supported, and then launch the compiled kernel:
 
-.. code-block:: julia
+.. tabs:: 
 
-   # compile kernel
-   kernel = @cuda launch=false vadd!(C_d, A_d, B_d)
-   # extract configuration via occupancy API
-   config = launch_configuration(kernel.fun)
-   # number of threads should not exceed size of array
-   threads = min(length(A), config.threads)
-   # smallest integer larger than or equal to length(A)/threads
-   blocks = cld(length(A), threads)
+   .. group-tab:: NVIDIA 
 
-   # launch kernel with specific configuration
-   kernel(C_d, A_d, B_d; threads, blocks)
+      .. code-block:: julia
+      
+         # compile kernel
+         kernel = @cuda launch=false vadd!(C_d, A_d, B_d)
+         # extract configuration via occupancy API
+         config = launch_configuration(kernel.fun)
+         # number of threads should not exceed size of array
+         threads = min(length(A), config.threads)
+         # smallest integer larger than or equal to length(A)/threads
+         blocks = cld(length(A), threads)
+
+         # launch kernel with specific configuration
+         kernel(C_d, A_d, B_d; threads, blocks)
+
+   .. group-tab:: AMD 
+
+      WRITEME
+
+   .. group-tab:: Intel
+
+      WRITEME
+
+   .. group-tab:: Apple
+
+      WRITEME
+
+.. challenge:: Compare broadcasting to kernel
+
+   Consider the vector addition function from above:
+
+   .. code-block:: julia
+
+      function vadd!(c, a, b)
+          for i in 1:length(a)
+              @inbounds c[i] = a[i] + b[i]
+          end
+      end
+
+   - Write a kernel (or use the one shown above) and benchmark it with a moderately large vector.
+   - Then benchmark a broadcasted version of the vector addition. How does it compare to the kernel?
+
 
 
 Profiling
