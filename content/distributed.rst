@@ -328,14 +328,13 @@ Examples
  
    .. tab:: send/recv
 
-      .. code-block:: python
-         :emphasize-lines: 10, 14
+      .. code-block:: julia
 
-         from mpi4py import MPI
+         using MPI
    
          comm = MPI.COMM_WORLD
-         rank = comm.Get_rank()
-         n_ranks = comm.Get_size()
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
    
          if rank != 0:
              # All ranks other than 0 should send a message
@@ -349,14 +348,13 @@ Examples
 
    .. tab:: isend/irecv
 
-      .. code-block:: python
-         :emphasize-lines: 10,15
+      .. code-block:: julia
 
-         from mpi4py import MPI
+         using MPI
 
          comm = MPI.COMM_WORLD
-         rank = comm.Get_rank()
-         n_ranks = comm.Get_size()
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
 
          if rank != 0:
              # All ranks other than 0 should send a message
@@ -369,16 +367,17 @@ Examples
                  req = comm.irecv(source=sender, tag=0)
                  message = req.wait()
                  print(message)          
+
    .. tab:: broadcast
 
-      .. code-block:: python
+      .. code-block:: julia
          :emphasize-lines: 13
             
-         from mpi4py import MPI
-   
+         using MPI
+
          comm = MPI.COMM_WORLD
-         rank = comm.Get_rank()
-         n_ranks = comm.Get_size()
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)   
    
          # Rank 0 will broadcast message to all other ranks
          if rank == 0:
@@ -393,14 +392,14 @@ Examples
 
    .. tab:: gather
       
-      .. code-block:: python
+      .. code-block:: julia
          :emphasize-lines: 9
          
-         from mpi4py import MPI
+         using MPI
    
          comm = MPI.COMM_WORLD
-         rank = comm.Get_rank()
-         n_ranks = comm.Get_size()
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)   
    
          # Use gather to send all messages to rank 0
          send_message = "Hello World, I'm rank {:d}".format(rank)
@@ -412,14 +411,14 @@ Examples
    
    .. tab:: scatter
 
-      .. code-block:: python
+      .. code-block:: julia
          :emphasize-lines: 14
 
-         from mpi4py import MPI
-         
+         using MPI
+
          comm = MPI.COMM_WORLD
-         size = comm.Get_size()
-         rank = comm.Get_rank()
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)         
          
          if rank == 0:
              sendbuf = []
