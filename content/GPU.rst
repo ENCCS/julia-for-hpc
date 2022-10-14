@@ -4,7 +4,7 @@ GPU programming
 .. questions::
 
    - What are the high-level and low-level methods for GPU programming in Julia?
-   - How do CuArrays work?
+   - How do GPU Arrays work?
    - How are GPU kernels written?
 
 .. instructor-note::
@@ -19,9 +19,11 @@ packages that target GPUs from all three major vendors:
 - `CUDA.jl <https://cuda.juliagpu.org/stable/>`_ for NVIDIA GPUs
 - `AMDGPU.jl <https://amdgpu.juliagpu.org/stable/>`_ for AMD GPUs
 - `oneAPI.jl <https://github.com/JuliaGPU/oneAPI.jl>`_ for Intel GPUs
+- `Metal.jl <https://github.com/JuliaGPU/Metal.jl>`_ for Apple M-series GPUs
 
 ``CUDA.jl`` is the most mature, ``AMDGPU.jl`` is somewhat behind but still 
-ready for general use, while ``oneAPI.jl`` is still under heavy development.
+ready for general use, while ``oneAPI.jl`` and ``Metal.jl`` are functional but might 
+contain bugs, miss some features and provide suboptimal performance.
 
 NVIDIA still dominates the HPC accelerator market and we will focus here 
 on using ``CUDA.jl`` - the API of ``AMDGPU.jl`` is however completely analogous
@@ -34,32 +36,62 @@ for fine-grained control.
 Setup
 -----
 
-Installing ``CUDA.jl``:
+.. tabs::
 
-.. code-block:: julia
+   .. group-tab:: NVIDIA
 
-   using Pkg
-   Pkg.add("CUDA")
+      Installing ``CUDA.jl``:
 
-To use the Julia GPU stack, one needs to have NVIDIA drivers installed and
-the CUDA toolkit to go with the drivers. Supercomputers with NVIDIA GPUs 
-will already have both. For installation on other workstations one can follow the 
-`instructions from NVIDIA <https://www.nvidia.com/Download/index.aspx>`_ to 
-install the drivers, and let Julia automatically install the correct version 
-of the toolkit upon the first import: ``using CUDA``.
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("CUDA")
 
-Access to GPUs in the cloud
----------------------------
+   .. group-tab:: AMD
+
+      Installing ``AMDGPU.jl``:
+
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("AMDGPU")
+
+   .. group-tab:: Intel
+
+      Installing ``oneAPI.jl``:
+
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("oneAPI")
+
+   .. group-tab:: Apple
+
+      Installing ``Metal.jl``:
+
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("Metal")
+
+
+To use the Julia GPU stack, one needs to have the relevant GPU drivers and 
+programming toolkits installed. GPU drivers are already installed on HPC systems 
+while on your own machine you will need to install them yourself (see e.g.  these 
+`instructions from NVIDIA <https://www.nvidia.com/Download/index.aspx>`_). 
+Programming toolkits (e.g. CUDA, ROCm etc.) can be installed automatically through 
+Julia's artifact system upon the first import (e.g. ``using CUDA``).
+
+Access to GPUs
+--------------
 
 To fully experience the walkthrough in this episode we need to have access 
-to an NVIDIA GPU and the necessary software stack. Access to a HPC system with 
-GPUs and a Julia installation will work. Another option is to use 
+to a GPU device and the necessary software stack. Access to a HPC system with 
+GPUs and a Julia installation is optimal. If you have a powerful GPU on your own 
+machine you can also install the drivers and toolkits yourself. Another option is to use 
 `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from 
 `Julia Computing <https://juliacomputing.com/>`_ with 
 access to Julia's ecosystem of packages and GPU hardware. 
-
-.. figure:: img/juliahub-logo-vector.jpeg
-   :target: https://juliahub.com/lp/
 
 Or one can use 
 `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
@@ -96,20 +128,57 @@ Some key aspects of GPUs that need to be kept in mind:
 The array interface
 -------------------
 
-GPU programming with Julia can be as simple as using ``CuArray``
-(``ROCArray`` for AMD) instead of regular ``Base.Array`` arrays. 
-The ``CuArray`` type closely resembles ``Base.Array`` which enables 
+GPU programming with Julia can be as simple as using a different array type 
+instead of regular ``Base.Array`` arrays:
+
+- ``CuArray`` from CUDA.jl for NVIDIA GPUs
+- ``ROCArray`` from AMDGPU.jl for AMD GPUs
+- ``oneArray`` from oneAPI.jl for Intel GPUs
+- ``MtlArray`` from Metal.jl for Apple GPUs
+
+These array types closely resemble ``Base.Array`` which enables 
 us to write generic code which works on both types.
 
 The following code copies an array to the GPU and executes a simple operation on 
 the GPU:
 
-.. code-block:: julia
+.. tabs::
 
-   using CUDA
+   .. group-tab:: NVIDIA
 
-   A_d = CuArray([1,2,3,4])
-   A_d .+= 1
+      .. code-block:: julia
+      
+         using CUDA
+
+         A_d = CuArray([1,2,3,4])
+         A_d .+= 1
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         using AMDGPU
+      
+         A_d = ROCArray([1,2,3,4])
+         A_d .+= 1
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+      
+         using oneAPI
+      
+         A_d = oneArray([1,2,3,4])
+         A_d .+= 1
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         using Metal
+      
+         A_d = MtlArray([1,2,3,4])
+         A_d .+= 1
 
 Moving an array back from the GPU to the CPU is simple:
 
@@ -125,15 +194,60 @@ Let's have a look at a more realistic example: matrix multiplication. We
 create two random arrays, one on the CPU and one on the GPU, and compare the 
 performance:
 
-.. code-block:: julia
+.. tabs::
 
-   using BenchmarkTools
+   .. group-tab:: NVIDIA
 
-   A = rand(2^13, 2^13)
-   A_d = CUDA.rand(2^13, 2^13)
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using CUDA
 
-   @btime A * A
-   @btime A_d * A_d
+         A = rand(2^9, 2^9)
+         A_d = CuArray(A)
+
+         @btime A * A
+         @btime A_d * A_d
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using AMDGPU
+      
+         A = rand(2^9, 2^9)
+         A_d = ROCArray(A)
+      
+         @btime A * A
+         @btime A_d * A_d
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using oneAPI
+      
+         A = rand(2^9, 2^9)
+         A_d = oneArray(A)
+      
+         @btime A * A
+         @btime A_d * A_d
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using Metal         
+      
+         A = rand(2^9, 2^9)
+         A_d = MtlArray(A)
+      
+         @btime A * A
+         @btime A_d * A_d
+
 
 There should be a dramatic speedup!
 
