@@ -308,7 +308,9 @@ There should be a dramatic speedup!
 Vendor libraries
 ^^^^^^^^^^^^^^^^
 
-The NVIDIA libraries contain precompiled kernels for common 
+Support for using GPU vendor libraries from Julia is currently only supported on 
+NVIDIA GPUs.
+NVIDIA libraries contain precompiled kernels for common 
 operations like matrix multiplication (`cuBLAS`), fast Fourier transforms 
 (`cuFFT`), linear solvers (`cuSOLVER`), etc. These kernels are wrapped
 in ``CUDA.jl`` and can be used directly with ``CuArrays``:
@@ -372,30 +374,38 @@ an example of this, but more general constructs can be created with
 
          accumulate(+, A)
 
-Let's see if we can GPU-port the ``sqrt_sum`` function we saw in an earlier 
-episode using these methods.
+.. challenge:: Port :meth:`sqrt_sum` to GPU
 
-.. code-block:: julia
+   Try to GPU-port the ``sqrt_sum`` function we saw in an earlier 
+   episode:
 
-   function sqrt_sum(A)
-       s = zero(eltype(A))
-       for i in eachindex(A)
-           @inbounds s += sqrt(A[i])
-       end
-       return s
-   end
+   .. code-block:: julia
 
-First the square root should be taken of each element of the array, 
-which we can do with ``map(sqrt,A)``. Next we perform a reduction with the ``+``
-operator. Combining these steps:
+      function sqrt_sum(A)
+          s = zero(eltype(A))
+          for i in eachindex(A)
+              @inbounds s += sqrt(A[i])
+          end
+          return s
+      end
 
-.. code-block:: julia
+   Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
 
-   A = CuArray([1 2 3; 4 5 6; 7 8 9])
+   Hint: You can do it on a single line...
 
-   reduce(+, map(sqrt,A))
+   .. solution::
 
-GPU porting complete!
+      First the square root should be taken of each element of the array, 
+      which we can do with ``map(sqrt,A)``. Next we perform a reduction with the ``+``
+      operator. Combining these steps:
+      
+      .. code-block:: julia
+      
+         A = CuArray([1 2 3; 4 5 6; 7 8 9])
+      
+         reduce(+, map(sqrt,A))
+      
+      GPU porting complete!
 
 
 Writing your own kernels
