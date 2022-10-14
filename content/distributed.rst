@@ -234,8 +234,202 @@ MPI
 
 `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_ is a Julia interface to 
 the Message Passing Interface, which has been the standard workhorse of 
-parallel computing for decades. If you know how to parallelize a program 
-with MPI in any other languages, you know how to do it in Julia!
+parallel computing for decades. Like ``Distributed``, MPI belongs to the 
+distributed-memory paradigm.
+
+The idea behind MPI is that:
+
+- Tasks have a rank and are numbered 0, 1, 2, 3, ...
+- Each task manages its own memory
+- Each task can run multiple threads
+- Tasks communicate and share data by sending messages.
+- Many higher-level functions exist to distribute information to other tasks
+  and gather information from other tasks.
+- All tasks typically *run the entire code* and we have to be careful to avoid
+  that all tasks do the same thing.
+
+``MPI.jl`` provides Julia bindings for the Message Passing Interface (MPI) standard.
+This is how a hello world MPI program looks like in Python:
+
+.. code-block:: julia
+
+   using MPI
+   MPI.Init()
+   comm = MPI.COMM_WORLD
+   rank = MPI.Comm_rank(comm)
+   size = MPI.Comm_size(comm)
+   println("Hello from process $(rank) out of $(size)")
+   MPI.Barrier(comm)
+
+- ``MPI.COMM_WORLD`` is the `communicator` - a group of processes that can talk to each other
+- ``Comm_rank`` returns the individual rank (0, 1, 2, ...) for each task that calls it
+- ``Comm_size`` returns the total number of ranks.
+
+To run this code with a specific number of processes we use the ``mpirun`` command which 
+comes with the MPI library:
+
+.. code-block:: console
+
+   # on some HPC systems you might need 'srun -n 4' instead of 'mpirun -np 4'
+   # on Vega, add this module for MPI libraries: ml add foss/2020b  
+   $ mpirun -np 4 julia hello.py
+
+   # Hello from process 1 out of 4
+   # Hello from process 0 out of 4
+   # Hello from process 2 out of 4
+   # Hello from process 3 out of 4
+
+Point-to-point and collective communication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The MPI standard contains a `lot of functionality <https://mpi4py.readthedocs.io/en/stable/index.html>`__, 
+but in principle one can get away with only point-to-point communication (``MPI.COMM_WORLD.send`` and 
+``MPI.COMM_WORLD.recv``). However, collective communication can sometimes require less effort as you 
+will learn in an exercise below.
+In any case, it is good to have a mental model of different communication patterns in MPI.
+
+.. figure:: img/send-recv.png
+   :align: center
+   :scale: 100 %
+
+   ``send`` and ``recv``: blocking point-to-point communication between two ranks.    
+
+.. figure:: img/gather.png
+   :align: right
+   :scale: 80 %
+
+   ``gather``: all ranks send data to rank ``root``.
+
+.. figure:: img/scatter.png
+   :align: center
+   :scale: 80 %
+
+   ``scatter``: data on rank 0 is split into chunks and sent to other ranks
+
+
+.. figure:: img/broadcast.png
+   :align: left
+   :scale: 80 %
+
+   ``bcast``: broadcast message to all ranks
+
+
+.. figure:: img/reduction.png
+   :align: center
+   :scale: 100 %
+
+   ``reduce``: ranks send data which are reduced on rank ``root``
+
+
+Examples
+~~~~~~~~
+
+.. tabs::
+ 
+   .. tab:: send/recv
+
+      .. code-block:: python
+         :emphasize-lines: 10, 14
+
+         from mpi4py import MPI
+   
+         comm = MPI.COMM_WORLD
+         rank = comm.Get_rank()
+         n_ranks = comm.Get_size()
+   
+         if rank != 0:
+             # All ranks other than 0 should send a message
+             message = "Hello World, I'm rank {:d}".format(rank)
+             comm.send(message, dest=0, tag=0)
+         else:
+             # Rank 0 will receive each message and print them
+             for sender in range(1, n_ranks):
+                 message = comm.recv(source=sender, tag=0)
+                 print(message)      
+
+   .. tab:: isend/irecv
+
+      .. code-block:: python
+         :emphasize-lines: 10,15
+
+         from mpi4py import MPI
+
+         comm = MPI.COMM_WORLD
+         rank = comm.Get_rank()
+         n_ranks = comm.Get_size()
+
+         if rank != 0:
+             # All ranks other than 0 should send a message
+             message = "Hello World, I'm rank {:d}".format(rank)
+             req = comm.isend(message, dest=0, tag=0)
+             req.wait()
+         else:
+             # Rank 0 will receive each message and print them
+             for sender in range(1, n_ranks):
+                 req = comm.irecv(source=sender, tag=0)
+                 message = req.wait()
+                 print(message)          
+   .. tab:: broadcast
+
+      .. code-block:: python
+         :emphasize-lines: 13
+            
+         from mpi4py import MPI
+   
+         comm = MPI.COMM_WORLD
+         rank = comm.Get_rank()
+         n_ranks = comm.Get_size()
+   
+         # Rank 0 will broadcast message to all other ranks
+         if rank == 0:
+             send_message = "Hello World from rank 0"
+         else:
+             send_message = None
+   
+         receive_message = comm.bcast(send_message, root=0)
+   
+         if rank != 0:
+             print(f"rank {rank} received message: {receive_message}")       
+
+   .. tab:: gather
+      
+      .. code-block:: python
+         :emphasize-lines: 9
+         
+         from mpi4py import MPI
+   
+         comm = MPI.COMM_WORLD
+         rank = comm.Get_rank()
+         n_ranks = comm.Get_size()
+   
+         # Use gather to send all messages to rank 0
+         send_message = "Hello World, I'm rank {:d}".format(rank)
+         receive_message = comm.gather(send_message, root=0)
+   
+         if rank == 0:
+             for i in range(n_ranks):
+                 print(receive_message[i])     
+   
+   .. tab:: scatter
+
+      .. code-block:: python
+         :emphasize-lines: 14
+
+         from mpi4py import MPI
+         
+         comm = MPI.COMM_WORLD
+         size = comm.Get_size()
+         rank = comm.Get_rank()
+         
+         if rank == 0:
+             sendbuf = []
+             for i in range(size):
+                 sendbuf.append(f"Hello World from rank 0 to rank {i}")
+         else:
+             sendbuf = None
+         
+         recvbuf = comm.scatter(sendbuf, root=0)
+         print(f"rank {rank} received message: {recvbuf}")
 
 
 
