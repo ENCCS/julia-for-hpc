@@ -251,6 +251,60 @@ performance:
 
 There should be a dramatic speedup!
 
+.. challenge:: Effect of array size
+   
+   Does the size of the array affect how much the performance improves?
+
+   .. solution::
+
+      For example, on an A100 NVIDIA GPU:
+
+      .. code-block:: julia
+
+         using CUDA
+         using BenchmarkTools
+
+         A = rand(2^9, 2^9)
+         A_d = CuArray(A)
+         @btime A * A
+         #  1.702 ms (2 allocations: 2.00 MiB)  
+         @btime A_d * A_d
+         #  13.000 μs (29 allocations: 592 bytes)  
+         #  130 times faster
+      
+         A = rand(2^10, 2^10)
+         A_d = CuArray(A)
+         @btime A * A
+         #  10.179 ms (2 allocations: 8.00 MiB)
+         @btime A_d * A_d
+         #  9.620 μs (29 allocations: 592 bytes)  
+         #  1,114 times faster
+
+         A = rand(2^11, 2^11)
+         A_d = CuArray(A)
+         @btime A * A
+         #    72.950 ms (2 allocations: 32.00 MiB)
+         @btime A_d * A_d
+         #    10.861 μs (29 allocations: 592 bytes)
+         # 6,717 times faster
+
+         A = rand(2^12, 2^12)
+         A_d = CuArray(A)
+         @btime A * A
+         #  454.483 ms (2 allocations: 128.00 MiB)
+         @btime A * A
+         #  12.480 μs (29 allocations: 592 bytes)
+         # 36,416 times faster
+
+         A = rand(2^13, 2^13)
+         A_d = CuArray(A)
+         @btime A * A
+         #  3.237 s (2 allocations: 512.00 MiB)
+         @btime A * A
+         #  15.000 μs (32 allocations: 640 bytes)
+         # 216,000 times faster!
+
+
 Vendor libraries
 ^^^^^^^^^^^^^^^^
 
