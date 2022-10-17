@@ -282,9 +282,9 @@ comes with the MPI library:
 Point-to-point and collective communication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The MPI standard contains a `lot of functionality <https://mpi4py.readthedocs.io/en/stable/index.html>`__, 
-but in principle one can get away with only point-to-point communication (``MPI.COMM_WORLD.send`` and 
-``MPI.COMM_WORLD.recv``). However, collective communication can sometimes require less effort as you 
+The MPI standard contains a `lot of functionality <https://juliaparallel.org/MPI.jl/stable/refindex/>`__, 
+but in principle one can get away with only point-to-point communication (:meth:`MPI.send` and 
+:meth:`MPI.recv`). However, collective communication can sometimes require less effort as you 
 will learn in an exercise below.
 In any case, it is good to have a mental model of different communication patterns in MPI.
 
@@ -331,104 +331,336 @@ Examples
       .. code-block:: julia
 
          using MPI
-   
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-   
-         if rank != 0:
-             # All ranks other than 0 should send a message
-             message = "Hello World, I'm rank {:d}".format(rank)
-             comm.send(message, dest=0, tag=0)
-         else:
-             # Rank 0 will receive each message and print them
-             for sender in range(1, n_ranks):
-                 message = comm.recv(source=sender, tag=0)
-                 print(message)      
-
-   .. tab:: isend/irecv
-
-      .. code-block:: julia
-
-         using MPI
+         MPI.Init(   )
 
          comm = MPI.COMM_WORLD
          rank = MPI.Comm_rank(comm)
          size = MPI.Comm_size(comm)
-
-         if rank != 0:
+   
+         if rank != 0
              # All ranks other than 0 should send a message
-             message = "Hello World, I'm rank {:d}".format(rank)
-             req = comm.isend(message, dest=0, tag=0)
-             req.wait()
-         else:
+             local message = "Hello World, I'm rank $rank"
+             MPI.send(message, comm, dest=0, tag=0)
+         else
              # Rank 0 will receive each message and print them
-             for sender in range(1, n_ranks):
-                 req = comm.irecv(source=sender, tag=0)
-                 message = req.wait()
-                 print(message)          
+             for sender in 1:(size-1)
+                 message = MPI.recv(comm, source=sender, tag=0)
+                 println(message)
+             end
+         end   
 
    .. tab:: broadcast
 
       .. code-block:: julia
-         :emphasize-lines: 13
             
          using MPI
+         MPI.Init()
 
          comm = MPI.COMM_WORLD
          rank = MPI.Comm_rank(comm)
          size = MPI.Comm_size(comm)   
-   
+
          # Rank 0 will broadcast message to all other ranks
-         if rank == 0:
+         if rank == 0
              send_message = "Hello World from rank 0"
-         else:
-             send_message = None
-   
-         receive_message = comm.bcast(send_message, root=0)
-   
-         if rank != 0:
-             print(f"rank {rank} received message: {receive_message}")       
+         else
+             send_message = nothing
+         end
+
+         receive_message = MPI.bcast(send_message, comm, root=0)
+
+         if rank != 0
+             print("rank $rank received message: $receive_message")
+         end
 
    .. tab:: gather
       
       .. code-block:: julia
-         :emphasize-lines: 9
-         
+
          using MPI
-   
+         MPI.Init()
+
          comm = MPI.COMM_WORLD
          rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)   
-   
-         # Use gather to send all messages to rank 0
-         send_message = "Hello World, I'm rank {:d}".format(rank)
-         receive_message = comm.gather(send_message, root=0)
-   
-         if rank == 0:
-             for i in range(n_ranks):
-                 print(receive_message[i])     
-   
+         size = MPI.Comm_size(comm)
+
+         # Only upper-case Gather exists so message must be buffer-like of isbitstype
+         send_message = rank^3
+         # data from all ranks are gathered on root rank
+         receive_message = MPI.Gather(send_message, comm, root=0)
+
+         if rank == 0
+             for i in 1:size
+         	     println("Received $(receive_message[i]) from rank $(i-1)")
+             end
+         end
+
    .. tab:: scatter
 
       .. code-block:: julia
-         :emphasize-lines: 14
 
          using MPI
+         MPI.Init()
 
          comm = MPI.COMM_WORLD
          rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)         
+         size = MPI.Comm_size(comm)
+
+         # Only upper-case Scatter exists so message must be buffer-like of isbitstype
+         if rank == 0
+             sendbuf = [i^3 for i in 1:size]
+         else
+             sendbuf = nothing
+         end
+
+         recvbuf = MPI.Scatter(sendbuf, Int64, comm, root=0)
+         println("rank $rank received message: $recvbuf")
+
+   .. tab:: reduce
+
+      .. code-block:: julia
+
+         using MPI
+         MPI.Init()
+
+         comm = MPI.COMM_WORLD
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
+
+         # Only upper-case Reduce exists so message must be buffer-like of isbitstype
+         data = rank
+         recvbuf = MPI.Reduce(data, +, comm, root=0)
+
+         if rank == 0
+             println(recvbuf)
+         end
+
+
+
+.. callout:: Serialised vs buffer-like objects
+
+   Lower-case methods (e.g. :meth:`send` and :meth:`recv`) are used to communicate generic 
+   objects between MPI processes. It is also possible to send buffer-like ``isbits`` objects 
+   which provides faster communication, but require the memory space to be allocated for the 
+   receiving buffer prior to communication. These methods start with uppercase letters, 
+   e.g. :meth:`Send`, :meth:`Recv`, :meth:`Gather` etc.   
+
+.. callout:: Mutating vs non-mutating 
+
+   For communication operations which receive data, MPI.jl typically
+   defines two separate functions:
+
+   - One function in which the output buffer is supplied by the user.
+     as it mutates this value, it adopts the Julia convention of suffixing
+     with ``!`` (e.g. :meth:`MPI.Recv!`, :meth:`MPI.Reduce!`).
+   - One function which allocates the buffer for the output
+     (:meth:`MPI.Recv`, :meth:`MPI.Reduce`).
+
+Blocking and non-blocking communication
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Point-to-point communication can be *blocking* or *non-blocking*: 
+:meth:`MPI.Send` will only return when the program can safely modify the send buffer and 
+:meth:`MPI.Recv` will only return once the data has been received and written to the receive 
+buffer.
+
+Consider the following example of a **deadlock** caused by blocking communication. 
+The problem can be circumvented by introducing sequential sends and receives, but 
+it's more conveniently solved by using non-blocking send and receive.
+
+.. tabs:: 
+
+   .. tab:: Blocking communication deadlock
+
+      .. code-block:: julia
+
+         using MPI
+         MPI.Init()
+
+         comm = MPI.COMM_WORLD
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
+
+         # Check that there are exactly two ranks
+         if size != 2
+             print("This example requires exactly two ranks")
+             exit(1)
+         end
+
+         # Call the other rank the neighbour
+         if rank == 0
+             neighbour = 1
+         else
+             neighbour = 0
+         end
+
+         # Send a message to the other rank
+         send_message = [i for i in 1:100]
+         MPI.send(send_message, comm, dest=neighbour, tag=0)
+
+         # Receive the message from the other rank
+         recv_message = MPI.recv(comm, source=neighbour, tag=0)
+
+         print("Message received by rank $rank")
+
+   .. tab:: Workaround with blocking communication
+
+      .. code-block:: julia
+
+         using MPI
+         MPI.Init()
+
+         comm = MPI.COMM_WORLD
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
+
+         # Check that there are exactly two ranks
+         if size != 2
+             print("This example requires exactly two ranks")
+             exit(1)
+         end
+
+         # Call the other rank the neighbour
+         if rank == 0
+             neighbour = 1
+         else
+             neighbour = 0
+         end
+
+         # Send a message to the other rank
+         send_message = [i for i in 1:100]
+
+         if rank == 0
+             MPI.send(send_message, comm, dest=neighbour, tag=0)
+         end
+
+         # Receive the message from the other rank
+         if rank == 1
+             recv_message = MPI.recv(comm, source=neighbour, tag=0)
+             print("Message received by rank $rank")
+         end
+
+         if rank == 1
+             MPI.send(send_message, comm, dest=neighbour, tag=0)
+         end
+
+         if rank == 0
+             recv_message = MPI.recv(comm, source=neighbour, tag=0)
+             print("Message received by rank $rank")
+         end
+    
+   .. tab:: Non-blocking solution
+
+      .. code-block:: julia
+
+         using MPI
+         MPI.Init()
+
+         comm = MPI.COMM_WORLD
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
+
+         # Check that there are exactly two ranks
+         if size != 2
+             print("This example requires exactly two ranks")
+             exit(1)
+         end
+
+         # Call the other rank the neighbour
+         if rank == 0
+             neighbour = 1
+         else
+             neighbour = 0
+         end
+
+         # Send a message to the other rank
+         send_message = [i for i in 1:100]
+         recv_message = similar(send_message)
+
+         # non-blocking send
+         sreq = MPI.Isend(send_message, comm, dest=neighbour, tag=0)
+
+         # non-blocking receive into receive buffer
+         rreq = MPI.Irecv!(recv_message, comm, source=neighbour, tag=0)
+
+         stats = MPI.Waitall!([rreq, sreq])
+
+         print("Message received by rank $rank")
+
+
          
-         if rank == 0:
-             sendbuf = []
-             for i in range(size):
-                 sendbuf.append(f"Hello World from rank 0 to rank {i}")
-         else:
-             sendbuf = None
-         
-         recvbuf = comm.scatter(sendbuf, root=0)
-         print(f"rank {rank} received message: {recvbuf}")
+
+.. challenge:: From blocking to non-blocking
+
+   Consider the following two examples where data is sent around "in a circle" 
+   (0->1, 1->2, ..., N->0). Will it work as intended? 
+
+      .. code-block:: julia
+      
+         using MPI
+         MPI.Init()
+
+         comm = MPI.COMM_WORLD
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
+
+         # where to send to
+         dst = mod(rank+1, size)
+         # where to receive from
+         src = mod(rank-1, size)
+
+         # unititalised send and receive buffers
+         send_mesg = Array{Float64}(undef, 5)
+         recv_mesg = Array{Float64}(undef, 5)
+
+         # fill the send array
+         fill!(send_mesg, Float64(rank))
+
+         print("$rank: Sending   $rank -> $dst = $send_mesg\n")
+         MPI.Send(send_mesg, comm, dest=dst, tag=rank+32)
+
+         print("$rank: Received $src -> $rank = $recv_mesg\n")
+         MPI.Recv!(recv_mesg, comm, source=src,  tag=src+32)
+
+         MPI.Barrier(comm)
+
+   Try running this program. Were the arrays received successfully? 
+   Introduce non-blocking communication to solve the problem.
+
+   .. solution:: 
+
+      .. code-block:: julia
+            
+         using MPI
+         MPI.Init()
+
+         comm = MPI.COMM_WORLD
+         rank = MPI.Comm_rank(comm)
+         size = MPI.Comm_size(comm)
+
+         # where to send to
+         dst = mod(rank+1, size)
+         # where to receive from
+         src = mod(rank-1, size)
+
+         send_mesg = Array{Float64}(undef, 5)
+         recv_mesg = Array{Float64}(undef, 5)
+
+         # fill the send array
+         fill!(send_mesg, Float64(rank))
+
+         print("$rank: Sending   $rank -> $dst = $send_mesg\n")
+         sreq = MPI.Isend(send_mesg, comm, dest=dst, tag=rank+32)
+
+         rreq = MPI.Irecv!(recv_mesg, comm, source=src,  tag=src+32)
+
+         stats = MPI.Waitall!([rreq, sreq])
+
+         print("$rank: Received $src -> $rank = $recv_mesg\n")
+
+         MPI.Barrier(comm)
+
+
 
 
 
