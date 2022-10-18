@@ -229,14 +229,6 @@ Currently, distributed arrays do not have much functionality
 and they requires significant book-keeping of array indices. 
 
 
-MPI
-^^^
-
-`MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_ is a Julia interface to 
-the Message Passing Interface, which has been the standard workhorse of 
-parallel computing for decades. If you know how to parallelize a program 
-with MPI in any other languages, you know how to do it in Julia!
-
 
 
 Exercises
@@ -409,9 +401,7 @@ See also
 .. keypoints::
 
    - One should choose a distributed mechanism that fits with the 
-     time and memory parameters of your problem   
-   - ``Threads`` is as easy as decorating for loops with ``@threads``, but data 
-     dependencies (race conditions) need to be avoided.
+     time and memory parameters of your problem.
    - ``@distributed`` is good for reductions and fast inner loops with limited 
      data transfer.
    - ``pmap`` is good for expensive inner loops that return a value.

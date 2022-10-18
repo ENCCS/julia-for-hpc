@@ -49,6 +49,7 @@ computing.
    performant-code
    multithreading
    distributed
+   MPI
    GPU
    exercises
    outlook

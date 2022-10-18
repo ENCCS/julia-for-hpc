@@ -107,6 +107,29 @@ In this field enter the path to the Julia executable that you have installed.
 
 If you are curious, scroll through the other possible configuration settings!
 
+MPI
+---
+
+FIXME
+
+https://juliaparallel.org/MPI.jl/latest/usage/#Julia-wrapper-for-mpiexec
+
+.. code-block:: julia
+
+   using Pkg
+   Pkg.add("MPI")
+
+Julia wrapper for ``mpiexec``:
+
+.. code-block:: julia
+
+   using MPI
+   MPI.install_mpiexecjl()
+
+This installs a ``mpiexecjl`` under ``~/.julia/bin``, which should be added to your 
+``PATH`` variable. 
+
+
 (Optional) Installing JupyterLab and a Julia kernel
 ---------------------------------------------------
 
