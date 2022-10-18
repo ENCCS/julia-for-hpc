@@ -4,7 +4,7 @@ GPU programming
 .. questions::
 
    - What are the high-level and low-level methods for GPU programming in Julia?
-   - How do CuArrays work?
+   - How do GPU Arrays work?
    - How are GPU kernels written?
 
 .. instructor-note::
@@ -19,9 +19,11 @@ packages that target GPUs from all three major vendors:
 - `CUDA.jl <https://cuda.juliagpu.org/stable/>`_ for NVIDIA GPUs
 - `AMDGPU.jl <https://amdgpu.juliagpu.org/stable/>`_ for AMD GPUs
 - `oneAPI.jl <https://github.com/JuliaGPU/oneAPI.jl>`_ for Intel GPUs
+- `Metal.jl <https://github.com/JuliaGPU/Metal.jl>`_ for Apple M-series GPUs
 
 ``CUDA.jl`` is the most mature, ``AMDGPU.jl`` is somewhat behind but still 
-ready for general use, while ``oneAPI.jl`` is still under heavy development.
+ready for general use, while ``oneAPI.jl`` and ``Metal.jl`` are functional but might 
+contain bugs, miss some features and provide suboptimal performance.
 
 NVIDIA still dominates the HPC accelerator market and we will focus here 
 on using ``CUDA.jl`` - the API of ``AMDGPU.jl`` is however completely analogous
@@ -34,32 +36,62 @@ for fine-grained control.
 Setup
 -----
 
-Installing ``CUDA.jl``:
+.. tabs::
 
-.. code-block:: julia
+   .. group-tab:: NVIDIA
 
-   using Pkg
-   Pkg.add("CUDA")
+      Installing ``CUDA.jl``:
 
-To use the Julia GPU stack, one needs to have NVIDIA drivers installed and
-the CUDA toolkit to go with the drivers. Supercomputers with NVIDIA GPUs 
-will already have both. For installation on other workstations one can follow the 
-`instructions from NVIDIA <https://www.nvidia.com/Download/index.aspx>`_ to 
-install the drivers, and let Julia automatically install the correct version 
-of the toolkit upon the first import: ``using CUDA``.
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("CUDA")
 
-Access to GPUs in the cloud
----------------------------
+   .. group-tab:: AMD
+
+      Installing ``AMDGPU.jl``:
+
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("AMDGPU")
+
+   .. group-tab:: Intel
+
+      Installing ``oneAPI.jl``:
+
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("oneAPI")
+
+   .. group-tab:: Apple
+
+      Installing ``Metal.jl``:
+
+      .. code-block:: julia
+      
+         using Pkg
+         Pkg.add("Metal")
+
+
+To use the Julia GPU stack, one needs to have the relevant GPU drivers and 
+programming toolkits installed. GPU drivers are already installed on HPC systems 
+while on your own machine you will need to install them yourself (see e.g.  these 
+`instructions from NVIDIA <https://www.nvidia.com/Download/index.aspx>`_). 
+Programming toolkits (e.g. CUDA, ROCm etc.) can be installed automatically through 
+Julia's artifact system upon the first import (e.g. ``using CUDA``).
+
+Access to GPUs
+--------------
 
 To fully experience the walkthrough in this episode we need to have access 
-to an NVIDIA GPU and the necessary software stack. Access to a HPC system with 
-GPUs and a Julia installation will work. Another option is to use 
+to a GPU device and the necessary software stack. Access to a HPC system with 
+GPUs and a Julia installation is optimal. If you have a powerful GPU on your own 
+machine you can also install the drivers and toolkits yourself. Another option is to use 
 `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from 
 `Julia Computing <https://juliacomputing.com/>`_ with 
 access to Julia's ecosystem of packages and GPU hardware. 
-
-.. figure:: img/juliahub-logo-vector.jpeg
-   :target: https://juliahub.com/lp/
 
 Or one can use 
 `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
@@ -96,20 +128,57 @@ Some key aspects of GPUs that need to be kept in mind:
 The array interface
 -------------------
 
-GPU programming with Julia can be as simple as using ``CuArray``
-(``ROCArray`` for AMD) instead of regular ``Base.Array`` arrays. 
-The ``CuArray`` type closely resembles ``Base.Array`` which enables 
+GPU programming with Julia can be as simple as using a different array type 
+instead of regular ``Base.Array`` arrays:
+
+- ``CuArray`` from CUDA.jl for NVIDIA GPUs
+- ``ROCArray`` from AMDGPU.jl for AMD GPUs
+- ``oneArray`` from oneAPI.jl for Intel GPUs
+- ``MtlArray`` from Metal.jl for Apple GPUs
+
+These array types closely resemble ``Base.Array`` which enables 
 us to write generic code which works on both types.
 
 The following code copies an array to the GPU and executes a simple operation on 
 the GPU:
 
-.. code-block:: julia
+.. tabs::
 
-   using CUDA
+   .. group-tab:: NVIDIA
 
-   A_d = CuArray([1,2,3,4])
-   A_d .+= 1
+      .. code-block:: julia
+      
+         using CUDA
+
+         A_d = CuArray([1,2,3,4])
+         A_d .+= 1
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         using AMDGPU
+      
+         A_d = ROCArray([1,2,3,4])
+         A_d .+= 1
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+      
+         using oneAPI
+      
+         A_d = oneArray([1,2,3,4])
+         A_d .+= 1
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         using Metal
+      
+         A_d = MtlArray([1,2,3,4])
+         A_d .+= 1
 
 Moving an array back from the GPU to the CPU is simple:
 
@@ -125,22 +194,123 @@ Let's have a look at a more realistic example: matrix multiplication. We
 create two random arrays, one on the CPU and one on the GPU, and compare the 
 performance:
 
-.. code-block:: julia
+.. tabs::
 
-   using BenchmarkTools
+   .. group-tab:: NVIDIA
 
-   A = rand(2^13, 2^13)
-   A_d = CUDA.rand(2^13, 2^13)
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using CUDA
 
-   @btime A * A
-   @btime A_d * A_d
+         A = rand(2^9, 2^9)
+         A_d = CuArray(A)
 
-There should be a dramatic speedup!
+         @btime A * A
+         @btime A_d * A_d
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using AMDGPU
+      
+         A = rand(2^9, 2^9)
+         A_d = ROCArray(A)
+      
+         @btime A * A
+         @btime A_d * A_d
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using oneAPI
+      
+         A = rand(2^9, 2^9)
+         A_d = oneArray(A)
+      
+         @btime A * A
+         @btime A_d * A_d
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         using BenchmarkTools
+         using Metal         
+      
+         A = rand(2^9, 2^9)
+         A_d = MtlArray(A)
+      
+         @btime A * A
+         @btime A_d * A_d
+
+
+There should be a considerable speedup!
+
+.. challenge:: Effect of array size
+   
+   Does the size of the array affect how much the performance improves?
+
+   .. solution::
+
+      For example, on an A100 NVIDIA GPU:
+
+      .. code-block:: julia
+
+         using CUDA
+         using BenchmarkTools
+
+         A = rand(2^9, 2^9)
+         A_d = CuArray(A)
+         @btime A * A
+         #  1.702 ms (2 allocations: 2.00 MiB)  
+         @btime A_d * A_d
+         #  13.000 μs (29 allocations: 592 bytes)  
+         #  130 times faster
+      
+         A = rand(2^10, 2^10)
+         A_d = CuArray(A)
+         @btime A * A
+         #  10.179 ms (2 allocations: 8.00 MiB)
+         @btime A_d * A_d
+         #  9.620 μs (29 allocations: 592 bytes)  
+         #  1,114 times faster
+
+         A = rand(2^11, 2^11)
+         A_d = CuArray(A)
+         @btime A * A
+         #    72.950 ms (2 allocations: 32.00 MiB)
+         @btime A_d * A_d
+         #    10.861 μs (29 allocations: 592 bytes)
+         # 6,717 times faster
+
+         A = rand(2^12, 2^12)
+         A_d = CuArray(A)
+         @btime A * A
+         #  454.483 ms (2 allocations: 128.00 MiB)
+         @btime A * A
+         #  12.480 μs (29 allocations: 592 bytes)
+         # 36,416 times faster
+
+         A = rand(2^13, 2^13)
+         A_d = CuArray(A)
+         @btime A * A
+         #  3.237 s (2 allocations: 512.00 MiB)
+         @btime A * A
+         #  15.000 μs (32 allocations: 640 bytes)
+         # 216,000 times faster!
+
 
 Vendor libraries
 ^^^^^^^^^^^^^^^^
 
-The NVIDIA libraries contain precompiled kernels for common 
+Support for using GPU vendor libraries from Julia is currently only supported on 
+NVIDIA GPUs.
+NVIDIA libraries contain precompiled kernels for common 
 operations like matrix multiplication (`cuBLAS`), fast Fourier transforms 
 (`cuFFT`), linear solvers (`cuSOLVER`), etc. These kernels are wrapped
 in ``CUDA.jl`` and can be used directly with ``CuArrays``:
@@ -204,30 +374,38 @@ an example of this, but more general constructs can be created with
 
          accumulate(+, A)
 
-Let's see if we can GPU-port the ``sqrt_sum`` function we saw in an earlier 
-episode using these methods.
+.. challenge:: Port :meth:`sqrt_sum` to GPU
 
-.. code-block:: julia
+   Try to GPU-port the ``sqrt_sum`` function we saw in an earlier 
+   episode:
 
-   function sqrt_sum(A)
-       s = zero(eltype(A))
-       for i in eachindex(A)
-           @inbounds s += sqrt(A[i])
-       end
-       return s
-   end
+   .. code-block:: julia
 
-First the square root should be taken of each element of the array, 
-which we can do with ``map(sqrt,A)``. Next we perform a reduction with the ``+``
-operator. Combining these steps:
+      function sqrt_sum(A)
+          s = zero(eltype(A))
+          for i in eachindex(A)
+              @inbounds s += sqrt(A[i])
+          end
+          return s
+      end
 
-.. code-block:: julia
+   Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
 
-   A = CuArray([1 2 3; 4 5 6; 7 8 9])
+   Hint: You can do it on a single line...
 
-   reduce(+, map(sqrt,A))
+   .. solution::
 
-GPU porting complete!
+      First the square root should be taken of each element of the array, 
+      which we can do with ``map(sqrt,A)``. Next we perform a reduction with the ``+``
+      operator. Combining these steps:
+      
+      .. code-block:: julia
+      
+         A = CuArray([1 2 3; 4 5 6; 7 8 9])
+      
+         reduce(+, map(sqrt,A))
+      
+      GPU porting complete!
 
 
 Writing your own kernels
@@ -272,40 +450,121 @@ analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
 
 We can split work between the GPU threads like this:   
 
-.. code-block:: julia
+.. tabs:: 
 
-   function vadd!(c, a, b)
-       index = threadIdx().x   # linear indexing, so only use `x`
-       stride = blockDim().x   
-       for i = index:stride:length(a)
-           c[i] = a[i] + b[i]
-       end
-       return
-   end
+   .. group-tab:: NVIDIA
 
-   # run using 256 threads
-   @cuda threads=256 vadd!(C_d, A_d, B_d)
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             index = threadIdx().x   # linear indexing, so only use `x`
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+
+         @cuda threads=length(A_d) vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = workitemIdx().x
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+      
+         @roc groupsize=length(A_d) vadd!(C_d, A_d, B_d)   
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = get_global_id()
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+      
+         @oneapi items=length(A_d) vadd!(C_d, A_d, B_d)         
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = thread_position_in_grid_1d()
+             @inbounds c[i] = a[i] + b[i]
+             return
+         end
+      
+         @metal threads=length(A_d) vadd(C_d, A_d, B_d)
 
 But we can parallelize even further. GPUs have a limited number of threads they 
 can run on a single SM, but they also have multiple SMs. 
 To take advantage of them all, we need to run a kernel with multiple blocks: 
 
-.. code-block:: julia
+.. tabs::
 
-   function vadd!(c, a, b)
-       i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
-       if i <= length(a)
-           c[i] = a[i] + b[i]
-       end
-       return
-   end
+   .. group-tab:: NVIDIA
 
-   # smallest integer larger than or equal to length(A_d)/threads
-   numblocks = cld(length(A_d), 256)
+      .. code-block:: julia
+      
+         function vadd!(c, a, b)
+             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
+             if i <= length(a)
+                 @inbounds c[i] = a[i] + b[i]
+             end
+             return
+         end
 
-   # run using 256 threads
-   @cuda threads=256 blocks=numblocks vadd!(C_d, A_d, B_d)
+         # smallest integer larger than or equal to length(A_d)/threads
+         numblocks = cld(length(A_d), 256)
 
+         # run using 256 threads
+         @cuda threads=size(A_d) blocks=numblocks vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         # WARNING: this is still untested on AMD GPUs
+         function vadd!(c, a, b)
+             i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x * 
+             if i <= length(a)
+                 @inbounds c[i] = a[i] + b[i]
+             end
+             return
+         end
+      
+         # smallest integer larger than or equal to length(A_d)/threads
+         numblocks = cld(length(A_d), 256)
+      
+         # run using 256 threads
+         @roc groupsize=256 blocks=numblocks vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: Intel
+
+      WRITEME
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         # WARNING: this is still untested on Apple GPUs
+         function vadd!(c, a, b)
+             i = thread_position_in_grid_1d()
+             if i <= length(a)
+                 @inbounds c[i] = a[i] + b[i]
+             end
+             return
+         end
+      
+         # smallest integer larger than or equal to length(A_d)/threads
+         numblocks = cld(length(A_d), 256)
+      
+         # run using 256 threads
+         @metal threads=256 grid=numblocks vadd!(C_d, A_d, B_d)                  
 
 We have been using 256 GPU threads, but this might not be optimal. The more 
 threads we use the better is the performance, but the maximum number depends 
@@ -313,19 +572,51 @@ both on the GPU and the nature of the kernel. To optimize this choice, we can
 first create the kernel without launching it, query it for the number of threads 
 supported, and then launch the compiled kernel:
 
-.. code-block:: julia
+.. tabs:: 
 
-   # compile kernel
-   kernel = @cuda launch=false vadd!(C_d, A_d, B_d)
-   # extract configuration via occupancy API
-   config = launch_configuration(kernel.fun)
-   # number of threads should not exceed size of array
-   threads = min(length(A), config.threads)
-   # smallest integer larger than or equal to length(A)/threads
-   blocks = cld(length(A), threads)
+   .. group-tab:: NVIDIA 
 
-   # launch kernel with specific configuration
-   kernel(C_d, A_d, B_d; threads, blocks)
+      .. code-block:: julia
+      
+         # compile kernel
+         kernel = @cuda launch=false vadd!(C_d, A_d, B_d)
+         # extract configuration via occupancy API
+         config = launch_configuration(kernel.fun)
+         # number of threads should not exceed size of array
+         threads = min(length(A), config.threads)
+         # smallest integer larger than or equal to length(A)/threads
+         blocks = cld(length(A), threads)
+
+         # launch kernel with specific configuration
+         kernel(C_d, A_d, B_d; threads, blocks)
+
+   .. group-tab:: AMD 
+
+      WRITEME
+
+   .. group-tab:: Intel
+
+      WRITEME
+
+   .. group-tab:: Apple
+
+      WRITEME
+
+.. challenge:: Compare broadcasting to kernel
+
+   Consider the vector addition function from above:
+
+   .. code-block:: julia
+
+      function vadd!(c, a, b)
+          for i in 1:length(a)
+              @inbounds c[i] = a[i] + b[i]
+          end
+      end
+
+   - Write a kernel (or use the one shown above) and benchmark it with a moderately large vector.
+   - Then benchmark a broadcasted version of the vector addition. How does it compare to the kernel?
+
 
 
 Profiling
