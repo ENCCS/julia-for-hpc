@@ -208,7 +208,6 @@ What you will not learn
   episode if you want to learn more.
 - How to interoperate with other languages. Calling code in Python, R, 
   C/C++ and Fortran is relatively straightforward but is outside the current scope.
-- Using MPI with Julia. If you know how to program with MPI, you also know how to do it in Julia!
 - Julia has mature packages for scientific computing in many different scientific disciplines.
   An overview of the package ecosystem will be provided in :ref:`scientific_computing` but we 
   will not go into any details except for an appetizer on data science and machine learning.
