@@ -249,7 +249,7 @@ performance:
          @btime A_d * A_d
 
 
-There should be a dramatic speedup!
+There should be a considerable speedup!
 
 .. challenge:: Effect of array size
    
