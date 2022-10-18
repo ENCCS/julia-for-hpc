@@ -442,6 +442,15 @@ Exercises
 
          MPI.Barrier(comm)
 
+Limitations
+-----------
+
+MPI.jl has (as of October 2022) not reached v1.0 so future changes could be backwards incompatible. 
+
+The MPI.jl documentation has a section on `known issues <https://juliaparallel.org/MPI.jl/latest/knownissues/>`__. 
+
+
+
 See also
 --------
 
