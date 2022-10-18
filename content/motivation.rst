@@ -188,7 +188,7 @@ What you will learn
 - How to work with datasets, make visualizations and create a simple machine learning model.
 - How to benchmark and profile Julia code.
 - How to write efficient serial code.
-- How to use multithreading and multiprocessing.
+- How to use multithreading, multiprocessing and MPI.
 - How to write Julia code for GPUs.
 
 We will be focusing on higher-level performance considerations and parallelization 
