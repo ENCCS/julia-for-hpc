@@ -8,8 +8,8 @@ Distributed computing
 
 .. instructor-note::
 
-   - 15 min teaching
-   - 20 min exercises
+   - 10 min teaching
+   - 15 min exercises
 
 
 Distributed computing
