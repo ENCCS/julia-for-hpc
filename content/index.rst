@@ -45,14 +45,22 @@ computing.
    syntax-intro
    overview
    development
-   scientific-computing   
    performant-code
    multithreading
    distributed
    MPI
    GPU
-   exercises
    outlook
+
+.. toctree:: 
+   :hidden:
+   :maxdepth: 1
+   :caption: Optional episodes  
+
+   scientific-computing
+   data-science
+   exercises
+
 
 .. toctree::
    :maxdepth: 1
