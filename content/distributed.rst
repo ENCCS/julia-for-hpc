@@ -170,7 +170,7 @@ but which one is preferable for a given use case?
 .. callout:: Multiprocessing overhead
 
    Just like with multithreading, multiprocessing with ``Distributed`` comes with an overhead 
-   because of sending messages and moving data between between processes. 
+   because of sending messages and moving data between processes. 
    
    The simple example with the :meth:`sqrt_sum` function will not benefit from parallelisation. 
    But if you add a :meth:`sleep(0.001)` inside the loop, to emulate an expensive calculation, 
@@ -362,10 +362,11 @@ Exercises
       num_points = 100_000_000
       estimate_pi(num_points)  # 3.14147572...
 
-   - Rewrite the function to accept a UnitRange (``1:10`` is a UnitRange{Int64})
-     and decorate it with ``@everywhere``.
+   - Rewrite the function to accept a UnitRange (``1:10`` is a ``UnitRange{Int64}``)
+     and decorate it with ``@everywhere`` (you can also just write a new method of the 
+     :meth:`estimate_pi` function, taking advantage of multiple dispatch).
    - Use a list comprehension to split up ``num_points`` into evenly sized chunks
-     (Hint: ``[(___:___) .+ ___ for ___ in ___:___:___]``).
+     (Hint: ``chunk = ___; ranges = [(1:chunk) .+ offset for ___ in ___:___:___]``).
    - Add worker processes as needed.
    - Use ``mean(pmap(___, ___))`` to get the mean from a parallel mapping 
      distributed among the workers.
