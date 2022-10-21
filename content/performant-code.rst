@@ -62,7 +62,7 @@ heat equation), we could run a loop of say 1000 "time" steps and visualize the r
 
    u, unew = setup()
 
-   for i in 1:50_000
+   for i in 1:1000
        lap2d!(u, unew)
        # copy new computed field to old array
        u = copy(unew)
