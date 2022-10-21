@@ -113,7 +113,7 @@ Examples
       .. code-block:: julia
 
          using MPI
-         MPI.Init(   )
+         MPI.Init()
 
          comm = MPI.COMM_WORLD
          rank = MPI.Comm_rank(comm)
