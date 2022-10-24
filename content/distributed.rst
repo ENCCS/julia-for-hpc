@@ -345,22 +345,14 @@ Exercises
    i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking 
    if they fall within the unit circle.
 
-   .. code-block:: julia
+   .. literalinclude:: code/estimate_pi.jl
+      :language: julia
 
-      function estimate_pi(num_points)
-          hits = 0
-          for _ in 1:num_points
-              x, y = rand(), rand()
-              if x^2 + y^2 < 1.0
-                  hits += 1
-              end
-          end
-          fraction = hits / num_points
-          return 4 * fraction
-      end
+   .. code-block:: julia
 
       num_points = 100_000_000
       estimate_pi(num_points)  # 3.14147572...
+
 
    - Rewrite the function to accept a UnitRange (``1:10`` is a ``UnitRange{Int64}``)
      and decorate it with ``@everywhere`` (you can also just write a new method of the 
@@ -376,36 +368,12 @@ Exercises
 
      .. solution::
 
+        .. literalinclude:: code/estimate_pi_distributed.jl      
+
         .. code-block:: julia
 
-           using Distributed
            using BenchmarkTools
-   
-           function estimate_pi(num_points)
-               hits = 0
-               for _ in 1:num_points
-                   x, y = rand(), rand()
-                   if x^2 + y^2 < 1.0
-                       hits += 1
-                   end
-               end
-               fraction = hits / num_points
-               return 4 * fraction
-           end
-           
-           @everywhere function estimate_pi(range::UnitRange)
-               hits = 0
-               for _ in range
-                   x, y = rand(), rand()
-                   if x^2 + y^2 < 1.0
-                       hits += 1
-                   end
-               end
-               fraction = hits / length(range)
-               return 4 * fraction
-           end
-           
-           
+                      
            num_points = 100_000_000
            @btime estimate_pi(num_points)
            # 366.751 ms (1 allocation: 16 bytes)
