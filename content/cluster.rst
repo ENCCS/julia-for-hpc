@@ -109,17 +109,93 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
 .. code-block:: julia
 
    using Distributed, ClusterManagers
-   
+
    # request 4 tasks 
    addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="d2021-135-users")
-   
+
    # let workers do some work
    for i in workers()
        id, pid, host = fetch(@spawnat i (myid(), getpid(), gethostname()))
        println(id, " " , pid, " ", host)
    end
-   
+
    # The Slurm resource allocation is released when all the workers have exited
    for i in workers()
        rmprocs(i)
    end
+
+
+.. challenge:: Use ClusterManagers.jl to launch parallel job
+
+   Take the serial and parallelised versions of the :meth:`estimate_pi` function encountered in an 
+   earlier exercise:
+
+   .. tabs:: 
+
+      .. tab:: Serial
+
+         .. literalinclude:: code/estimate_pi.jl
+            :language: julia
+
+      .. tab:: Distributed
+
+         .. literalinclude:: code/estimate_pi_distributed.jl
+            :language: julia
+
+   - Working in a Julia REPL running on a cluster login node, first benchmark the serial version 
+     using ``@btime``.
+   - Then use ClusterManagers.jl to run the job using 4 cores and benchmark again.
+   - Finally, add 4 more cores by repeating the :meth:`addprocs` command and benchmark it again.
+   - Keep in mind that you need to redefine :meth:`estimate_pi` every time you add workers!
+
+   .. solution:: 
+
+      Define the serial version:
+
+      .. literalinclude:: code/estimate_pi.jl
+         :language: julia
+
+      First benchmark the serial version:
+
+      .. code-block:: julia
+
+         using BenchmarkTools
+
+         num_points = 100_000_000
+         @btime estimate_pi(num_points)
+
+      Then request 4 workers (cores). Replace "PROJECT-ID" appropriately:
+
+      .. code-block:: julia
+
+         addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="PROJECT-ID")
+
+      Then define the function on all workers:
+
+      .. literalinclude:: code/estimate_pi_distributed.jl
+         :language: julia
+
+      Run on all the cores and time it:
+
+      .. code-block:: julia
+
+         chunk = 10_000_000
+         ranges = [(1:chunk) .+ offset for offset in 0:chunk:num_points-1]
+
+         @btime mean(pmap(estimate_pi, ranges))
+
+      Finally repeat the process with 4 more cores:
+
+      .. code-block:: julia
+
+         addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="PROJECT-ID")
+
+      .. literalinclude:: code/estimate_pi_distributed.jl
+         :language: julia
+
+      .. code-block:: julia
+
+         chunk = 10_000_000
+         ranges = [(1:chunk) .+ offset for offset in 0:chunk:num_points-1]
+
+         @btime mean(pmap(estimate_pi, ranges))
