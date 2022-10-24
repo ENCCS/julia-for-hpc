@@ -8,8 +8,8 @@ Multithreading
 
 .. instructor-note::
 
-   - 15 min teaching
-   - 20 min exercises
+   - 10 min teaching
+   - 15 min exercises
 
 
 Overview
@@ -124,6 +124,11 @@ We can now compare the performance:
    sqrt_array(A) ≈ threaded_sqrt_array(A)
 
 With 4 threads, the speedup could be between a factor 2 or 3.   
+
+.. callout:: Threading overhead
+
+   Using ``Threads.@threads`` has an overhead of a few microseconds (equivalent to thousands of computations), 
+   so threading is most efficient for time consuming jobs.
 
 
 Pitfalls

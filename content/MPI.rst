@@ -8,7 +8,7 @@ Message passing
 .. instructor-note::
 
    - 15 min teaching
-   - 20 min exercises
+   - 15 min exercises
 
 MPI
 ---
@@ -54,7 +54,7 @@ comes with the MPI library:
 
    # on some HPC systems you might need 'srun -n 4' instead of 'mpirun -np 4'
    # on Vega, add this module for MPI libraries: ml add foss/2020b  
-   $ mpirun -np 4 julia hello.py
+   $ mpirun -np 4 julia hello.jl
 
    # Hello from process 1 out of 4
    # Hello from process 0 out of 4
@@ -110,113 +110,23 @@ Examples
  
    .. tab:: send/recv
 
-      .. code-block:: julia
-
-         using MPI
-         MPI.Init(   )
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-   
-         if rank != 0
-             # All ranks other than 0 should send a message
-             local message = "Hello World, I'm rank $rank"
-             MPI.send(message, comm, dest=0, tag=0)
-         else
-             # Rank 0 will receive each message and print them
-             for sender in 1:(size-1)
-                 message = MPI.recv(comm, source=sender, tag=0)
-                 println(message)
-             end
-         end   
-
+      .. literalinclude:: code/send_recv.jl
+         
    .. tab:: broadcast
 
-      .. code-block:: julia
-            
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)   
-
-         # Rank 0 will broadcast message to all other ranks
-         if rank == 0
-             send_message = "Hello World from rank 0"
-         else
-             send_message = nothing
-         end
-
-         receive_message = MPI.bcast(send_message, comm, root=0)
-
-         if rank != 0
-             print("rank $rank received message: $receive_message")
-         end
+      .. literalinclude:: code/broadcast.jl
 
    .. tab:: gather
       
-      .. code-block:: julia
-
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Only upper-case Gather exists so message must be buffer-like of isbitstype
-         send_message = rank^3
-         # data from all ranks are gathered on root rank
-         receive_message = MPI.Gather(send_message, comm, root=0)
-
-         if rank == 0
-             for i in 1:size
-         	     println("Received $(receive_message[i]) from rank $(i-1)")
-             end
-         end
+      .. literalinclude:: code/gather.jl
 
    .. tab:: scatter
 
-      .. code-block:: julia
-
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Only upper-case Scatter exists so message must be buffer-like of isbitstype
-         if rank == 0
-             sendbuf = [i^3 for i in 1:size]
-         else
-             sendbuf = nothing
-         end
-
-         recvbuf = MPI.Scatter(sendbuf, Int64, comm, root=0)
-         println("rank $rank received message: $recvbuf")
+      .. literalinclude:: code/scatter.jl
 
    .. tab:: reduce
 
-      .. code-block:: julia
-
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Only upper-case Reduce exists so message must be buffer-like of isbitstype
-         data = rank
-         recvbuf = MPI.Reduce(data, +, comm, root=0)
-
-         if rank == 0
-             println(recvbuf)
-         end
-
+      .. literalinclude:: code/reduce.jl
 
 .. callout:: Serialised vs buffer-like objects
 

@@ -26,16 +26,9 @@ finite-difference formula, which reads:
 
 In Julia, this can be implemented as:
 
-.. code-block:: julia
 
-   function lap2d!(u, unew)
-       M, N = size(u)
-       for j in 2:N-1
-           for i in 2:M-1
-               unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
-           end 
-       end
-   end
+.. literalinclude:: code/lap2d.jl
+   :language: julia
 
 Note that we follow the Julia convention of appending an exclamation mark to functions that 
 mutate their arguments.
@@ -62,7 +55,7 @@ heat equation), we could run a loop of say 1000 "time" steps and visualize the r
 
    u, unew = setup()
 
-   for i in 1:50_000
+   for i in 1:1000
        lap2d!(u, unew)
        # copy new computed field to old array
        u = copy(unew)
@@ -206,17 +199,8 @@ indices are used!
 
 Let us add ``@inbounds`` to the inner loop in ``lap2d!`` and benchmark it:
 
-.. code-block:: julia
-
-   function lap2d!(u, unew)
-       M, N = size(u)
-       for j in 2:N-1
-           for i in 2:M-1
-               @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
-           end 
-       end
-   end
-
+.. literalinclude:: code/lap2d_inbounds.jl
+   :language: julia
 
 .. code-block:: julia
 

@@ -8,8 +8,8 @@ Distributed computing
 
 .. instructor-note::
 
-   - 15 min teaching
-   - 20 min exercises
+   - 10 min teaching
+   - 15 min exercises
 
 
 Distributed computing
@@ -73,20 +73,36 @@ but there are higher-level and simpler constructs than ``@spawn`` / ``@spawnat``
 - the ``pmap`` function which maps an array or range to a given function.
 
 To illustrate the difference between these approaches we revisit the 
-``sum_sqrt`` function from above. To use ``pmap`` we need to modify our 
+``sum_sqrt`` function from the :doc:`multithreading` episode. To use ``pmap`` we need to modify our 
 function to accept a range so we will use this modified version.
 Note that to make any function available to all processes it needs to 
 be decorated with the ``@everywhere`` macro:
 
-.. code-block:: julia
+.. tabs:: 
 
-   @everywhere function sqrt_sum_range(A, r)
-       s = zero(eltype(A))
-       for i in r
-           @inbounds s += sqrt(A[i])
-       end
-       return s
-   end
+   .. tab:: Distributed version
+
+      .. code-block:: julia
+      
+         @everywhere function sqrt_sum_range(A, r)
+             s = zero(eltype(A))
+             for i in r
+                 @inbounds s += sqrt(A[i])
+             end
+             return s
+         end
+
+   .. tab:: Serial version
+
+      .. code-block:: julia
+
+         function sqrt_sum(A)
+             s = zero(eltype(A))
+             for i in eachindex(A)
+                 @inbounds s += sqrt(A[i])
+             end
+             return s
+         end
 
 Let us look at and discuss example implementations using each of these 
 techniques:
@@ -97,7 +113,8 @@ techniques:
 
       .. code-block:: julia
       
-         batch = length(A) / 10
+         A = rand(100_000)
+         batch = Int(length(A) / 100)
 
          @distributed (+) for r in [(1:batch) .+ offset for offset in 0:batch:length(A)-1]
              sqrt_sum_range(A, r)
@@ -107,8 +124,9 @@ techniques:
    .. tab:: pmap
 
       .. code-block:: julia
-      
-         batch = length(A) / 10
+
+         A = rand(100_000)
+         batch = Int(length(A) / 100)      
 
          sum(pmap(r -> sqrt_sum_range(A, r), [(1:batch) .+ offset for offset in 0:batch:length(A)-1]))
 
@@ -118,6 +136,8 @@ techniques:
       .. code-block::  julia
       
          futures = Array{Future}(undef, nworkers())
+         A = rand(100_000)
+         batch = Int(length(A) / 100)         
       
          @time begin
              for (i, id) in enumerate(workers())
@@ -147,8 +167,17 @@ but which one is preferable for a given use case?
   and since dynamic scheduling introduces some overhead it's best to use ``pmap`` 
   for computationally heavy tasks.
 
-It should be emphasized that a common use case of ``pmap`` involves heavy 
-computations inside functions defined in user-imported packages. 
+.. callout:: Multiprocessing overhead
+
+   Just like with multithreading, multiprocessing with ``Distributed`` comes with an overhead 
+   because of sending messages and moving data between processes. 
+   
+   The simple example with the :meth:`sqrt_sum` function will not benefit from parallelisation. 
+   But if you add a :meth:`sleep(0.001)` inside the loop, to emulate an expensive calculation, 
+   and reduce array size to e.g. ``rand(1000)`` you should observe near-linear scaling. Try it!
+
+Finally, it should be emphasized that a common use case of ``pmap`` involves heavy 
+computations inside functions defined in imported packages. 
 For example, computing the singular value decomposition of many matrices:
 
 .. code-block:: julia
@@ -316,27 +345,20 @@ Exercises
    i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking 
    if they fall within the unit circle.
 
-   .. code-block:: julia
+   .. literalinclude:: code/estimate_pi.jl
+      :language: julia
 
-      function estimate_pi(num_points)
-          hits = 0
-          for _ in 1:num_points
-              x, y = rand(), rand()
-              if x^2 + y^2 < 1.0
-                  hits += 1
-              end
-          end
-          fraction = hits / num_points
-          return 4 * fraction
-      end
+   .. code-block:: julia
 
       num_points = 100_000_000
       estimate_pi(num_points)  # 3.14147572...
 
-   - Rewrite the function to accept a UnitRange (``1:10`` is a UnitRange{Int64})
-     and decorate it with ``@everywhere``.
+
+   - Rewrite the function to accept a UnitRange (``1:10`` is a ``UnitRange{Int64}``)
+     and decorate it with ``@everywhere`` (you can also just write a new method of the 
+     :meth:`estimate_pi` function, taking advantage of multiple dispatch).
    - Use a list comprehension to split up ``num_points`` into evenly sized chunks
-     (Hint: ``[(___:___) .+ ___ for ___ in ___:___:___]``).
+     (Hint: ``chunk = ___; ranges = [(1:chunk) .+ offset for ___ in ___:___:___]``).
    - Add worker processes as needed.
    - Use ``mean(pmap(___, ___))`` to get the mean from a parallel mapping 
      distributed among the workers.
@@ -346,36 +368,12 @@ Exercises
 
      .. solution::
 
+        .. literalinclude:: code/estimate_pi_distributed.jl      
+
         .. code-block:: julia
 
-           using Distributed
            using BenchmarkTools
-   
-           function estimate_pi(num_points)
-               hits = 0
-               for _ in 1:num_points
-                   x, y = rand(), rand()
-                   if x^2 + y^2 < 1.0
-                       hits += 1
-                   end
-               end
-               fraction = hits / num_points
-               return 4 * fraction
-           end
-           
-           @everywhere function estimate_pi(range::UnitRange)
-               hits = 0
-               for _ in range
-                   x, y = rand(), rand()
-                   if x^2 + y^2 < 1.0
-                       hits += 1
-                   end
-               end
-               fraction = hits / length(range)
-               return 4 * fraction
-           end
-           
-           
+                      
            num_points = 100_000_000
            @btime estimate_pi(num_points)
            # 366.751 ms (1 allocation: 16 bytes)
