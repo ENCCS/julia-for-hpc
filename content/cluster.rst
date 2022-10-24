@@ -102,3 +102,24 @@ ClusterManagers
 `ClusterManagers.jl <https://github.com/JuliaParallel/ClusterManagers.jl>`__ is a package for 
 interactive HPC work with all commonly used HPC scheduling systems, including SLURM, PBS, 
 LSF, SGE, HTCondor, Kubernetes, etc.
+
+To use ClusterManagers.jl we need access to Julia on the login node of a cluster. The following 
+script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
+
+.. code-block:: julia
+
+   using Distributed, ClusterManagers
+   
+   # request 4 tasks 
+   addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="d2021-135-users")
+   
+   # let workers do some work
+   for i in workers()
+       id, pid, host = fetch(@spawnat i (myid(), getpid(), gethostname()))
+       println(id, " " , pid, " ", host)
+   end
+   
+   # The Slurm resource allocation is released when all the workers have exited
+   for i in workers()
+       rmprocs(i)
+   end
