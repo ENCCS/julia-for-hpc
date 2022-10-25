@@ -255,6 +255,69 @@ Exercises
 
          MPI.Barrier(comm)
 
+.. challenge:: MPI-parallelise :meth:`compute_pi` function
+
+   .. figure:: img/pi_with_darts.png
+      :scale: 7 %
+      :align: right
+
+   Consider again the following function which estimates π by "throwing darts", 
+   i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking 
+   if they fall within the unit circle.
+
+   .. literalinclude:: code/estimate_pi.jl
+      :language: julia
+
+   .. code-block:: julia
+
+      num_points = 100_000_000
+      estimate_pi(num_points)  # 3.14147572...
+
+   There are several ways in which this function could be parallelised with MPI. Below you will 
+   find two guided exercises using collective communiation, one for doing it naively 
+   (but illustratively), and another for a more compact solution.
+
+   .. tabs:: 
+
+      .. tab:: Naive
+
+         Study the following fully functional MPI code and then answer the questions below. Feel free 
+         to add print statements to the code and run it with 
+         ``mpiexecjl -np <N> julia estimate_pi.jl`` to understand what's going on.
+
+         .. literalinclude:: code/estimate_pi_mpi_naive.jl
+            :language: julia
+
+         1. For ``num_jobs = 10`` and ``size = 4``, what would be the values of ``count`` and ``remainder``?
+         2. What is the purpose of the if-else block starting with ``if rank < remainder``?
+         3. For ``num_jobs = 10`` and ``size = 4``, what would be the values of ``first`` and 
+            ``last`` for each rank?
+
+
+         .. solution::
+
+            1. :meth:`div` performs integer division, and ``div(10, 4) = 2``. The ``%`` operator 
+               computes the remainder from integer division and ``10 % 4 = 2``.
+
+            2. This block splits indices of the chunks vector between ranks. The first ``remainder`` 
+               ranks get ``count + 1`` tasks each, remaining ``num_jobs - remainder`` ranks get 
+               ``count`` tasks each.
+
+            3. 
+
+      .. tab:: Compact
+
+         Study the following fully functional MPI code and then answer the questions:
+
+         .. literalinclude:: code/estimate_pi_mpi_compact.jl
+            :language: julia
+
+
+         .. solution::
+
+            foo
+
+
 Limitations
 -----------
 
