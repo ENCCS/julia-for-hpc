@@ -36,9 +36,6 @@ function main()
         last = first + count - 1
     end
 
-    # measure time
-    t1 = time()
-    
     # each rank computes pi for their vector elements
     estimates = []
     for i in first:last
@@ -51,9 +48,6 @@ function main()
         println("pi = $(pi_sum/num_jobs)")
     end
 
-    # print time
-    t2 = time()
-    println("time: $(t2-t1)")
 end
 
 using BenchmarkTools

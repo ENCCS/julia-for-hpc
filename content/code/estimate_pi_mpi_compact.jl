@@ -27,9 +27,6 @@ function main()
         my_points += 1
     end
 
-    # measure time
-    t1 = time()
-
     # each rank computes pi for their points
     pi = estimate_pi(my_points)
 
@@ -40,9 +37,8 @@ function main()
         println("pi = $(pi_sum / size)")
     end
 
-    # print time
-    t2 = time()
-    println("time: $(t2-t1)")
 end
 
-main()
+using BenchmarkTools
+
+@btime main()
