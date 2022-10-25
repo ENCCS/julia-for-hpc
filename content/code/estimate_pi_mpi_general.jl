@@ -26,11 +26,9 @@ function main()
     count = div(num_jobs, size)
     remainder = num_jobs % size
 
-    # first 'remainder' ranks get 'count + 1' tasks each
     if rank < remainder
         first = rank * (count + 1) + 1
         last = first + count
-    # remaining 'num_jobs - remainder' ranks get 'count' task each
     else
         first = rank * count + remainder + 1
         last = first + count - 1
@@ -43,11 +41,11 @@ function main()
     end
 
     # sum up all estimates and average on root tank
+#    pi_sum = MPI.Reduce(sum(estimates), +, comm, root=0)
     pi_sum = MPI.Reduce(sum(estimates), +, comm, root=0)
     if rank == 0
         println("pi = $(pi_sum/num_jobs)")
     end
-
 end
 
 using BenchmarkTools

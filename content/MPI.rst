@@ -274,40 +274,49 @@ Exercises
       estimate_pi(num_points)  # 3.14147572...
 
    There are several ways in which this function could be parallelised with MPI. Below you will 
-   find two guided exercises using collective communiation, one for doing it naively 
-   (but illustratively), and another for a more compact solution.
+   find two working solutions using collective communiation, one for doing it in an unnecessarily  
+   complicated way, which is nonetheless illustrative for more general cases, and another for a 
+   more compact and efficient solution. Inspect the complicated solution first!
 
    .. tabs:: 
 
-      .. tab:: Naive
+      .. tab:: Dividing indices between ranks
 
          Study the following fully functional MPI code and then answer the questions below. Feel free 
          to add print statements to the code and run it with 
          ``mpiexecjl -np <N> julia estimate_pi.jl`` to understand what's going on.
 
-         .. literalinclude:: code/estimate_pi_mpi_naive.jl
+         .. literalinclude:: code/estimate_pi_mpi_general.jl
             :language: julia
 
          1. For ``num_jobs = 10`` and ``size = 4``, what would be the values of ``count`` and ``remainder``?
          2. What is the purpose of the if-else block starting with ``if rank < remainder``?
          3. For ``num_jobs = 10`` and ``size = 4``, what would be the values of ``first`` and 
             ``last`` for each rank?
-
+         4. Is load-balancing an issue in this solution?
+         5. Would you expect this MPI solution to perform and scale similarly well to the distributed 
+            :meth:`pmap` solution we saw in the :doc:`distributed` episode?
+         6. Can you think of any improvements to the MPI algorithm algorithm employed?
+            
 
          .. solution::
 
             1. :meth:`div` performs integer division, and ``div(10, 4) = 2``. The ``%`` operator 
                computes the remainder from integer division and ``10 % 4 = 2``.
-
             2. This block splits indices of the chunks vector between ranks. The first ``remainder`` 
                ranks get ``count + 1`` tasks each, remaining ``num_jobs - remainder`` ranks get 
                ``count`` tasks each.
+            3. ``{rank 0 : [1,2,3], rank 1 : [4,5,6], rank 2 : [7,8], rank 3 : [9,10]}``
+            4. Yes, load balancing is an issue becase all ranks do not get equal amount of work.
+            5. It will depend on the load balancing! With e.g. 2 ranks, both ranks will have equal work and the performance 
+               will be very close to the :meth:`pmap` solution with 2 workers.
 
-            3. 
 
       .. tab:: Compact
 
-         Study the following fully functional MPI code and then answer the questions:
+         Study the following fully functional MPI code and then answer the questions below. Feel free 
+         to add print statements to the code and run it with 
+         ``mpiexecjl -np <N> julia estimate_pi.jl`` to understand what's going on.
 
          .. literalinclude:: code/estimate_pi_mpi_compact.jl
             :language: julia
