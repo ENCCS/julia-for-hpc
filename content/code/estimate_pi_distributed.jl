@@ -1,8 +1,8 @@
 using Distributed
 
-@everywhere function estimate_pi(range::UnitRange)
+@everywhere function estimate_pi(num_points)
     hits = 0
-    for _ in range
+    for _ in 1:num_points
         x, y = rand(), rand()
         if x^2 + y^2 < 1.0
             hits += 1
