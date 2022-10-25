@@ -8,6 +8,6 @@ using Distributed
             hits += 1
         end
     end
-    fraction = hits / length(range)
+    fraction = hits / num_points
     return 4 * fraction
 end
