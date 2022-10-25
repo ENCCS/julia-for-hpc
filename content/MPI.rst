@@ -163,120 +163,23 @@ it's more conveniently solved by using non-blocking send and receive.
 
    .. tab:: Blocking communication deadlock
 
-      .. code-block:: julia
+      .. literalinclude:: code/deadlock.jl
+         :language: julia
+         :emphasize-lines: 23, 26
 
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Check that there are exactly two ranks
-         if size != 2
-             print("This example requires exactly two ranks")
-             exit(1)
-         end
-
-         # Call the other rank the neighbour
-         if rank == 0
-             neighbour = 1
-         else
-             neighbour = 0
-         end
-
-         # Send a message to the other rank
-         send_message = [i for i in 1:100]
-         MPI.send(send_message, comm, dest=neighbour, tag=0)
-
-         # Receive the message from the other rank
-         recv_message = MPI.recv(comm, source=neighbour, tag=0)
-
-         print("Message received by rank $rank")
 
    .. tab:: Workaround with blocking communication
 
-      .. code-block:: julia
+      .. literalinclude:: code/deadlock_blocking_workaround.jl
+         :language: julia
+         :emphasize-lines: 25, 30, 35, 39
 
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Check that there are exactly two ranks
-         if size != 2
-             print("This example requires exactly two ranks")
-             exit(1)
-         end
-
-         # Call the other rank the neighbour
-         if rank == 0
-             neighbour = 1
-         else
-             neighbour = 0
-         end
-
-         # Send a message to the other rank
-         send_message = [i for i in 1:100]
-
-         if rank == 0
-             MPI.send(send_message, comm, dest=neighbour, tag=0)
-         end
-
-         # Receive the message from the other rank
-         if rank == 1
-             recv_message = MPI.recv(comm, source=neighbour, tag=0)
-             print("Message received by rank $rank")
-         end
-
-         if rank == 1
-             MPI.send(send_message, comm, dest=neighbour, tag=0)
-         end
-
-         if rank == 0
-             recv_message = MPI.recv(comm, source=neighbour, tag=0)
-             print("Message received by rank $rank")
-         end
     
    .. tab:: Non-blocking solution
 
-      .. code-block:: julia
-
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Check that there are exactly two ranks
-         if size != 2
-             print("This example requires exactly two ranks")
-             exit(1)
-         end
-
-         # Call the other rank the neighbour
-         if rank == 0
-             neighbour = 1
-         else
-             neighbour = 0
-         end
-
-         # Send a message to the other rank
-         send_message = [i for i in 1:100]
-         recv_message = similar(send_message)
-
-         # non-blocking send
-         sreq = MPI.Isend(send_message, comm, dest=neighbour, tag=0)
-
-         # non-blocking receive into receive buffer
-         rreq = MPI.Irecv!(recv_message, comm, source=neighbour, tag=0)
-
-         stats = MPI.Waitall!([rreq, sreq])
-
-         print("Message received by rank $rank")
+      .. literalinclude:: code/deadlock_nonblocking_solution.jl
+         :language: julia
+         :emphasize-lines: 23, 26, 29, 31
 
 
 Exercises
