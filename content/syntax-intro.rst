@@ -3,14 +3,6 @@ Introduction to Julia syntax
 
 This episodes provides a condensed overview of Julia's main syntax and features.
 
-.. callout:: Preparing for a workshop
-
-   To prepare for a workshop where this material is taught, please 
-   first install Julia as described in :doc:`setup`, and then go through 
-   the overview below and experiment with it either in the Julia REPL, 
-   a Jupyter or Pluto notebook, or in VSCode (refer to :doc:`setup` for 
-   installation and configuration instructions).
-
 .. callout:: Video alternative
 
   As an alternative to going through this page, learners can also watch 
