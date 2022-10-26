@@ -77,8 +77,8 @@ On some systems, it resides in the user's home directory. On other systems, it i
 scratch file system.
 
 To prepend the ``JULIA_DEPOT_PATH`` variable with a new directory, type 
-``export JULIA_DEPOT_PATH="/some/recommended/directory:$JULIA_DEPOT_PATH"`` (put this in the 
-shell configuration file, e.g. ``.bashrc`` or ``.bash_profile``).
+``export JULIA_DEPOT_PATH="/path_to_directory/v$(VERSION.major).$(VERSION.minor):$JULIA_DEPOT_PATH``
+(put this in the shell configuration file, e.g. ``.bashrc`` or ``.bash_profile``).
 
 
 MPI configuration 
