@@ -20,13 +20,45 @@ favorite cluster, it is easy to install Julia from scratch. Moreover, there is l
 expect the performance of official Julia binaries to be any worse compared to if a system administrator 
 built Julia from scratch with architecture-specific optimization. 
 
-An overview 
+An overview of the availability and documentation of Julia on a range of HPC systems around the 
+world (including EuroHPC systems) can be found at https://github.com/hlrs-tasc/julia-on-hpc-systems.
 
 
-JULIA_DEPOT_PATH
-----------------
+Installing Julia yourself
+-------------------------
 
-On a cluster it is often recommended to install own programs and packages in a directory different 
+If you want or need to install Julia yourself on an HPC system, keep the following points in mind:
+
+- Install Julia on the cluster's high-peformance parallel file system as this will improve 
+  performance of large parallel Julia jobs.
+- Installation of Julia packages can take up significant disk space and include a large number 
+  of files - make sure to use a file system with sufficiently high quotas for both disk space 
+  and number of files.
+- When in doubt, ask the support team of the cluster for guidance!
+
+.. type-along:: Install Julia on the cluster
+
+   1. Log in to the cluster used for the workshop or (if you're browsing this material independently)
+      some cluster you have access to.
+
+   2. Install Julia using `Juliaup <https://github.com/JuliaLang/juliaup>`__:
+
+      .. code-block:: console
+
+         $ curl -fsSL https://install.julialang.org | sh
+
+      If your home directory is not the optimal location for installing Julia, answer "no" to the 
+      question "Do you want to install with these default configuration choices?" and enter the 
+      appropriate directory path.
+
+      After the installation your shell configuration file(s) will be updated (e.g. ``.bashrc``). 
+      Source this file to update your PATH variable: ``. $HOME/.bashrc``.
+
+
+Installing packages
+~~~~~~~~~~~~~~~~~~~
+
+On HPC systems it is often recommended to install own programs and packages in a directory different 
 from the home directory (``$HOME``). The ``JULIA_DEPOT_PATH`` variable controls where Julia's 
 package manager (as well as Julia's code loading mechanisms) looks for package registries, 
 installed packages, named environments, repo clones, cached compiled package images, configuration 
@@ -45,14 +77,12 @@ On some systems, it resides in the user's home directory. On other systems, it i
 scratch file system.
 
 To prepend the ``JULIA_DEPOT_PATH`` variable with a new directory, type 
-``export JULIA_DEPOT_PATH="/some/recommended/directory:$JULIA_DEPOT_PATH"``
-
-Recommendations for using Julia on HPC systems, along with a listing of HPC systems around the world 
-where Julia is installed and documented, can be found at https://github.com/hlrs-tasc/julia-on-hpc-systems.
+``export JULIA_DEPOT_PATH="/some/recommended/directory:$JULIA_DEPOT_PATH"`` (put this in the 
+shell configuration file, e.g. ``.bashrc`` or ``.bash_profile``).
 
 
-Configuration of MPI
---------------------
+MPI configuration 
+-----------------
 
 MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing 
 MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate 
@@ -92,8 +122,34 @@ This will create a file ``LocalPreferences.toml`` in the default Julia directory
    mpiexec = "mpiexec"   
 
 
+Running on GPUs 
+---------------
 
+Julia packages for running code on GPUs (e.g. CUDA.jl and AMDGPU.jl) need both GPU drivers 
+and development toolkits installed on the system you're using. On a cluster these are normally 
+available through environment modules which need to be loaded before importing and using 
+the Julia GPU package.
 
+On NVIDIA GPUs, the CUDA.jl package needs NVIDIA drivers and toolkits. 
+When installing the CUDA.jl package and importing it, Julia will look for libraries in the 
+``CUDA_PATH`` (or ``CUDA_HOME``) environment variable. If these are not found they will be 
+automatically installed but it's strongly recommended to use instead optimised pre-installed 
+libraries. These are typically available in environment modules ``CUDA``, ``cuDNN`` etc.
+
+For example:
+
+.. code-block:: console
+
+   $ module load CUDA
+   $ julia
+
+.. code-block:: julia
+
+   using Pkg
+   Pkg.add("CUDA")
+
+   using CUDA
+   CUDA.versioninfo()   
 
 
 ClusterManagers
@@ -230,3 +286,10 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
       :language: bash
    
    Try running it with different number of nodes and/or cores. Does it scale well up to a full node?
+
+
+   .. keypoints::
+
+      - Julia can usually be installed and configured without too much hassle on HPC systems.
+      - ClusterManagers is a useful package for working interactively on a cluster through the Julia REPL.
+      - For non-interactive work, Julia jobs can also be submitted through the scheduler.
