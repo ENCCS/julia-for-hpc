@@ -18,7 +18,10 @@ function estimate_pi(num_points)
 end
 
 function main()
+<<<<<<< HEAD
     t1 = time()
+=======
+>>>>>>> main
     num_points = 10^9
 
     # divide work evenly between ranks
