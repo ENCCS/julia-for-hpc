@@ -155,12 +155,15 @@ Sometimes important information is displayed inside boxes with an exclamation ma
 See also
 --------
 
-Excellent resources for learning Julia can be found
+Many resources for learning Julia can be found
 at https://julialang.org/learning/. The list includes 
 `Julia Academy <https://juliaacademy.com/>`__ courses, 
 the `Julia manual <https://docs.julialang.org/en/v1/manual/getting-started/>`__,
 the `Julia Youtube channel <https://www.youtube.com/user/JuliaLanguage/playlists>`__, 
 and an assortment of tutorials and books.
+
+A recent talk given by Kristoffer Carlsson, developer at Julia Computing in Sweden, gives an 
+`excellent overview on using Julia for HPC <https://www.youtube.com/watch?v=bXHe7Kj3Xxg>`__.
 
 Credits
 -------
