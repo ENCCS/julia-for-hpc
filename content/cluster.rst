@@ -124,53 +124,66 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
        rmprocs(i)
    end
 
-
-.. challenge:: Use ClusterManagers.jl to launch parallel job
-
-   Take the serial and parallelised versions of the :meth:`estimate_pi` function encountered in an 
-   earlier exercise:
+.. callout:: Cluster-specifics
 
    .. tabs:: 
 
-      .. tab:: Serial
+      .. tab:: Meluxina
 
-         .. literalinclude:: code/estimate_pi.jl
-            :language: julia
+         One unusual feature of Meluxina is that environment modules are not mounted on the login node. 
+         Thus, to use Julia on the login node one needs to install it oneself. Fortunately this is 
+         straightforward:
 
-      .. tab:: Distributed
+         .. code-block:: console
 
-         .. literalinclude:: code/estimate_pi_distributed.jl
-            :language: julia
+            $ curl -fsSL https://install.julialang.org | sh 
 
-   - Working in a Julia REPL running on a cluster login node, first benchmark the serial version 
-     using ``@btime``.
-   - Then use ClusterManagers.jl to run the job using 4 cores and benchmark again.
-   - Finally, add 4 more cores by repeating the :meth:`addprocs` command and benchmark it again.
-   - Keep in mind that you need to redefine :meth:`estimate_pi` every time you add workers!
+         Since your home directory on Meluxina is mounted on the high performance parallel Lustre 
+         file system, you can safely install Julia in the default location under ``/home/users/``.
+
+         To add parallel workers through ClusterManagers (replace the fields as needed):
+
+         .. code-block:: julia
+
+            using ClusterManagers
+            addprocs(SlurmManager(8), partition="cpu", t="00:15:00", A="p200051", reservation="cpudev", q="dev")
+
+
+.. challenge:: Use ClusterManagers.jl to launch parallel job
+
+   Take the parallelised version of the :meth:`estimate_pi` function encountered in an 
+   earlier exercise:
+
+   .. literalinclude:: code/estimate_pi_distributed.jl
+      :language: julia
+
+   - Open a Julia REPL on the cluster login node. Import ClusterManagers, Distributed and BenchmarkTools.
+   - Request one SLURM task with the :meth:`addprocs` method (see cluster-specific info above).
+   - Define the :meth:`estimate_pi` function with the ``@everywhere`` macro.
+   - Benchmark the serial version:
+     
+     .. code-block:: julia
+
+        num_points = 10^9
+        num_jobs = 100
+        chunks = [num_points / num_jobs for i in 1:num_jobs]
+
+        @btime mean(pmap(estimate_pi, chunks))
+
+   - Now add 7 more cores by repeating the :meth:`addprocs` command and benchmark it again. 
+     Note that you need to redefine :meth:`estimate_pi` every time you add workers!
+   - Add another 8 workers and benchmark one final time.
+   - Finally remove the workers to release the allocations.
 
    .. solution:: 
 
-      Define the serial version:
-
-      .. literalinclude:: code/estimate_pi.jl
-         :language: julia
-
-      First benchmark the serial version:
+      Request 1 worker (core). Replace "PROJECT-ID" and "QOS" appropriately:
 
       .. code-block:: julia
 
-         using BenchmarkTools
+         addprocs(SlurmManager(1), partition="cpu", t="00:5:00", A="PROJECT-ID", qos="QOS")
 
-         num_points = 100_000_000
-         @btime estimate_pi(num_points)
-
-      Then request 4 workers (cores). Replace "PROJECT-ID" appropriately:
-
-      .. code-block:: julia
-
-         addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="PROJECT-ID")
-
-      Then define the function on all workers:
+      Then define the function on the worker:
 
       .. literalinclude:: code/estimate_pi_distributed.jl
          :language: julia
@@ -179,23 +192,41 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
 
       .. code-block:: julia
 
-         chunk = 10_000_000
-         ranges = [(1:chunk) .+ offset for offset in 0:chunk:num_points-1]
+         num_points = 10^9
+         num_jobs = 100
+         chunks = [num_points / num_jobs for i in 1:num_jobs]
 
-         @btime mean(pmap(estimate_pi, ranges))
+         @btime mean(pmap(estimate_pi, chunks))
 
-      Finally repeat the process with 4 more cores:
+      Repeat the process with 7 more cores:
 
       .. code-block:: julia
 
-         addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="PROJECT-ID")
+         addprocs(SlurmManager(7), partition="cpu", t="00:5:00", A="PROJECT-ID", qos="QOS")
 
       .. literalinclude:: code/estimate_pi_distributed.jl
          :language: julia
 
       .. code-block:: julia
 
-         chunk = 10_000_000
-         ranges = [(1:chunk) .+ offset for offset in 0:chunk:num_points-1]
+         @btime mean(pmap(estimate_pi, chunks))
 
-         @btime mean(pmap(estimate_pi, ranges))
+      The redo exact same thing with 8 more workers.
+
+
+.. challenge:: Run an MPI job
+
+   Take the MPI version of the :meth:`estimate_pi` code that we encountered in the MPI episode:
+
+   .. solution:: estimate_pi.jl
+
+      .. literalinclude:: code/estimate_pi_mpi_compact.jl
+         :language: julia
+
+   Use the following batch script to submit a Julia job to the queue (modify the SLURM options 
+   as needed):
+
+   .. literalinclude:: code/submit_meluxina.sh
+      :language: bash
+   
+   Try running it with different number of nodes and/or cores. Does it scale well up to a full node?

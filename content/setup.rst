@@ -107,6 +107,26 @@ In this field enter the path to the Julia executable that you have installed.
 
 If you are curious, scroll through the other possible configuration settings!
 
+Using EuroHPC systems
+---------------------
+
+.. tabs:: 
+
+   .. tab:: Meluxina
+
+      To reserve an interactive node (replace PROJECT and QOS (-q) and reservation (--res) 
+      as needed):
+
+      .. code-block:: console
+
+         $ salloc -A p200051 -t 0:10:0 -p cpu  -n 1  -q dev --res cpudev
+
+      To run a batch job to run an MPI job, create a job script similar to the following:
+
+      .. literalinclude:: code/submit_meluxina.sh
+         :language: bash
+
+
 MPI
 ---
 
