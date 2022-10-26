@@ -22,7 +22,7 @@ function main()
     num_jobs = 10
     chunks = [num_points / num_jobs for i in 1:num_jobs]
     
-    # distribute words among MPI tasks
+    # distribute work among MPI tasks
     count = div(num_jobs, size)
     remainder = num_jobs % size
 
@@ -41,7 +41,6 @@ function main()
     end
 
     # sum up all estimates and average on root tank
-#    pi_sum = MPI.Reduce(sum(estimates), +, comm, root=0)
     pi_sum = MPI.Reduce(sum(estimates), +, comm, root=0)
     if rank == 0
         println("pi = $(pi_sum/num_jobs)")
