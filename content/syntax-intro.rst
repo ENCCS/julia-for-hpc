@@ -58,6 +58,19 @@ We can write Julia code in various ways:
    code with ``julia filename.jl``. 
 
 
+.. callout:: Firing up Julia
+
+   If Julia has been installed according to the instructions in 
+   :doc:`setup` it should be possible to open up a Julia session by 
+   typing ``julia`` in a terminal window or by clicking on the Julia 
+   application in a file browser. The result should look something like this:
+
+   .. figure:: img/repl.png
+      :align: center
+      :scale: 40 %
+
+
+
 Basic syntax
 ------------
 
@@ -84,11 +97,33 @@ Basic syntax
 |                  | - ``Integer <: Real``               "Subtype of", returns True    |
 |                  | - ``struct``                        Immutable composite type      |
 |                  | - ``mutable struct``                Mutable composite type        |
+|                  | - ``:something``                   Symbol for a name or label     | 
 +------------------+-------------------------------------------------------------------+
 | Special values   | - ``Inf``                           Infinity (e.g. ``1 / 0``)     |
 |                  | - ``Nan``                           Not a number (e.g. ``0 / 0``) |
 |                  | - ``nothing``                       e.g. for variables w/o value  |
 +------------------+-------------------------------------------------------------------+
+
+Let us explore some basic types in the Julia REPL:
+
+.. code-block:: julia
+
+    typeof(1)  # returns Int64
+  
+    typeof(1.0) # returns Float64
+
+    typeof(1.0+2.0im) # returns ComplexF64
+  
+    supertypes(Float64) # returns (Float64, AbstractFloat, Real, Number, Any)
+
+    subtypes(Real) # returns (AbstractFloat, AbstractIrrational, Integer, Rational)
+
+Vectors and arrays
+------------------
+
++------------------+-------------------------------------------------------------------+
+| Feature          | Example syntax and its result/meaning                             |
++==================+===================================================================+
 | 1D arrays        | - ``t = (1, 2, 3)``                 Tuple (immutable)             |
 |                  | - ``t = (a=2, b=1+2)``              Named tuple, access: ``t.a``  |
 |                  | - ``d = Dict("A"=>1, "B"=>2)``      Dictionary                    |
@@ -131,10 +166,6 @@ Basic syntax
 | arrays           | - ``insert!(a, 1, 42)``             Insert in given position      |
 |                  | - ``append!(a, [3, 5, 7])``         Append another array          |
 |                  | - ``splice!(a, 3, -1])``            Rm in given pos and replace   |
-+------------------+-------------------------------------------------------------------+
-| Miscellanous     | - ``δ = 0.1``  (type ``\delta`` <TAB>)  Unicode names with LaTeX  |
-|                  | - ``println("A = $A")``            Print using interpolation      |
-|                  | - ``:something``                   Symbol for a name or label     |
 +------------------+-------------------------------------------------------------------+
 
 Loops and conditionals
@@ -191,6 +222,7 @@ While loops:
        println(n)
    end
 
+
 Working with files
 ------------------
 
@@ -230,13 +262,21 @@ Some useful functions to work with files:
 | Function               |  What it does                                             |
 +========================+===========================================================+
 | - ``pwd()``            | - Show current directory                                  |
++------------------------+-----------------------------------------------------------+
 | - ``cd(path)``         | - Change directory                                        |
++------------------------+-----------------------------------------------------------+
 | - ``readdir(path)``    | - Return list of current directory                        |
++------------------------+-----------------------------------------------------------+
 | - ``mkdir(path)``      | - Create directory                                        |
++------------------------+-----------------------------------------------------------+
 | - ``abspath(path)``    | - Add current dir to filename                             |
++------------------------+-----------------------------------------------------------+
 | - ``joinpath(p1, p2)`` | - Join two paths                                          |
++------------------------+-----------------------------------------------------------+
 | - ``isdir(path)``      | - Check if path is a directory                            |         
++------------------------+-----------------------------------------------------------+
 | - ``splitdir(path)``   | - Split path into tuple of dirname and filename           |
++------------------------+-----------------------------------------------------------+
 | - ``homedir()``        | - Return home directory                                   |
 +------------------------+-----------------------------------------------------------+
 
