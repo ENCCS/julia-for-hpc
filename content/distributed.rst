@@ -335,7 +335,7 @@ Exercises
          #   WRITEME
 
 
-.. exercise:: Parallel mapping
+.. exercise:: Distribute the computation of π
 
    .. figure:: img/pi_with_darts.png
       :scale: 7 %
@@ -353,38 +353,101 @@ Exercises
       num_points = 100_000_000
       estimate_pi(num_points)  # 3.14147572...
 
+   Try to parallelise this function using both a parallel mapping with :meth:`pmap` 
+   and an ``@everywhere (+)`` construct. Write your code in a script which you can call with 
+   ``julia -p N estimate_pi.jl``.
 
-   - Rewrite the function to accept a UnitRange (``1:10`` is a ``UnitRange{Int64}``)
-     and decorate it with ``@everywhere`` (you can also just write a new method of the 
-     :meth:`estimate_pi` function, taking advantage of multiple dispatch).
-   - Use a list comprehension to split up ``num_points`` into evenly sized chunks
-     (Hint: ``chunk = ___; ranges = [(1:chunk) .+ offset for ___ in ___:___:___]``).
-   - Add worker processes as needed.
-   - Use ``mean(pmap(___, ___))`` to get the mean from a parallel mapping 
-     distributed among the workers.
-   - Do some benchmarking, and try varying the chunk size from small (each process 
-     gets a small task and there's more communication) to large (larger amount of work 
-     for each worker and smaller communication).
+   - First decorate the function with ``@everywhere``.
+   - Call it in serial with ``p1 = estimate_pi(num_points)``.
+   - Use a list comprehension to split up ``num_points`` into evenly sized chunks in a Vector.  
+     Hint: 
+     
+     .. code-block:: julia
 
-     .. solution::
+       num_jobs = 100
+       chunks = [____ / ____ for i in 1:____]
 
-        .. literalinclude:: code/estimate_pi_distributed.jl      
+   - For parallel mapping, use ``p2 = mean(pmap(___, ___))`` to get the mean from a parallel mapping.
+   - For a distributed for loop, use something like:
 
-        .. code-block:: julia
+     .. code-block:: julia
+   
+        p3 = @distributed (+) for ____ in ____
+           estimate_pi(____)
+        end
+        p3 = p3 / num_jobs
 
-           using BenchmarkTools
-                      
-           num_points = 100_000_000
-           @btime estimate_pi(num_points)
-           # 366.751 ms (1 allocation: 16 bytes)
-           
-           # splitting into ~10-50 chunks seems to be close to a sweet spot for 4 workers
-           # chunk = 100_000  # too much communication overhead
-           chunk = 10_000_000
-           ranges = [(1:chunk) .+ offset for offset in 0:chunk:num_points-1]
-           
-           @btime mean(pmap(estimate_pi, ranges))
-           # 151.578 ms (572 allocations: 20.61 KiB)
+   - Print ``p1``, ``p2`` and ``p3`` to make sure that your code is working well.
+   - Now do some benchmarking. You'll need to remove the assignments to use ``@btime`` 
+     (e.g. replace ``p1 = estimate_pi(num_points))`` with ``@btime estimate_pi(num_points))``. 
+     To benchmark the for loop, you can encapsulate the loop in a ``@btime begin`` - ``end`` block.
+   - Run your script with different number of processes and observe the parallel efficiency.
+   - Do you see a difference in parallel efficiency from changing the number of jobs?
+
+   .. solution::
+
+      .. literalinclude:: code/estimate_pi_distributed.jl      
+         :language: julia 
+
+      Set number of points and split into chunks:
+
+      .. code-block:: julia
+
+         num_points = 100_000_000
+         num_jobs = 100
+         chunks = [num_points / num_jobs for i in 1:num_jobs]
+
+      Call :meth:`estimate_pi` in serial, with :meth:`pmap` and ``@distributed (+)``:
+
+      .. code-block:: julia
+
+         p1 = estimate_pi(num_points)
+         p2 = mean(pmap(estimate_pi, chunks))
+         p3 = @distributed (+) for c in chunks
+            estimate_pi(c)
+         end
+         p3 = p3 / num_jobs
+
+         println("$p1 $p2 $p3")
+
+
+      Benchmark with ``@btime``:
+
+      .. code-block:: julia
+
+         using BenchmarkTools
+
+         @btime estimate_pi(num_points)
+
+         @btime mean(pmap(estimate_pi, chunks))
+
+         @btime begin
+             @distributed (+) for c in chunks
+                 estimate_pi(c)
+             end
+         end   
+
+      Finally run from a terminal:
+
+      .. code-block:: console 
+
+         $ julia -p 4 estimate_pi.jl
+
+         #  227.873 ms (1 allocation: 16 bytes)
+         #  63.707 ms (4602 allocations: 163.09 KiB)
+         #  59.410 ms (259 allocations: 15.12 KiB)         
+
+      Increasing number of jobs (``num_jobs = 1000``) reduces efficiency for the parallel mapping 
+      because increased communication overhead:
+
+      .. code-block:: console
+
+         $ julia -p 4 estimate_pi.jl
+
+         #  228.595 ms (1 allocation: 16 bytes)
+         #  86.811 ms (45462 allocations: 1.57 MiB)
+         #  59.480 ms (270 allocations: 43.61 KiB)
+
 
 See also
 --------

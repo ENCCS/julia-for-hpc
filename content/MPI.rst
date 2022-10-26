@@ -3,7 +3,8 @@ Message passing
 
 .. questions::
 
-   - What is MPI
+   - How is MPI different from Distributed.jl?
+   - What methods for parallelisation exist in MPI?
 
 .. instructor-note::
 
@@ -12,7 +13,6 @@ Message passing
 
 MPI
 ---
-
 
 `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_ is a Julia interface to 
 the Message Passing Interface, which has been the standard workhorse of 
@@ -163,120 +163,23 @@ it's more conveniently solved by using non-blocking send and receive.
 
    .. tab:: Blocking communication deadlock
 
-      .. code-block:: julia
+      .. literalinclude:: code/deadlock.jl
+         :language: julia
+         :emphasize-lines: 23, 26
 
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Check that there are exactly two ranks
-         if size != 2
-             print("This example requires exactly two ranks")
-             exit(1)
-         end
-
-         # Call the other rank the neighbour
-         if rank == 0
-             neighbour = 1
-         else
-             neighbour = 0
-         end
-
-         # Send a message to the other rank
-         send_message = [i for i in 1:100]
-         MPI.send(send_message, comm, dest=neighbour, tag=0)
-
-         # Receive the message from the other rank
-         recv_message = MPI.recv(comm, source=neighbour, tag=0)
-
-         print("Message received by rank $rank")
 
    .. tab:: Workaround with blocking communication
 
-      .. code-block:: julia
+      .. literalinclude:: code/deadlock_blocking_workaround.jl
+         :language: julia
+         :emphasize-lines: 25, 30, 35, 39
 
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Check that there are exactly two ranks
-         if size != 2
-             print("This example requires exactly two ranks")
-             exit(1)
-         end
-
-         # Call the other rank the neighbour
-         if rank == 0
-             neighbour = 1
-         else
-             neighbour = 0
-         end
-
-         # Send a message to the other rank
-         send_message = [i for i in 1:100]
-
-         if rank == 0
-             MPI.send(send_message, comm, dest=neighbour, tag=0)
-         end
-
-         # Receive the message from the other rank
-         if rank == 1
-             recv_message = MPI.recv(comm, source=neighbour, tag=0)
-             print("Message received by rank $rank")
-         end
-
-         if rank == 1
-             MPI.send(send_message, comm, dest=neighbour, tag=0)
-         end
-
-         if rank == 0
-             recv_message = MPI.recv(comm, source=neighbour, tag=0)
-             print("Message received by rank $rank")
-         end
     
    .. tab:: Non-blocking solution
 
-      .. code-block:: julia
-
-         using MPI
-         MPI.Init()
-
-         comm = MPI.COMM_WORLD
-         rank = MPI.Comm_rank(comm)
-         size = MPI.Comm_size(comm)
-
-         # Check that there are exactly two ranks
-         if size != 2
-             print("This example requires exactly two ranks")
-             exit(1)
-         end
-
-         # Call the other rank the neighbour
-         if rank == 0
-             neighbour = 1
-         else
-             neighbour = 0
-         end
-
-         # Send a message to the other rank
-         send_message = [i for i in 1:100]
-         recv_message = similar(send_message)
-
-         # non-blocking send
-         sreq = MPI.Isend(send_message, comm, dest=neighbour, tag=0)
-
-         # non-blocking receive into receive buffer
-         rreq = MPI.Irecv!(recv_message, comm, source=neighbour, tag=0)
-
-         stats = MPI.Waitall!([rreq, sreq])
-
-         print("Message received by rank $rank")
+      .. literalinclude:: code/deadlock_nonblocking_solution.jl
+         :language: julia
+         :emphasize-lines: 23, 26, 29, 31
 
 
 Exercises
@@ -352,6 +255,97 @@ Exercises
 
          MPI.Barrier(comm)
 
+.. challenge:: MPI-parallelise :meth:`compute_pi` function
+
+   .. figure:: img/pi_with_darts.png
+      :scale: 7 %
+      :align: right
+
+   Consider again the following function which estimates π by "throwing darts", 
+   i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking 
+   if they fall within the unit circle.
+
+   .. literalinclude:: code/estimate_pi.jl
+      :language: julia
+
+   .. code-block:: julia
+
+      num_points = 100_000_000
+      estimate_pi(num_points)  # 3.14147572...
+
+   There are several ways in which this function could be parallelised with MPI. Below you will 
+   find two working solutions using collective communication: 
+   
+   - One implements an unnecessarily complicated algorithm, which nonetheless is illustrative for 
+     more general cases.
+   - The other implements a more compact and efficient solution. 
+   
+   Inspect the complicated solution first and answer the questions!
+
+   .. tabs:: 
+
+      .. tab:: Dividing indices between ranks
+
+         Study the following fully functional MPI code and then answer the questions below. Feel free 
+         to add print statements to the code and run it with 
+         ``mpiexecjl -np <N> julia estimate_pi.jl`` to understand what's going on.
+
+         .. literalinclude:: code/estimate_pi_mpi_general.jl
+            :language: julia
+
+         1. For ``num_jobs = 10`` and ``size = 4``, what would be the values of ``count`` and ``remainder``?
+         2. What is the purpose of the if-else block starting with ``if rank < remainder``?
+         3. For ``num_jobs = 10`` and ``size = 4``, what would be the values of ``first`` and 
+            ``last`` for each rank?
+         4. Is load-balancing an issue in this solution? (i.e. how evenly work is split between tasks)
+         5. Would you expect this MPI solution to perform and scale similarly well to the distributed 
+            :meth:`pmap` solution we saw in the :doc:`distributed` episode?
+         6. Can you think of any improvements to the MPI algorithm algorithm employed?
+         7. Now look at the more compact solution!
+            
+
+         .. solution::
+
+            1. :meth:`div` performs integer division, and ``div(10, 4) = 2``. The ``%`` operator 
+               computes the remainder from integer division and ``10 % 4 = 2``.
+            2. This block splits indices of the chunks vector between ranks. The first ``remainder`` 
+               ranks get ``count + 1`` tasks each, remaining ``num_jobs - remainder`` ranks get 
+               ``count`` tasks each.
+            3. ``{rank 0 : [1,2,3], rank 1 : [4,5,6], rank 2 : [7,8], rank 3 : [9,10]}``
+            4. Yes, load balancing is an issue becase all ranks do not get equal amount of work.
+            5. It will depend on the load balancing! With e.g. 2 ranks, both ranks will have equal work and the performance 
+               will be very close to the :meth:`pmap` solution with 2 workers. With 4 ranks, the 
+               load-balancing will be poorer for this MPI solution and it will perform worse than :meth:`pmap`.
+            6. Splitting vector (or array) indices between MPI tasks is a common construct and useful 
+               to know well. In this case, however, it's overkill. It will be enough to divide 
+               ``num_points`` evenly between the ranks.
+
+
+      .. tab:: Compact
+
+         Study the following fully functional MPI code and then answer the questions below. Feel free 
+         to add print statements to the code and run it with 
+         ``mpiexecjl -np <N> julia estimate_pi.jl`` to understand what's going on.
+
+         .. literalinclude:: code/estimate_pi_mpi_compact.jl
+            :language: julia
+
+         The algorithm to split work is significantly simpler here with ``num_points`` divided as 
+         evenly as possible between the ranks.
+
+         1. Is load balancing better in this solution? What's the "worst case" load imbalance?
+         2. How does the performance of this MPI version compare to the distributed :meth:`pmap` 
+            version that we saw in the :doc:`distributed` episode?
+
+
+         .. solution::
+
+            1. Load balancing is in general much better in this version. The worst case is a 
+               difference of one single point between ranks.
+            2. The performance is statistically equivalent to the :meth:`pmap` version!
+
+
+
 Limitations
 -----------
 
@@ -370,8 +364,8 @@ See also
 .. keypoints::
 
    - MPI is a standard work-horse of parallel computing.
-   - Programming with MPI requires a different mental model.
-   - Each parallel rank is executing the same program and the programmer needs to distribute 
-     the work by hand.
+   - All communication is handled explicitly - not behind the scenes as in ``Distributed``.
+   - Programming with MPI requires a different mental model since each parallel rank is executing 
+     the same program and the programmer needs to distribute the work by hand.
 
 
