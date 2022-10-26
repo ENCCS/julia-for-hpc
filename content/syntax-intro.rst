@@ -501,45 +501,6 @@ Exceptions can be created explicitly with `throw`:
 	  end
 
 	  
-Macros
-------
-
-The `metaprogramming support in Julia <https://docs.julialang.org/en/v1/manual/metaprogramming/>`_ 
-allows code to be automatically transformed and generated. A full treatment of metaprogramming 
-is outside the scope of this lesson but familiarity with macros is highly useful. 
-Macros provide a mechanism to include generated code in the final body of a program.
-A simple macro can be created by:
-
-.. code-block:: julia
-	
-	macro sayhello(name)
-		return :( println("Hello, ", $name) )
-	end
-
-and called by:
-
-.. code-block:: julia
-
-	@sayhello "world!"
-
-Many useful macros are already predefined in base Julia or in various 
-packages. For example:
-
-.. code-block:: julia
-
-	# time an expression
-	@time sum(rand(1000,1000))
-
-.. code-block:: julia
-
-	# which function method will be used for specified args
-	@which(sin(2.0))
-
-.. code-block:: julia
-
-	# print generated LLVM bitcode for given type
-	@code_llvm sin(2.0)
-
 Scope
 -----
 
