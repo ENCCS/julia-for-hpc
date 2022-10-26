@@ -3,7 +3,8 @@ Message passing
 
 .. questions::
 
-   - What is MPI
+   - How is MPI different from Distributed.jl?
+   - What methods for parallelisation exist in MPI?
 
 .. instructor-note::
 
@@ -12,7 +13,6 @@ Message passing
 
 MPI
 ---
-
 
 `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_ is a Julia interface to 
 the Message Passing Interface, which has been the standard workhorse of 
@@ -274,9 +274,13 @@ Exercises
       estimate_pi(num_points)  # 3.14147572...
 
    There are several ways in which this function could be parallelised with MPI. Below you will 
-   find two working solutions using collective communiation, one for doing it in an unnecessarily  
-   complicated way, which is nonetheless illustrative for more general cases, and another for a 
-   more compact and efficient solution. Inspect the complicated solution first!
+   find two working solutions using collective communication: 
+   
+   - One implements an unnecessarily complicated algorithm, which nonetheless is illustrative for 
+     more general cases.
+   - The other implements a more compact and efficient solution. 
+   
+   Inspect the complicated solution first and answer the questions!
 
    .. tabs:: 
 
@@ -293,10 +297,11 @@ Exercises
          2. What is the purpose of the if-else block starting with ``if rank < remainder``?
          3. For ``num_jobs = 10`` and ``size = 4``, what would be the values of ``first`` and 
             ``last`` for each rank?
-         4. Is load-balancing an issue in this solution?
+         4. Is load-balancing an issue in this solution? (i.e. how evenly work is split between tasks)
          5. Would you expect this MPI solution to perform and scale similarly well to the distributed 
             :meth:`pmap` solution we saw in the :doc:`distributed` episode?
          6. Can you think of any improvements to the MPI algorithm algorithm employed?
+         7. Now look at the more compact solution!
             
 
          .. solution::
@@ -309,7 +314,11 @@ Exercises
             3. ``{rank 0 : [1,2,3], rank 1 : [4,5,6], rank 2 : [7,8], rank 3 : [9,10]}``
             4. Yes, load balancing is an issue becase all ranks do not get equal amount of work.
             5. It will depend on the load balancing! With e.g. 2 ranks, both ranks will have equal work and the performance 
-               will be very close to the :meth:`pmap` solution with 2 workers.
+               will be very close to the :meth:`pmap` solution with 2 workers. With 4 ranks, the 
+               load-balancing will be poorer for this MPI solution and it will perform worse than :meth:`pmap`.
+            6. Splitting vector (or array) indices between MPI tasks is a common construct and useful 
+               to know well. In this case, however, it's overkill. It will be enough to divide 
+               ``num_points`` evenly between the ranks.
 
 
       .. tab:: Compact
@@ -321,10 +330,20 @@ Exercises
          .. literalinclude:: code/estimate_pi_mpi_compact.jl
             :language: julia
 
+         The algorithm to split work is significantly simpler here with ``num_points`` divided as 
+         evenly as possible between the ranks.
+
+         1. Is load balancing better in this solution? What's the "worst case" load imbalance?
+         2. How does the performance of this MPI version compare to the distributed :meth:`pmap` 
+            version that we saw in the :doc:`distributed` episode?
+
 
          .. solution::
 
-            foo
+            1. Load balancing is in general much better in this version. The worst case is a 
+               difference of one single point between ranks.
+            2. The performance is statistically equivalent to the :meth:`pmap` version!
+
 
 
 Limitations
@@ -345,8 +364,8 @@ See also
 .. keypoints::
 
    - MPI is a standard work-horse of parallel computing.
-   - Programming with MPI requires a different mental model.
-   - Each parallel rank is executing the same program and the programmer needs to distribute 
-     the work by hand.
+   - All communication is handled explicitly - not behind the scenes as in ``Distributed``.
+   - Programming with MPI requires a different mental model since each parallel rank is executing 
+     the same program and the programmer needs to distribute the work by hand.
 
 

@@ -31,7 +31,7 @@ function main()
     pi = estimate_pi(my_points)
 
     # sum up all estimates and average on root tank
-    pi_sum = MPI.Reduce(sum(pi), +, comm, root=0)    
+    pi_sum = MPI.Reduce(pi, +, comm, root=0)    
 
     if rank == 0
         println("pi = $(pi_sum / size)")
