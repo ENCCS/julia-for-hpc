@@ -59,7 +59,7 @@ The two-language problem
 .. discussion:: Combining languages
 
    Have you ever written and prototyped code in a high-level language and then 
-   found it necessary to rewrite it or port to a different language for performance?
+   found it necessary to rewrite or port it to a different language for performance?
 
 To run code in any programming language, some sort of translation into
 machine instructions (assembly code) needs to take place, but how
@@ -76,11 +76,12 @@ because less information on aspects like types and array sizes needs
 to be provided.  **Programmer productivity** is thus higher in interpreted
 languages, but compiled languages can perform **faster by orders of
 magnitude** because the compiler can perform optimizations during the
-translation to assembly.
+translation to assembly. This is also known as the two-language problem. 
 
 In many ways **Julia looks like an
 interpreted language**, and mostly behaves like one. But before each
-function is executed it will compile it "just in time". More on that later.
+function is executed, the Julia engine Low-Level Virtual Machine (LLVM) will 
+compile it "just in time" (JIT). More on that later.
 Thus you get the flexibility of an interpreted language and the
 execution speed of the compiled language at the cost of waiting a bit
 longer for the first execution of any function.
@@ -99,8 +100,8 @@ A well known example is the interplay between
 `DifferentialEquations.jl <https://diffeq.sciml.ai/stable/>`__,  a package for 
 solving differential equations, and 
 `Measurements.jl <https://github.com/JuliaPhysics/Measurements.jl>`__, a package for 
-working with numbers with uncertainty. Here's an example solving the simple pendulum 
-equation: 
+working with magnitudes where uncertainties are explicitly reckoned.
+Here's an example solving the simple pendulum equation: 
 
 .. math::
 
@@ -157,7 +158,7 @@ to perform light work.
 
 
 **Ecosystem**: The ecosystem of packages is less mature than e.g. Python and R, 
-so you might not find a package that corresponds exactly with your favorite 
+so you might not find a package that corresponds exactly to your favorite 
 package in another language.
 
 - Workaround 1: It's straightforward to use external libraries in Python or R
@@ -167,7 +168,7 @@ package in another language.
 **Rapid package evolution**: Although most major packages have stabilized, there are still 
 many packages that go through frequent large changes that can break your code.
 
-- Workaround: Julia comes with a powerful package manager and inbuilt support 
+- Workaround: Julia comes with a powerful package manager and in-built support 
   for isolated software environments where dependencies can be recorded exactly.
 
 **Large memory footprint**: Because of precompilation of Julia's Base libraries 
@@ -191,8 +192,8 @@ What you will learn
 - How to use multithreading, multiprocessing and MPI.
 - How to write Julia code for GPUs.
 
-We will be focusing on higher-level performance considerations and parallelization 
-approaces and not dig deep into lower-level aspects. There is always a tradeoff; 
+We will be focusing on high-level performance considerations and parallelization 
+approaces and not dig deep into low-level aspects. There is always a tradeoff; 
 to squeeze as much performance out of a code as possible one often needs to drop 
 down to lower levels of memory management, interprocess communication etc.
 But using higher-level approaches can lead to significant performance gain 
