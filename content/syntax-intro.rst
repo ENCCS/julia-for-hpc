@@ -640,3 +640,35 @@ Exercises
          # i = 4, A[i] = 4         
 
       Julia loops over columns since it's a column-major language!
+
+
+.. challenge:: FizzBuzz
+
+   Write a program that prints the integers from 1 to 100 (inclusive), except that:
+
+   - for multiples of three, print "Fizz" instead of the number
+   - for multiples of five, print "Buzz" instead of the number
+   - for multiples of both three and five, print "FizzBuzz" instead of the number
+
+   If you prefer translating a FizzBuzz code from your favorite language to Julia, you 
+   can find it on `Rosetta Code <https://rosettacode.org/wiki/FizzBuzz>`__.
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         for i in 1:100
+             if i % 15 == 0
+                 println("FizzBuzz")
+             elseif i % 3 == 0
+                 println("Fizz")
+             elseif i % 5 == 0
+                 println("Buzz")
+             else
+                 println(i)
+             end
+         end         
+
+
+      On the `Rosetta Code page for FizzBuzz <https://rosettacode.org/wiki/FizzBuzz#Julia>`__  
+      you find several other Julia versions.
