@@ -90,6 +90,7 @@ Basic syntax
 | Types            | - ``A = 3.14``                      Scalar, float                 |
 |                  | - ``B = 10``                        Scalar, integer               |
 |                  | - ``C = "hello"``                   String                        |
+|                  | - ``C[1]``                          Char                          |
 |                  | - ``D = true``                      Boolean                       |
 |                  | - ``typeof(A)``                     Find type                     |
 |                  | - ``supertype(Integer)``            Find supertypes               |
@@ -108,15 +109,24 @@ Let us explore some basic types in the Julia REPL:
 
 .. code-block:: julia
 
-    typeof(1)  # returns Int64
+    typeof(1)  
+    # Int64
   
-    typeof(1.0) # returns Float64
+    typeof(1.0) 
+    # Float64
 
-    typeof(1.0+2.0im) # returns ComplexF64
+    typeof(1.0+2.0im) 
+    # ComplexF64
   
-    supertypes(Float64) # returns (Float64, AbstractFloat, Real, Number, Any)
+    supertypes(Float64) 
+    # (Float64, AbstractFloat, Real, Number, Any)
 
-    subtypes(Real) # returns (AbstractFloat, AbstractIrrational, Integer, Rational)
+    subtypes(Real) 
+    # 4-element Vector{Any}:
+    #  AbstractFloat
+    #  AbstractIrrational
+    #  Integer
+    #  Rational
 
 Vectors and arrays
 ------------------
@@ -128,6 +138,7 @@ Vectors and arrays
 |                  | - ``t = (a=2, b=1+2)``              Named tuple, access: ``t.a``  |
 |                  | - ``d = Dict("A"=>1, "B"=>2)``      Dictionary                    |
 |                  | - ``a = [1, 2, 3, 4]``              4-element Vector{Int64}       |
+|                  | - ``a = [i^3 for i in [1,2,3]]``    Array comprehension           |
 |                  | - ``Vector{T}(undef, n)``           undef 1-D array length n      |
 |                  | - ``Float64[1,2]``                  2-element Vector{Float64}     |
 |                  | - ``[1:5;]``                        5-element Array{Int64,1}      |
@@ -168,6 +179,38 @@ Vectors and arrays
 |                  | - ``splice!(a, 3, -1])``            Rm in given pos and replace   |
 +------------------+-------------------------------------------------------------------+
 
+We can play around with Vectors and Arrays to get used to their syntax:
+
+.. code-block:: julia
+
+   v1 = [1.0, 2.0, 3.0]
+   # 4-element Vector{Int64}:
+   m1 = [1.0 2.0 3.0]
+   # 1×4 Matrix{Int64}:
+
+   # broadcasting
+   v2 = v1.^2
+   v3 = v2 .- v1
+
+   # slicing
+   v1[2:3]
+   v1[begin:2:end]
+
+   # combine vectors into matrix
+   A = [v1 v2 [7.0, 6.0, 5.0]]
+   size(A)
+   length(A)
+   A[1:2, 1] = [3,3] # types are cast automatically   
+
+   # solve Ax=b
+   b = [4.0, 3.0, 2.0]
+   x = A \ b
+
+   # assert with matrix-vector multiply
+   A*x == b
+   # true
+
+
 Loops and conditionals
 ----------------------
 
@@ -176,33 +219,41 @@ Loops and conditionals
 
 .. code-block:: julia
 
-	  for i in [1,2,3,4,5]
-	      println("i = $i")
-	  end
+   for i in [1,2,3,4,5]
+       println("i = $i")
+   end
 
 .. code-block:: julia
 
-	  for (k, v) in Dict("A" => 1, "B" => 2, "C" => 3)
-	      println("$k is $v")
-	  end
+   A = [1 2; 3 4]
+   # visit each index of A efficiently
+   for i in eachindex(A)
+       println("i = $i, A[i] = $(A[i])")
+   end
+
+.. code-block:: julia
+
+   for (k, v) in Dict("A" => 1, "B" => 2, "C" => 3)
+       println("$k is $v")
+   end
 
 .. code-block:: julia
 
 	for (i, j) in ([1, 2, 3], ("a", "b", "c"))
-		println("$i $j")
+	    println("$i $j")
 	end
 
 Conditionals work like in other languages.
 
 .. code-block:: julia
 	  
-	  if x > 5
-	      println("x > 5")
-	  elseif x < 5    # optional elseif
-	      println("x < 5")
-	  else            # optional else
-	      println("x = 5")
-	  end
+   if x > 5
+       println("x > 5")
+   elseif x < 5    # optional elseif
+       println("x < 5")
+   else            # optional else
+       println("x = 5")
+   end
 
 The ternary operator exists in Julia:
 
@@ -563,3 +614,29 @@ Style conventions
   ``!``. These are sometimes called "mutating" or "in-place" functions
   because they are intended to produce changes in their arguments
   after the function is called, not just return a value.
+
+Exercises
+---------
+
+.. challenge:: Row vs column-major ordering?
+
+   Based on one of the for-loop examples, can you tell whether Julia is row or column-major 
+   ordered? (i.e., whether arrays are stacked one row or one column at a time in memory)
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         A = [1 2; 3 4]
+         # visit each index of A efficiently
+         for i in eachindex(A)
+             println("i = $i, A[i] = $(A[i])")
+         end         
+
+         # output:
+         # i = 1, A[i] = 1
+         # i = 2, A[i] = 3
+         # i = 3, A[i] = 2
+         # i = 4, A[i] = 4         
+
+      Julia loops over columns since it's a column-major language!
