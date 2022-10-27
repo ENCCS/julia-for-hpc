@@ -642,6 +642,99 @@ Exercises
       Julia loops over columns since it's a column-major language!
 
 
+.. challenge:: Reading files
+
+   Write a function which opens and reads a file and returns the number of words in it.
+   Here are example codes for this task in other languages which you can translate:
+
+   .. tabs:: 
+
+      .. tab:: Python
+
+         .. code-block:: python
+         
+            def count_word_occurrence_in_file(file_name, word):
+                """
+                Counts how often word appears in file file_name.
+                Example: if file contains "one two one two three four"
+                         and word is "one", then this function returns 2
+                """
+                count = 0
+                with open(file_name, 'r') as f:
+                    for line in f:
+                        words = line.split()
+                        count += words.count(word)
+                return count
+
+      .. tab:: C++
+
+         .. code-block:: C++
+
+            #include <fstream>
+            #include <streambuf>
+            #include <string>
+
+            /* Counts how often word appears in file fname.
+             * Example: if file contains "one two one two three four"
+             *          and word is "one", then this function returns 2
+             */
+            int count_word_occurrence_in_file(std::string fname, std::string word) {
+              std::ifstream fh(fname);
+              std::string text((std::istreambuf_iterator<char>(fh)),
+            		   std::istreambuf_iterator<char>());
+
+              auto word_count = 0lu; // will be used for indexing and therefore it has to be *long unsigned* int for the safe conversion to 'std::__cxx11::basic_string<char>::size_type'.
+              auto count = 0;
+
+              for (const auto ch : text) {
+                if (ch == word[word_count]) ++word_count;
+                if (word[word_count] == '\0') {
+                  word_count = 0;
+                  ++count;
+                }
+              }
+
+              return count;
+            }
+
+      .. tab:: R
+
+         .. code-block:: R
+
+            #' Counts how often a given word appears in a file.
+            #'
+            #' @param file_name The name of the file to search in.
+            #' @param word The word to search for in the file.
+            #' @return The number of times the word appeared in the file.
+            count_word_occurrence_in_file <- function(file_name, word) {
+              count <- 0
+              for (line in readLines(file_name)) {
+                words <- strsplit(line, ' ')[[1]]
+                count <- count + sum(words == word)
+              }
+              count
+            }
+
+   .. solution::
+
+      .. code-block:: julia
+
+         """
+             count_word_occurrence_in_file(file_name::String, word::String)
+         
+         Counts how often word appears in file file_name.
+         Example: if file contains "one two one two three four"
+                  And word is "one", then this function returns 2
+         """
+         function count_word_occurrence_in_file(file_name::String, word::String)
+             open(file_name, "r") do file
+                 lines = readlines(file)
+                 return count(word, join(lines))
+             end
+         end
+         
+
+
 .. challenge:: FizzBuzz
 
    Write a program that prints the integers from 1 to 100 (inclusive), except that:
