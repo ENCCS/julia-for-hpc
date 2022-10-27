@@ -206,7 +206,7 @@ We can play around with Vectors and Arrays to get used to their syntax:
    b = [4.0, 3.0, 2.0]
    x = A \ b
 
-   # assert with matrix-vector multiply
+   # test with matrix-vector multiply
    A*x == b
    # true
 
@@ -581,6 +581,7 @@ Examples:
 
    x = 123 # global
 
+   # hard scope
    function greet()
        x = "hello" # new local
        println(x)
@@ -595,6 +596,21 @@ Examples:
 
    greet2()
    println(x)  # gives "hello" (global x redefined)
+
+   # soft scope
+   x = 123
+   for i in 1:3
+       x = i
+   end
+   println(x)
+   # returns 3
+
+   x = 123
+   for i in 1:3
+       local x = i
+   end
+   println(x)
+   # returns 123
 
 Further details can be found at 
 https://docs.julialang.org/en/v1/manual/variables-and-scoping/
@@ -721,7 +737,7 @@ Exercises
 
          """
              count_word_occurrence_in_file(file_name::String, word::String)
-         
+
          Counts how often word appears in file file_name.
          Example: if file contains "one two one two three four"
                   And word is "one", then this function returns 2
@@ -732,7 +748,7 @@ Exercises
                  return count(word, join(lines))
              end
          end
-         
+
 
 
 .. challenge:: FizzBuzz
