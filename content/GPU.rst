@@ -409,38 +409,6 @@ an example of this, but more general constructs can be created with
 
          accumulate(+, A)
 
-.. challenge:: Port :meth:`sqrt_sum` to GPU
-
-   Try to GPU-port the ``sqrt_sum`` function we saw in an earlier 
-   episode:
-
-   .. code-block:: julia
-
-      function sqrt_sum(A)
-          s = zero(eltype(A))
-          for i in eachindex(A)
-              @inbounds s += sqrt(A[i])
-          end
-          return s
-      end
-
-   Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
-
-   Hint: You can do it on a single line...
-
-   .. solution::
-
-      First the square root should be taken of each element of the array, 
-      which we can do with ``map(sqrt,A)``. Next we perform a reduction with the ``+``
-      operator. Combining these steps:
-      
-      .. code-block:: julia
-      
-         A = CuArray([1 2 3; 4 5 6; 7 8 9])
-      
-         reduce(+, map(sqrt,A))
-      
-      GPU porting complete!
 
 
 Writing your own kernels
@@ -637,20 +605,6 @@ supported, and then launch the compiled kernel:
 
       WRITEME
 
-.. challenge:: Compare broadcasting to kernel
-
-   Consider the vector addition function from above:
-
-   .. code-block:: julia
-
-      function vadd!(c, a, b)
-          for i in 1:length(a)
-              @inbounds c[i] = a[i] + b[i]
-          end
-      end
-
-   - Write a kernel (or use the one shown above) and benchmark it with a moderately large vector.
-   - Then benchmark a broadcasted version of the vector addition. How does it compare to the kernel?
 
 
 
@@ -711,6 +665,40 @@ For example:
 Exercises
 ---------
 
+.. challenge:: Port :meth:`sqrt_sum` to GPU
+
+   Try to GPU-port the ``sqrt_sum`` function we saw in an earlier 
+   episode:
+
+   .. code-block:: julia
+
+      function sqrt_sum(A)
+          s = zero(eltype(A))
+          for i in eachindex(A)
+              @inbounds s += sqrt(A[i])
+          end
+          return s
+      end
+
+   Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
+
+   Hint: You can do it on a single line...
+
+   .. solution::
+
+      First the square root should be taken of each element of the array, 
+      which we can do with ``map(sqrt,A)``. Next we perform a reduction with the ``+``
+      operator. Combining these steps:
+      
+      .. code-block:: julia
+      
+         A = CuArray([1 2 3; 4 5 6; 7 8 9])
+      
+         reduce(+, map(sqrt,A))
+      
+      GPU porting complete!
+
+
 .. challenge:: Does LinearAlgebra provide acceleration?
 
    Compare how long it takes to run a normal matrix multiplication and using the :meth:`mul!`
@@ -738,6 +726,20 @@ Exercises
 
       :meth:`LinearAlgebra.mul!` is around 15-20% faster!
 
+.. challenge:: Compare broadcasting to kernel
+
+   Consider the vector addition function from above:
+
+   .. code-block:: julia
+
+      function vadd!(c, a, b)
+          for i in 1:length(a)
+              @inbounds c[i] = a[i] + b[i]
+          end
+      end
+
+   - Write a kernel (or use the one shown above) and benchmark it with a moderately large vector.
+   - Then benchmark a broadcasted version of the vector addition. How does it compare to the kernel?
 
 
 .. exercise:: Port Laplace function to GPU
