@@ -86,19 +86,17 @@ Access to GPUs
 --------------
 
 To fully experience the walkthrough in this episode we need to have access 
-to a GPU device and the necessary software stack. Access to a HPC system with 
-GPUs and a Julia installation is optimal. If you have a powerful GPU on your own 
-machine you can also install the drivers and toolkits yourself. Another option is to use 
-`JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from 
-`Julia Computing <https://juliacomputing.com/>`_ with 
-access to Julia's ecosystem of packages and GPU hardware. 
+to a GPU device and the necessary software stack. 
 
-Or one can use 
-`Google Colab <https://colab.research.google.com/>`_ which requires a Google 
-account and a manual Julia installation, but using simple NVIDIA GPUs is free.
-Google Colab does not support Julia, but a
-`helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
-has created a Colab notebook that can be reused for Julia computing on Colab.
+- Access to a HPC system with GPUs and a Julia installation is optimal. 
+- If you have a powerful GPU on your own machine you can also install the drivers and toolkits yourself. Another option is to use 
+- `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from `Julia Computing <https://juliacomputing.com/>`_ 
+  with access to Julia's ecosystem of packages and GPU hardware. 
+- Or one can use `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
+  account and a manual Julia installation, but using simple NVIDIA GPUs is free.
+  Google Colab does not support Julia, but a
+  `helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
+  has created a Colab notebook that can be reused for Julia computing on Colab.
 
 
 GPUs vs CPUs
@@ -318,8 +316,8 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
 .. code-block:: julia
 
    # create a 100x100 Float32 random array and an uninitialized array
-   A = CUDA.rand(100, 100)
-   B = CuArray{Float32, 2}(undef, 100, 100)
+   A = CUDA.rand(2^9, 2^9)
+   B = CuArray{Float32, 2}(undef, 2^9, 2^9)
 
    # use cuBLAS for matrix multiplication
    using LinearAlgebra
@@ -334,6 +332,43 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
    # use cuFFT for FFT
    using CUDA.CUFFT
    fft(A)
+
+.. challenge:: Convert from Base.Array or use GPU methods?
+
+   What is the difference between creating a random array in the following two ways? 
+
+   .. tabs:: 
+
+      .. tab:: Converting from ``Base.Array``
+
+         .. code-block:: julia
+         
+            A = rand(2^9, 2^9)
+            A_d = CuArray(A)
+
+      .. tab:: :meth:`rand` method from CUDA.jl
+
+         .. code-block:: julia
+
+            A_d = CUDA.rand(2^9, 2^9)
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         A = rand(2^9, 2^9)
+         A_d = CuArray(A)
+         typeof(A_d)
+         # CuArray{Float64, 2, CUDA.Mem.DeviceBuffer}
+
+         B_d = CUDA.rand(2^9, 2^9)
+         typeof(B_d)
+         # CuArray{Float32, 2, CUDA.Mem.DeviceBuffer}
+
+      The :meth:`rand` method defined in CUDA.jl creates 32-bit floating point numbers while 
+      converting from a 64-bit float Base.Array to a CuArray retains it as Float64!
+
+      GPUs normally perform significantly better for 32-bit floats.
 
 
 Higher-order abstractions
@@ -675,6 +710,35 @@ For example:
 
 Exercises
 ---------
+
+.. challenge:: Does LinearAlgebra provide acceleration?
+
+   Compare how long it takes to run a normal matrix multiplication and using the :meth:`mul!`
+   method from LinearAlgebra. Is there a speedup from using :meth:`mul!`? 
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         using CUDA, BenchmarkTools, LinearAlgebra
+
+         A = CUDA.rand(2^5, 2^5)
+         B = similar(A)
+         @btime A*A;
+         #  8.803 μs (16 allocations: 384 bytes)  
+         @btime mul!(B, A, A);
+         #  7.282 μs (12 allocations: 224 bytes)
+
+         A = CUDA.rand(2^12, 2^12)
+         B = similar(A)
+         @btime A*A;
+         #  12.760 μs (28 allocations: 576 bytes)
+         @btime mul!(B, A, A)
+         #  11.020 μs (24 allocations: 416 bytes)
+
+      :meth:`LinearAlgebra.mul!` is around 15-20% faster!
+
+
 
 .. exercise:: Port Laplace function to GPU
 
