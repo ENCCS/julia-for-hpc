@@ -463,7 +463,7 @@ We can split work between the GPU threads like this:
       .. code-block:: julia
       
          function vadd!(C, A, B)
-             index = threadIdx().x   # linear indexing, so only use `x`
+             i = threadIdx().x   # linear indexing, so only use `x`
              @inbounds C[i] = A[i] + B[i]
              return
          end
@@ -619,6 +619,24 @@ supported, and then launch the compiled kernel:
       WRITEME
 
 
+.. callout:: Restrictions in kernel programming
+
+   Within kernels, most of the Julia language is supported with the exception of functionality 
+   that requires the Julia runtime library. This means one cannot allocate memory or perform 
+   dynamic function calls, both of which are easy to do accidentally!
+
+
+Debugging
+---------
+
+Many things can go wrong with GPU kernel programming and unfortunately error messages are not very 
+useful because of how the GPU compiler works.
+
+- @cuprintln
+- @cushow
+- @device_code_warntype
+
+WRITEME
 
 
 Profiling
@@ -646,7 +664,31 @@ To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
 When we quit the REPL again, the profiler process will print information about 
 the executed kernels and API calls.
 
+Conditional use
+---------------
 
+Using functionality from CUDA.jl (or another GPU package) will result in a run-time error 
+on systems without CUDA and a GPU.
+If GPU is required for a code to run, one can use an assertion:
+
+.. code-block:: julia
+
+   using CUDA
+   @assert CUDA.functional(true)   
+
+However, it can be desirable to be able to write code that works systems both with and without 
+GPUs. If GPU is optional, you can write a function to copy arrays to the GPU if one is present:
+
+.. code-block:: julia
+
+   if CUDA.functional()
+       to_gpu_or_not_to_gpu(x::AbstractArray) = CuArray(x)
+   else
+       to_gpu_or_not_to_gpu(x::AbstractArray) = x
+   end
+
+Some caveats apply and other solutions exist to address them as outlined in 
+`the documentation <https://cuda.juliagpu.org/stable/installation/conditional/>`__.
 
 Exercises
 ---------
