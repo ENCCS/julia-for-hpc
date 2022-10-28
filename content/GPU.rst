@@ -319,7 +319,10 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
    A = CUDA.rand(2^9, 2^9)
    B = CuArray{Float32, 2}(undef, 2^9, 2^9)
 
-   # use cuBLAS for matrix multiplication
+   # regular matrix multiplication uses cuBLAS under the hood
+   A * A
+
+   # use LinearAlgebra for matrix multiplication
    using LinearAlgebra
    mul!(B, A, A)
 
@@ -421,9 +424,9 @@ Let's take a simple example, adding two vectors:
 
 .. code-block:: julia
 
-   function vadd!(c, a, b)
-       for i in 1:length(a)
-           @inbounds c[i] = a[i] + b[i]
+   function vadd!(C, A, B)
+       for i in 1:length(A)
+           @inbounds C[i] = A[i] + B[i]
        end
    end
 
@@ -459,49 +462,56 @@ We can split work between the GPU threads like this:
 
       .. code-block:: julia
       
-         function vadd!(c, a, b)
+         function vadd!(C, A, B)
              index = threadIdx().x   # linear indexing, so only use `x`
-             @inbounds c[i] = a[i] + b[i]
+             @inbounds C[i] = A[i] + B[i]
              return
          end
 
-         @cuda threads=length(A_d) vadd!(C_d, A_d, B_d)
+         A, B = CUDA.ones(2^10)*2, CUDA.ones(2^10)*3
+         C = similar(A)
+
+         nthreads = length(A)
+         @cuda threads=nthreads vadd!(C, A, B)
 
    .. group-tab:: AMD
 
       .. code-block:: julia
       
-         function vadd!(c, a, b)
+         function vadd!(C, A, B)
              i = workitemIdx().x
-             @inbounds c[i] = a[i] + b[i]
+             @inbounds C[i] = A[i] + B[i]
              return
          end
-      
-         @roc groupsize=length(A_d) vadd!(C_d, A_d, B_d)   
+            
+         groupsize = length(A)
+         @roc groupsize=groupsize vadd!(C, A, B)   
 
    .. group-tab:: Intel
 
       .. code-block:: julia
       
-         function vadd!(c, a, b)
+         function vadd!(C, A, B)
              i = get_global_id()
-             @inbounds c[i] = a[i] + b[i]
+             @inbounds C[i] = A[i] + B[i]
              return
          end
       
-         @oneapi items=length(A_d) vadd!(C_d, A_d, B_d)         
+         items = length(A)
+         @oneapi items=items vadd!(C, A, B)   
 
    .. group-tab:: Apple
 
       .. code-block:: julia
       
-         function vadd!(c, a, b)
+         function vadd!(C, A, B)
              i = thread_position_in_grid_1d()
-             @inbounds c[i] = a[i] + b[i]
+             @inbounds C[i] = A[i] + B[i]
              return
          end
       
-         @metal threads=length(A_d) vadd(C_d, A_d, B_d)
+         nthreads = length(A)
+         @metal threads=nthreads vadd!(C, A, B)
 
 But we can parallelize even further. GPUs have a limited number of threads they 
 can run on a single SM, but they also have multiple SMs. 
@@ -513,38 +523,40 @@ To take advantage of them all, we need to run a kernel with multiple blocks:
 
       .. code-block:: julia
       
-         function vadd!(c, a, b)
+         function vadd!(C, A, B)
              i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
-             if i <= length(a)
-                 @inbounds c[i] = a[i] + b[i]
+             if i <= length(A)
+                 @inbounds C[i] = A[i] + B[i]
              end
              return
          end
 
-         # smallest integer larger than or equal to length(A_d)/threads
-         numblocks = cld(length(A_d), 256)
+         nthreads = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numblocks = cld(length(A), nthreads)
 
          # run using 256 threads
-         @cuda threads=size(A_d) blocks=numblocks vadd!(C_d, A_d, B_d)
+         @cuda threads=nthreads blocks=numblocks vadd!(C, A, B)
 
    .. group-tab:: AMD
 
       .. code-block:: julia
       
          # WARNING: this is still untested on AMD GPUs
-         function vadd!(c, a, b)
+         function vadd!(C, A, B)
              i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x * 
              if i <= length(a)
-                 @inbounds c[i] = a[i] + b[i]
+                 @inbounds C[i] = A[i] + B[i]
              end
              return
          end
       
-         # smallest integer larger than or equal to length(A_d)/threads
-         numblocks = cld(length(A_d), 256)
+         nthreads = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numblocks = cld(length(A_d), nthreads)
       
          # run using 256 threads
-         @roc groupsize=256 blocks=numblocks vadd!(C_d, A_d, B_d)
+         @roc groupsize=nthreads blocks=numblocks vadd!(C, A, B)
 
    .. group-tab:: Intel
 
@@ -555,19 +567,20 @@ To take advantage of them all, we need to run a kernel with multiple blocks:
       .. code-block:: julia
       
          # WARNING: this is still untested on Apple GPUs
-         function vadd!(c, a, b)
+         function vadd!(C, A, B)
              i = thread_position_in_grid_1d()
-             if i <= length(a)
-                 @inbounds c[i] = a[i] + b[i]
+             if i <= length(A)
+                 @inbounds C[i] = A[i] + B[i]
              end
              return
          end
       
-         # smallest integer larger than or equal to length(A_d)/threads
-         numblocks = cld(length(A_d), 256)
+         nthread = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numblocks = cld(length(A), nthreads)
       
          # run using 256 threads
-         @metal threads=256 grid=numblocks vadd!(C_d, A_d, B_d)                  
+         @metal threads=nthreads grid=numblocks vadd!(C, A, B)                  
 
 We have been using 256 GPU threads, but this might not be optimal. The more 
 threads we use the better is the performance, but the maximum number depends 
@@ -582,7 +595,7 @@ supported, and then launch the compiled kernel:
       .. code-block:: julia
       
          # compile kernel
-         kernel = @cuda launch=false vadd!(C_d, A_d, B_d)
+         kernel = @cuda launch=false vadd!(C, A, B)
          # extract configuration via occupancy API
          config = launch_configuration(kernel.fun)
          # number of threads should not exceed size of array
@@ -591,7 +604,7 @@ supported, and then launch the compiled kernel:
          blocks = cld(length(A), threads)
 
          # launch kernel with specific configuration
-         kernel(C_d, A_d, B_d; threads, blocks)
+         kernel(C, A, B; threads, blocks)
 
    .. group-tab:: AMD 
 

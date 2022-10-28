@@ -141,6 +141,7 @@ Vectors and arrays
 |                  | - ``a = [i^3 for i in [1,2,3]]``    Array comprehension           |
 |                  | - ``Vector{T}(undef, n)``           undef 1-D array length n      |
 |                  | - ``Float64[1,2]``                  2-element Vector{Float64}     |
+|                  | - ``Array(1:5)``                    5-element Array{Int64,1}      |
 |                  | - ``[1:5;]``                        5-element Array{Int64,1}      |
 |                  | - ``[1:5]``                         1-element vector with a range |
 |                  | - ``[range(0,stop=2π,length=5);]``  5-element Vector{Float64}     |
