@@ -18,6 +18,10 @@ function estimate_pi(num_points)
 end
 
 function main()
+<<<<<<< HEAD
+    t1 = time()
+=======
+>>>>>>> main
     num_points = 10^9
     num_jobs = 10
     chunks = [num_points / num_jobs for i in 1:num_jobs]
@@ -45,8 +49,8 @@ function main()
     if rank == 0
         println("pi = $(pi_sum/num_jobs)")
     end
+    t2 = time()
+    println("elapsed time = $(t2 - t1)")
 end
 
-using BenchmarkTools
-
-@btime main()
+main()

@@ -49,6 +49,7 @@ computing.
    multithreading
    distributed
    MPI
+   cluster
    GPU
    outlook
 
