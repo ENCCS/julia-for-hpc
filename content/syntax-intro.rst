@@ -3,14 +3,6 @@ Introduction to Julia syntax
 
 This episodes provides a condensed overview of Julia's main syntax and features.
 
-.. callout:: Preparing for a workshop
-
-   To prepare for a workshop where this material is taught, please 
-   first install Julia as described in :doc:`setup`, and then go through 
-   the overview below and experiment with it either in the Julia REPL, 
-   a Jupyter or Pluto notebook, or in VSCode (refer to :doc:`setup` for 
-   installation and configuration instructions).
-
 .. callout:: Video alternative
 
   As an alternative to going through this page, learners can also watch 
@@ -66,6 +58,19 @@ We can write Julia code in various ways:
    code with ``julia filename.jl``. 
 
 
+.. callout:: Firing up Julia
+
+   If Julia has been installed according to the instructions in 
+   :doc:`setup` it should be possible to open up a Julia session by 
+   typing ``julia`` in a terminal window or by clicking on the Julia 
+   application in a file browser. The result should look something like this:
+
+   .. figure:: img/repl.png
+      :align: center
+      :scale: 40 %
+
+
+
 Basic syntax
 ------------
 
@@ -85,6 +90,7 @@ Basic syntax
 | Types            | - ``A = 3.14``                      Scalar, float                 |
 |                  | - ``B = 10``                        Scalar, integer               |
 |                  | - ``C = "hello"``                   String                        |
+|                  | - ``C[1]``                          Char                          |
 |                  | - ``D = true``                      Boolean                       |
 |                  | - ``typeof(A)``                     Find type                     |
 |                  | - ``supertype(Integer)``            Find supertypes               |
@@ -92,15 +98,47 @@ Basic syntax
 |                  | - ``Integer <: Real``               "Subtype of", returns True    |
 |                  | - ``struct``                        Immutable composite type      |
 |                  | - ``mutable struct``                Mutable composite type        |
+|                  | - ``:something``                   Symbol for a name or label     | 
 +------------------+-------------------------------------------------------------------+
 | Special values   | - ``Inf``                           Infinity (e.g. ``1 / 0``)     |
 |                  | - ``Nan``                           Not a number (e.g. ``0 / 0``) |
 |                  | - ``nothing``                       e.g. for variables w/o value  |
 +------------------+-------------------------------------------------------------------+
+
+Let us explore some basic types in the Julia REPL:
+
+.. code-block:: julia
+
+    typeof(1)  
+    # Int64
+  
+    typeof(1.0) 
+    # Float64
+
+    typeof(1.0+2.0im) 
+    # ComplexF64
+  
+    supertypes(Float64) 
+    # (Float64, AbstractFloat, Real, Number, Any)
+
+    subtypes(Real) 
+    # 4-element Vector{Any}:
+    #  AbstractFloat
+    #  AbstractIrrational
+    #  Integer
+    #  Rational
+
+Vectors and arrays
+------------------
+
++------------------+-------------------------------------------------------------------+
+| Feature          | Example syntax and its result/meaning                             |
++==================+===================================================================+
 | 1D arrays        | - ``t = (1, 2, 3)``                 Tuple (immutable)             |
 |                  | - ``t = (a=2, b=1+2)``              Named tuple, access: ``t.a``  |
 |                  | - ``d = Dict("A"=>1, "B"=>2)``      Dictionary                    |
 |                  | - ``a = [1, 2, 3, 4]``              4-element Vector{Int64}       |
+|                  | - ``a = [i^3 for i in [1,2,3]]``    Array comprehension           |
 |                  | - ``Vector{T}(undef, n)``           undef 1-D array length n      |
 |                  | - ``Float64[1,2]``                  2-element Vector{Float64}     |
 |                  | - ``[1:5;]``                        5-element Array{Int64,1}      |
@@ -140,10 +178,38 @@ Basic syntax
 |                  | - ``append!(a, [3, 5, 7])``         Append another array          |
 |                  | - ``splice!(a, 3, -1])``            Rm in given pos and replace   |
 +------------------+-------------------------------------------------------------------+
-| Miscellanous     | - ``δ = 0.1``  (type ``\delta`` <TAB>)  Unicode names with LaTeX  |
-|                  | - ``println("A = $A")``            Print using interpolation      |
-|                  | - ``:something``                   Symbol for a name or label     |
-+------------------+-------------------------------------------------------------------+
+
+We can play around with Vectors and Arrays to get used to their syntax:
+
+.. code-block:: julia
+
+   v1 = [1.0, 2.0, 3.0]
+   # 4-element Vector{Int64}:
+   m1 = [1.0 2.0 3.0]
+   # 1×4 Matrix{Int64}:
+
+   # broadcasting
+   v2 = v1.^2
+   v3 = v2 .- v1
+
+   # slicing
+   v1[2:3]
+   v1[begin:2:end]
+
+   # combine vectors into matrix
+   A = [v1 v2 [7.0, 6.0, 5.0]]
+   size(A)
+   length(A)
+   A[1:2, 1] = [3,3] # types are cast automatically   
+
+   # solve Ax=b
+   b = [4.0, 3.0, 2.0]
+   x = A \ b
+
+   # test with matrix-vector multiply
+   A*x == b
+   # true
+
 
 Loops and conditionals
 ----------------------
@@ -153,33 +219,41 @@ Loops and conditionals
 
 .. code-block:: julia
 
-	  for i in [1,2,3,4,5]
-	      println("i = $i")
-	  end
+   for i in [1,2,3,4,5]
+       println("i = $i")
+   end
 
 .. code-block:: julia
 
-	  for (k, v) in Dict("A" => 1, "B" => 2, "C" => 3)
-	      println("$k is $v")
-	  end
+   A = [1 2; 3 4]
+   # visit each index of A efficiently
+   for i in eachindex(A)
+       println("i = $i, A[i] = $(A[i])")
+   end
+
+.. code-block:: julia
+
+   for (k, v) in Dict("A" => 1, "B" => 2, "C" => 3)
+       println("$k is $v")
+   end
 
 .. code-block:: julia
 
 	for (i, j) in ([1, 2, 3], ("a", "b", "c"))
-		println("$i $j")
+	    println("$i $j")
 	end
 
 Conditionals work like in other languages.
 
 .. code-block:: julia
 	  
-	  if x > 5
-	      println("x > 5")
-	  elseif x < 5    # optional elseif
-	      println("x < 5")
-	  else            # optional else
-	      println("x = 5")
-	  end
+   if x > 5
+       println("x > 5")
+   elseif x < 5    # optional elseif
+       println("x < 5")
+   else            # optional else
+       println("x = 5")
+   end
 
 The ternary operator exists in Julia:
 
@@ -198,6 +272,7 @@ While loops:
        n += 1
        println(n)
    end
+
 
 Working with files
 ------------------
@@ -238,13 +313,21 @@ Some useful functions to work with files:
 | Function               |  What it does                                             |
 +========================+===========================================================+
 | - ``pwd()``            | - Show current directory                                  |
++------------------------+-----------------------------------------------------------+
 | - ``cd(path)``         | - Change directory                                        |
++------------------------+-----------------------------------------------------------+
 | - ``readdir(path)``    | - Return list of current directory                        |
++------------------------+-----------------------------------------------------------+
 | - ``mkdir(path)``      | - Create directory                                        |
++------------------------+-----------------------------------------------------------+
 | - ``abspath(path)``    | - Add current dir to filename                             |
++------------------------+-----------------------------------------------------------+
 | - ``joinpath(p1, p2)`` | - Join two paths                                          |
++------------------------+-----------------------------------------------------------+
 | - ``isdir(path)``      | - Check if path is a directory                            |         
++------------------------+-----------------------------------------------------------+
 | - ``splitdir(path)``   | - Split path into tuple of dirname and filename           |
++------------------------+-----------------------------------------------------------+
 | - ``homedir()``        | - Return home directory                                   |
 +------------------------+-----------------------------------------------------------+
 
@@ -469,45 +552,6 @@ Exceptions can be created explicitly with `throw`:
 	  end
 
 	  
-Macros
-------
-
-The `metaprogramming support in Julia <https://docs.julialang.org/en/v1/manual/metaprogramming/>`_ 
-allows code to be automatically transformed and generated. A full treatment of metaprogramming 
-is outside the scope of this lesson but familiarity with macros is highly useful. 
-Macros provide a mechanism to include generated code in the final body of a program.
-A simple macro can be created by:
-
-.. code-block:: julia
-	
-	macro sayhello(name)
-		return :( println("Hello, ", $name) )
-	end
-
-and called by:
-
-.. code-block:: julia
-
-	@sayhello "world!"
-
-Many useful macros are already predefined in base Julia or in various 
-packages. For example:
-
-.. code-block:: julia
-
-	# time an expression
-	@time sum(rand(1000,1000))
-
-.. code-block:: julia
-
-	# which function method will be used for specified args
-	@which(sin(2.0))
-
-.. code-block:: julia
-
-	# print generated LLVM bitcode for given type
-	@code_llvm sin(2.0)
-
 Scope
 -----
 
@@ -537,6 +581,7 @@ Examples:
 
    x = 123 # global
 
+   # hard scope
    function greet()
        x = "hello" # new local
        println(x)
@@ -551,6 +596,21 @@ Examples:
 
    greet2()
    println(x)  # gives "hello" (global x redefined)
+
+   # soft scope
+   x = 123
+   for i in 1:3
+       x = i
+   end
+   println(x)
+   # returns 3
+
+   x = 123
+   for i in 1:3
+       local x = i
+   end
+   println(x)
+   # returns 123
 
 Further details can be found at 
 https://docs.julialang.org/en/v1/manual/variables-and-scoping/
@@ -570,3 +630,154 @@ Style conventions
   ``!``. These are sometimes called "mutating" or "in-place" functions
   because they are intended to produce changes in their arguments
   after the function is called, not just return a value.
+
+Exercises
+---------
+
+.. challenge:: Row vs column-major ordering?
+
+   Based on one of the for-loop examples, can you tell whether Julia is row or column-major 
+   ordered? (i.e., whether arrays are stacked one row or one column at a time in memory)
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         A = [1 2; 3 4]
+         # visit each index of A efficiently
+         for i in eachindex(A)
+             println("i = $i, A[i] = $(A[i])")
+         end         
+
+         # output:
+         # i = 1, A[i] = 1
+         # i = 2, A[i] = 3
+         # i = 3, A[i] = 2
+         # i = 4, A[i] = 4         
+
+      Julia loops over columns since it's a column-major language!
+
+
+.. challenge:: Reading files
+
+   Write a function which opens and reads a file and returns the number of words in it.
+   Here are example codes for this task in other languages which you can translate:
+
+   .. tabs:: 
+
+      .. tab:: Python
+
+         .. code-block:: python
+         
+            def count_word_occurrence_in_file(file_name, word):
+                """
+                Counts how often word appears in file file_name.
+                Example: if file contains "one two one two three four"
+                         and word is "one", then this function returns 2
+                """
+                count = 0
+                with open(file_name, 'r') as f:
+                    for line in f:
+                        words = line.split()
+                        count += words.count(word)
+                return count
+
+      .. tab:: C++
+
+         .. code-block:: C++
+
+            #include <fstream>
+            #include <streambuf>
+            #include <string>
+
+            /* Counts how often word appears in file fname.
+             * Example: if file contains "one two one two three four"
+             *          and word is "one", then this function returns 2
+             */
+            int count_word_occurrence_in_file(std::string fname, std::string word) {
+              std::ifstream fh(fname);
+              std::string text((std::istreambuf_iterator<char>(fh)),
+            		   std::istreambuf_iterator<char>());
+
+              auto word_count = 0lu; // will be used for indexing and therefore it has to be *long unsigned* int for the safe conversion to 'std::__cxx11::basic_string<char>::size_type'.
+              auto count = 0;
+
+              for (const auto ch : text) {
+                if (ch == word[word_count]) ++word_count;
+                if (word[word_count] == '\0') {
+                  word_count = 0;
+                  ++count;
+                }
+              }
+
+              return count;
+            }
+
+      .. tab:: R
+
+         .. code-block:: R
+
+            #' Counts how often a given word appears in a file.
+            #'
+            #' @param file_name The name of the file to search in.
+            #' @param word The word to search for in the file.
+            #' @return The number of times the word appeared in the file.
+            count_word_occurrence_in_file <- function(file_name, word) {
+              count <- 0
+              for (line in readLines(file_name)) {
+                words <- strsplit(line, ' ')[[1]]
+                count <- count + sum(words == word)
+              }
+              count
+            }
+
+   .. solution::
+
+      .. code-block:: julia
+
+         """
+             count_word_occurrence_in_file(file_name::String, word::String)
+
+         Counts how often word appears in file file_name.
+         Example: if file contains "one two one two three four"
+                  And word is "one", then this function returns 2
+         """
+         function count_word_occurrence_in_file(file_name::String, word::String)
+             open(file_name, "r") do file
+                 lines = readlines(file)
+                 return count(word, join(lines))
+             end
+         end
+
+
+
+.. challenge:: FizzBuzz
+
+   Write a program that prints the integers from 1 to 100 (inclusive), except that:
+
+   - for multiples of three, print "Fizz" instead of the number
+   - for multiples of five, print "Buzz" instead of the number
+   - for multiples of both three and five, print "FizzBuzz" instead of the number
+
+   If you prefer translating a FizzBuzz code from your favorite language to Julia, you 
+   can find it on `Rosetta Code <https://rosettacode.org/wiki/FizzBuzz>`__.
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         for i in 1:100
+             if i % 15 == 0
+                 println("FizzBuzz")
+             elseif i % 3 == 0
+                 println("Fizz")
+             elseif i % 5 == 0
+                 println("Buzz")
+             else
+                 println(i)
+             end
+         end         
+
+
+      On the `Rosetta Code page for FizzBuzz <https://rosettacode.org/wiki/FizzBuzz#Julia>`__  
+      you find several other Julia versions.

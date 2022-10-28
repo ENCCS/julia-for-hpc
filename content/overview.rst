@@ -38,29 +38,7 @@ types in Julia:
   can be used for variables.
 
 
-.. callout:: Firing up Julia
 
-   If Julia has been installed according to the instructions in 
-   :doc:`setup` it should be possible to open up a Julia session by 
-   typing ``julia`` in a terminal window or by clicking on the Julia 
-   application in a file browser. The result should look something like this:
-
-   .. figure:: img/repl.png
-      :align: center
-      :scale: 40 %
-
-
-.. code-block:: julia
-
-    typeof(1)  # returns Int64
-  
-    typeof(1.0) # returns Float64
-
-    typeof(1.0+2.0im) # returns ComplexF64
-  
-    supertypes(Float64) # returns (Float64, AbstractFloat, Real, Number, Any)
-
-    subtypes(Real) # returns (AbstractFloat, AbstractIrrational, Integer, Rational)
 
 
 Types in Julia form a “type tree”, in which the leaves are concrete
