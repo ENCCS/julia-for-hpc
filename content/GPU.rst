@@ -634,33 +634,6 @@ When we quit the REPL again, the profiler process will print information about
 the executed kernels and API calls.
 
 
-Neural networks on the GPU
---------------------------
-
-Flux has `inbuilt support for running on GPUs 
-<https://fluxml.ai/Flux.jl/stable/gpu/>`__ and 
-provides simple macros and convenience functions 
-to transfer data and models to the GPU.
-For example:
-
-.. code-block:: julia
-
-   (xtrain, xtest), (ytrain, ytest) = partition((X, Y), 0.8, shuffle=true, rng=123, multi=true)
-   xtrain, xtest = Float32.(Array(xtrain)'), Float32.(Array(xtest)')    |> gpu
-   ytrain = Flux.onehotbatch(ytrain, ["Adelie", "Gentoo", "Chinstrap"]) |> gpu
-   ytest = Flux.onehotbatch(ytest, ["Adelie", "Gentoo", "Chinstrap"])   |> gpu
-      
-   n_features, n_classes, n_neurons = 4, 3, 10
-   model = Chain(
-           Dense(n_features, n_neurons),
-           BatchNorm(n_neurons, relu),
-           Dense(n_neurons, n_classes),
-           softmax)  |> gpu
-
-
-
-
-
 
 Exercises
 ---------
@@ -863,15 +836,6 @@ Exercises
          @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
 
 
-.. exercise:: Port a neural network to the GPU
-
-   Take the neural network model that you trained in the  
-   :ref:`Deep learning exercise <DLexercise>` and GPU-port it!
-
-   Additional reading material that might help:
-
-   - https://fluxml.ai/Flux.jl/stable/gpu/
-   - https://fluxml.ai/tutorials/2020/09/15/deep-learning-flux.html
 
 See also
 --------
