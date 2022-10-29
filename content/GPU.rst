@@ -527,7 +527,7 @@ We can split work between the GPU threads like this:
       .. code-block:: julia
       
          function vadd!(C, A, B)
-             i = get_global_id()
+             i = get_local_id()
              @inbounds C[i] = A[i] + B[i]
              return
          end
@@ -548,9 +548,40 @@ We can split work between the GPU threads like this:
          nthreads = length(A)
          @metal threads=nthreads vadd!(C, A, B)
 
-But we can parallelize even further. GPUs have a limited number of threads they 
-can run on a single SM, but they also have multiple SMs. 
-To take advantage of them all, we need to run a kernel with multiple blocks: 
+Unfortunately, this implementation will **not scale up** to arrays that are larger than the 
+maximum number of threads in a block! We can find out how many threads are supported on the 
+GPU we are using:
+
+.. tabs::
+
+   .. group-tab:: NVIDIA
+
+      .. code-block:: julia
+
+         CUDA.attribute(device(), CUDA.DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+   
+         Int(AMDGPU.max_group_size(first(AMDGPU.isas(get_default_agent()))))
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+
+         oneL0.compute_properties(device()).maxTotalGroupSize
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+
+         WRITEME
+
+
+Clearly, GPUs have a limited number of threads they can run on a single SM. 
+But they also have multiple SMs! 
+To parallelise over more SMs, we need to run a kernel with multiple blocks: 
 
 .. tabs::
 
@@ -579,7 +610,7 @@ To take advantage of them all, we need to run a kernel with multiple blocks:
       
          # WARNING: this is still untested on AMD GPUs
          function vadd!(C, A, B)
-             i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x * 
+             i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x 
              if i <= length(a)
                  @inbounds C[i] = A[i] + B[i]
              end
