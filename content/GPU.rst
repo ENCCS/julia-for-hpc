@@ -438,16 +438,51 @@ Let's take a simple example, adding two vectors:
 We can already run this on the GPU with the ``@cuda`` macro, which 
 will compile ``vadd!`` into a GPU kernel and launch it:
 
-.. code-block:: julia
+.. tabs:: 
 
-   A_d = CuArray(A)
-   B_d = CuArray(B)
-   C_d = similar(B_d)
+   .. group-tab:: NVIDIA
 
-   @cuda vadd!(C_d, A_d, B_d)
+      .. code-block:: julia
 
-But the performance would be terrible because each thread on the GPU 
-would be performing the same loop. So we have to remove the loop over all 
+         A_d = CuArray(A)
+         B_d = CuArray(B)
+         C_d = similar(B_d)
+
+         @cuda vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+
+         A_d = ROCArray(A)
+         B_d = ROCArray(B)
+         C_d = similar(B_d)
+
+         @roc vadd!(C_d, A_d, B_d)         
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+
+         A_d = oneArray(A)
+         B_d = oneArray(B)
+         C_d = similar(B_d)
+
+         @oneapi vadd!(C_d, A_d, B_d)   
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+
+         A_d = MtlArray(A)
+         B_d = MtlArray(B)
+         C_d = similar(B_d)
+
+         @metal vadd!(C_d, A_d, B_d)   
+
+
+**But the performance would be terrible** because each thread on the GPU 
+would be performing the same loop! So we have to remove the loop over all 
 elements and instead use the special ``threadIdx`` and ``blockDim`` functions,  
 analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
 
