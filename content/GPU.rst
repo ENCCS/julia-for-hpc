@@ -961,7 +961,8 @@ Exercises
 See also
 --------
 
-- https://juliagpu.org/
-- https://cuda.juliagpu.org/stable/
-- https://github.com/maleadt/juliacon21-gpu_workshop
-- https://fluxml.ai/tutorials/2020/09/15/deep-learning-flux.html
+- `JuliaGPU organisation <https://juliagpu.org/>`__
+- `CUDA.jl documentation <https://cuda.juliagpu.org/stable/>`__
+- `AMDGPU.jl documentation <https://amdgpu.juliagpu.org/stable/>`__
+- `JuliaCon2021 GPU workshop <https://github.com/maleadt/juliacon21-gpu_workshop>`__
+- `Advanced GPU programming tutorials <https://github.com/JuliaComputing/Training/tree/master/AdvancedGPU>`__
