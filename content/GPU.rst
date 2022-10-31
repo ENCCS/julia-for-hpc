@@ -86,19 +86,17 @@ Access to GPUs
 --------------
 
 To fully experience the walkthrough in this episode we need to have access 
-to a GPU device and the necessary software stack. Access to a HPC system with 
-GPUs and a Julia installation is optimal. If you have a powerful GPU on your own 
-machine you can also install the drivers and toolkits yourself. Another option is to use 
-`JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from 
-`Julia Computing <https://juliacomputing.com/>`_ with 
-access to Julia's ecosystem of packages and GPU hardware. 
+to a GPU device and the necessary software stack. 
 
-Or one can use 
-`Google Colab <https://colab.research.google.com/>`_ which requires a Google 
-account and a manual Julia installation, but using simple NVIDIA GPUs is free.
-Google Colab does not support Julia, but a
-`helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
-has created a Colab notebook that can be reused for Julia computing on Colab.
+- Access to a HPC system with GPUs and a Julia installation is optimal. 
+- If you have a powerful GPU on your own machine you can also install the drivers and toolkits yourself. Another option is to use 
+- `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from `Julia Computing <https://juliacomputing.com/>`_ 
+  with access to Julia's ecosystem of packages and GPU hardware. 
+- Or one can use `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
+  account and a manual Julia installation, but using simple NVIDIA GPUs is free.
+  Google Colab does not support Julia, but a
+  `helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
+  has created a Colab notebook that can be reused for Julia computing on Colab.
 
 
 GPUs vs CPUs
@@ -318,10 +316,13 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
 .. code-block:: julia
 
    # create a 100x100 Float32 random array and an uninitialized array
-   A = CUDA.rand(100, 100)
-   B = CuArray{Float32, 2}(undef, 100, 100)
+   A = CUDA.rand(2^9, 2^9)
+   B = CuArray{Float32, 2}(undef, 2^9, 2^9)
 
-   # use cuBLAS for matrix multiplication
+   # regular matrix multiplication uses cuBLAS under the hood
+   A * A
+
+   # use LinearAlgebra for matrix multiplication
    using LinearAlgebra
    mul!(B, A, A)
 
@@ -334,6 +335,43 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
    # use cuFFT for FFT
    using CUDA.CUFFT
    fft(A)
+
+.. challenge:: Convert from Base.Array or use GPU methods?
+
+   What is the difference between creating a random array in the following two ways? 
+
+   .. tabs:: 
+
+      .. tab:: Converting from ``Base.Array``
+
+         .. code-block:: julia
+         
+            A = rand(2^9, 2^9)
+            A_d = CuArray(A)
+
+      .. tab:: :meth:`rand` method from CUDA.jl
+
+         .. code-block:: julia
+
+            A_d = CUDA.rand(2^9, 2^9)
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         A = rand(2^9, 2^9)
+         A_d = CuArray(A)
+         typeof(A_d)
+         # CuArray{Float64, 2, CUDA.Mem.DeviceBuffer}
+
+         B_d = CUDA.rand(2^9, 2^9)
+         typeof(B_d)
+         # CuArray{Float32, 2, CUDA.Mem.DeviceBuffer}
+
+      The :meth:`rand` method defined in CUDA.jl creates 32-bit floating point numbers while 
+      converting from a 64-bit float Base.Array to a CuArray retains it as Float64!
+
+      GPUs normally perform significantly better for 32-bit floats.
 
 
 Higher-order abstractions
@@ -374,6 +412,415 @@ an example of this, but more general constructs can be created with
 
          accumulate(+, A)
 
+
+
+Writing your own kernels
+------------------------
+
+Not all algorithms can be made to work with the higher-level abstractions 
+in ``CUDA.jl``. In such cases it's necessary to explicitly write our own GPU kernel.
+
+Let's take a simple example, adding two vectors:
+
+.. code-block:: julia
+
+   function vadd!(C, A, B)
+       for i in 1:length(A)
+           @inbounds C[i] = A[i] + B[i]
+       end
+   end
+
+   A = zeros(10) .+ 5.0
+   B = ones(10)
+   C = similar(B)
+   vadd!(C, A, B)
+
+We can already run this on the GPU with the ``@cuda`` macro, which 
+will compile :meth:`vadd!` into a GPU kernel and launch it:
+
+.. tabs:: 
+
+   .. group-tab:: NVIDIA
+
+      .. code-block:: julia
+
+         A_d = CuArray(A)
+         B_d = CuArray(B)
+         C_d = similar(B_d)
+
+         @cuda vadd!(C_d, A_d, B_d)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+
+         A_d = ROCArray(A)
+         B_d = ROCArray(B)
+         C_d = similar(B_d)
+
+         @roc vadd!(C_d, A_d, B_d)         
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+
+         A_d = oneArray(A)
+         B_d = oneArray(B)
+         C_d = similar(B_d)
+
+         @oneapi vadd!(C_d, A_d, B_d)   
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+
+         A_d = MtlArray(Float32.(A))
+         B_d = MtlArray(Float32.(B))
+         C_d = similar(B_d)
+
+         @metal vadd!(C_d, A_d, B_d)   
+
+
+**But the performance would be terrible** because each thread on the GPU 
+would be performing the same loop! So we have to remove the loop over all 
+elements and instead use the special ``threadIdx`` and ``blockDim`` functions,  
+analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
+
+.. figure:: img/MappingBlocksToSMs.png
+   :align: center
+
+We can split work between the GPU threads by using a special function which 
+returns the index of the GPU thread which executes it (e.g. ``threadIdx().x`` for NVIDIA 
+and ``workitemIdx().x`` for AMD):  
+
+.. tabs:: 
+
+   .. group-tab:: NVIDIA
+
+      .. code-block:: julia
+      
+         function vadd!(C, A, B)
+             index = threadIdx().x   # linear indexing, so only use `x`
+             @inbounds C[index] = A[index] + B[index]
+             return
+         end
+
+         A, B = CUDA.ones(2^9)*2, CUDA.ones(2^9)*3
+         C = similar(A)
+
+         nthreads = length(A)
+         @cuda threads=nthreads vadd!(C, A, B)
+
+         @assert all(Array(C) .== 5.0)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+
+         # WARNING: this is still untested on AMD GPUs
+         function vadd!(C, A, B)
+             index = workitemIdx().x   # linear indexing, so only use `x`
+             @inbounds C[index] = A[index] + B[index]
+             return
+         end
+
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3)
+         C = similar(A)  
+
+         groupsize = length(A)
+         @roc groupsize=groupsize vadd!(C, A, B)   
+         
+         @assert all(Array(C) .== 5.0)
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+
+         # WARNING: this is still untested on Intel GPUs
+         function vadd!(C, A, B)
+             index = get_local_id()
+             @inbounds C[index] = A[index] + B[index]
+             return
+         end
+
+         A, B = oneArray(ones(2^9)*2), oneArray(ones(2^9)*3)
+         C = similar(A)      
+
+         items = length(A)
+         @oneapi items=items vadd!(C, A, B) 
+
+         @assert all(Array(C) .== 5.0)  
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         function vadd!(C, A, B)
+             index = thread_position_in_grid_1d()
+             @inbounds C[index] = A[index] + B[index]
+             return
+         end
+      
+         A, B = MtlArray(ones(Float32, 2^9)*2), MtlArray(Float32, ones(2^9)*3)
+         C = similar(A)
+
+         nthreads = length(A)
+         @metal threads=nthreads vadd!(C, A, B)
+
+         @assert all(Array(C) .== 5.0)
+
+However, this implementation will **not scale up** to arrays that are larger than the 
+maximum number of threads in a block! We can find out how many threads are supported on the 
+GPU we are using:
+
+.. tabs::
+
+   .. group-tab:: NVIDIA
+
+      .. code-block:: julia
+
+         CUDA.attribute(device(), CUDA.DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+   
+         Int(AMDGPU.max_group_size(first(AMDGPU.isas(get_default_agent()))))
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+
+         oneL0.compute_properties(device()).maxTotalGroupSize
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+
+         WRITEME
+
+
+Clearly, GPUs have a limited number of threads they can run on a single SM. 
+To parallelise over multiple SMs we need to run a kernel with multiple blocks 
+where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functions 
+(in the case of NVIDIA):
+
+.. tabs::
+
+   .. group-tab:: NVIDIA
+
+      .. code-block:: julia
+      
+         function vadd!(C, A, B)
+             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
+             if i <= length(A)
+                 @inbounds C[i] = A[i] + B[i]
+             end
+             return
+         end
+
+         nthreads = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numblocks = cld(length(A), nthreads)
+
+         # run using 256 threads
+         @cuda threads=nthreads blocks=numblocks vadd!(C, A, B)
+
+         @assert all(Array(C) .== 5.0)
+
+   .. group-tab:: AMD
+
+      .. code-block:: julia
+      
+         # WARNING: this is still untested on AMD GPUs
+         function vadd!(C, A, B)
+             i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x 
+             if i <= length(a)
+                 @inbounds C[i] = A[i] + B[i]
+             end
+             return
+         end
+      
+         nthreads = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numblocks = cld(length(A_d), nthreads)
+      
+         # run using 256 threads
+         @roc groupsize=nthreads blocks=numblocks vadd!(C, A, B)
+
+         @assert all(Array(C) .== 5.0)
+
+   .. group-tab:: Intel
+
+      .. code-block:: julia
+
+         # WARNING: this is still untested on Intel GPUs
+         function vadd!(C, A, B)
+             i = get_global_id()
+             if i <= length(a)
+                 c[i] = a[i] + b[i]
+             end
+             return
+         end
+   
+         nthreads = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numgroups = cld(length(a),256)
+   
+         @oneapi items=nthreads groups=numgroups vadd!(c, a, b)
+
+         @assert all(Array(C) .== 5.0)
+
+   .. group-tab:: Apple
+
+      .. code-block:: julia
+      
+         function vadd!(C, A, B)
+             i = thread_position_in_grid_1d()
+             if i <= length(A)
+                 @inbounds C[i] = A[i] + B[i]
+             end
+             return
+         end
+      
+         nthreads = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numblocks = cld(length(A), nthreads)
+      
+         # run using 256 threads
+         @metal threads=nthreads grid=numblocks vadd!(C, A, B)    
+
+         @assert all(Array(C) .== 5.0)              
+
+We have been using 256 GPU threads, but this might not be optimal. The more 
+threads we use the better is the performance, but the maximum number depends 
+both on the GPU and the nature of the kernel. 
+
+To optimize the number of threads, we can 
+first create the kernel without launching it, query it for the number of threads 
+supported, and then launch the compiled kernel:
+
+.. tabs:: 
+
+   .. group-tab:: NVIDIA 
+
+      .. code-block:: julia
+      
+         # compile kernel
+         kernel = @cuda launch=false vadd!(C, A, B)
+         # extract configuration via occupancy API
+         config = launch_configuration(kernel.fun)
+         # number of threads should not exceed size of array
+         threads = min(length(A), config.threads)
+         # smallest integer larger than or equal to length(A)/threads
+         blocks = cld(length(A), threads)
+
+         # launch kernel with specific configuration
+         kernel(C, A, B; threads, blocks)
+
+   .. group-tab:: AMD 
+
+      WRITEME
+
+   .. group-tab:: Intel
+
+      WRITEME
+
+   .. group-tab:: Apple
+
+      WRITEME
+
+
+.. callout:: Restrictions in kernel programming
+
+   Within kernels, most of the Julia language is supported with the exception of functionality 
+   that requires the Julia runtime library. This means one cannot allocate memory or perform 
+   dynamic function calls, both of which are easy to do accidentally!
+
+.. callout:: 1D, 2D and 3D
+
+   CUDA.jl and AMDGPU.jl support indexing in up to 3 dimensions (x, y and z, e.g. 
+   ``threadIdx().x`` and ``workitemIdx().x``). This is convenient 
+   for multidimensional data where thread blocks can be organised into 1D, 2D or 3D arrays of 
+   threads.
+
+
+Debugging
+---------
+
+Many things can go wrong with GPU kernel programming and unfortunately error messages are 
+sometimes not very useful because of how the GPU compiler works. 
+
+Conventional print-debugging is often a reasonably effective way to debug GPU code. 
+CUDA.jl provides macros that facilitate this:
+
+- ``@cushow`` (like ``@show``): visualize an expression and its result, and return that value. 
+- ``@cuprintln`` (like ``println``): to print text and values. 
+- ``@cuaassert`` (like ``@assert``) can also be useful to find issues and abort execution.
+
+GPU code introspection macros also exist, like ``@device_code_warntype``, to track 
+down type instabilities.
+
+More information on debugging can be found in the 
+`documentation <https://cuda.juliagpu.org/stable/development/debugging/>`__.
+
+Profiling
+---------
+
+We can not use the regular Julia profilers to profile GPU code. However, 
+we can use NVIDIA's Nsight systems profiler simply by starting Julia like this:
+
+.. code-block:: bash
+
+   nsys launch julia
+
+To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
+
+.. code-block:: julia
+
+   using CUDA
+   A = CuArray(zeros(10) .+ 5.0)
+   B = CuArray(ones(10))
+   C = CuArray(similar(B))
+   # first run it once to force compilation
+   @cuda threads=length(A) vadd!(C, A, B)  
+   CUDA.@profile @cuda threads=length(A) vadd!(C, A, B)
+
+When we quit the REPL again, the profiler process will print information about 
+the executed kernels and API calls.
+
+More information on profiling with NVIDIA tools can be found in the 
+`documentation <https://cuda.juliagpu.org/stable/development/profiling/>`__.
+
+Conditional use
+---------------
+
+Using functionality from CUDA.jl (or another GPU package) will result in a run-time error 
+on systems without CUDA and a GPU.
+If GPU is required for a code to run, one can use an assertion:
+
+.. code-block:: julia
+
+   using CUDA
+   @assert CUDA.functional(true)   
+
+However, it can be desirable to be able to write code that works systems both with and without 
+GPUs. If GPU is optional, you can write a function to copy arrays to the GPU if one is present:
+
+.. code-block:: julia
+
+   if CUDA.functional()
+       to_gpu_or_not_to_gpu(x::AbstractArray) = CuArray(x)
+   else
+       to_gpu_or_not_to_gpu(x::AbstractArray) = x
+   end
+
+Some caveats apply and other solutions exist to address them as outlined in 
+`the documentation <https://cuda.juliagpu.org/stable/installation/conditional/>`__.
+
+Exercises
+---------
+
 .. challenge:: Port :meth:`sqrt_sum` to GPU
 
    Try to GPU-port the ``sqrt_sum`` function we saw in an earlier 
@@ -389,7 +836,8 @@ an example of this, but more general constructs can be created with
           return s
       end
 
-   Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
+   - Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
+   - If you're interested in how the performance changes, benchmark the CPU and GPU versions with ``@btime``
 
    Hint: You can do it on a single line...
 
@@ -407,200 +855,52 @@ an example of this, but more general constructs can be created with
       
       GPU porting complete!
 
-
-Writing your own kernels
-------------------------
-
-Not all algorithms can be made to work with the higher-level abstractions 
-in ``CUDA.jl``. In such cases it's necessary to explicitly write our own GPU kernel.
-
-Let's take a simple example, adding two vectors:
-
-.. code-block:: julia
-
-   function vadd!(c, a, b)
-       for i in 1:length(a)
-           @inbounds c[i] = a[i] + b[i]
-       end
-   end
-
-   A = zeros(10) .+ 5.0
-   B = ones(10)
-   C = similar(B)
-   vadd!(C, A, B)
-
-We can already run this on the GPU with the ``@cuda`` macro, which 
-will compile ``vadd!`` into a GPU kernel and launch it:
-
-.. code-block:: julia
-
-   A_d = CuArray(A)
-   B_d = CuArray(B)
-   C_d = similar(B_d)
-
-   @cuda vadd!(C_d, A_d, B_d)
-
-But the performance would be terrible because each thread on the GPU 
-would be performing the same loop. So we have to remove the loop over all 
-elements and instead use the special ``threadIdx`` and ``blockDim`` functions,  
-analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
-
-.. figure:: img/MappingBlocksToSMs.png
-   :align: center
-
-We can split work between the GPU threads like this:   
-
-.. tabs:: 
-
-   .. group-tab:: NVIDIA
+      To benchmark:
 
       .. code-block:: julia
-      
-         function vadd!(c, a, b)
-             index = threadIdx().x   # linear indexing, so only use `x`
-             @inbounds c[i] = a[i] + b[i]
-             return
-         end
 
-         @cuda threads=length(A_d) vadd!(C_d, A_d, B_d)
+         A=ones(1024,1024);
+         A_d = CuArray(A);
 
-   .. group-tab:: AMD
+         # benchmark CPU function
+         @btime sqrt_sum(A)
+         #  2.664 ms (1 allocation: 16 bytes)
 
-      .. code-block:: julia
-      
-         function vadd!(c, a, b)
-             i = workitemIdx().x
-             @inbounds c[i] = a[i] + b[i]
-             return
-         end
-      
-         @roc groupsize=length(A_d) vadd!(C_d, A_d, B_d)   
+         # benchmark also broadcast operations on the CPU:
+         @btime reduce(+, map(sqrt,A))
+         #  2.930 ms (4 allocations: 8.00 MiB)
+         #  Slightly slower than the sqrt_sum function call but much larger memory allocations!
 
-   .. group-tab:: Intel
+         # benchmark GPU broadcast (result is from NVIDIA A100):
+         @btime reduce(+, map(sqrt,A_d))
+         #  59.719 μs (119 allocations: 6.36 KiB)
 
-      .. code-block:: julia
-      
-         function vadd!(c, a, b)
-             i = get_global_id()
-             @inbounds c[i] = a[i] + b[i]
-             return
-         end
-      
-         @oneapi items=length(A_d) vadd!(C_d, A_d, B_d)         
+.. challenge:: Does LinearAlgebra provide acceleration?
 
-   .. group-tab:: Apple
+   Compare how long it takes to run a normal matrix multiplication and using the :meth:`mul!`
+   method from LinearAlgebra. Is there a speedup from using :meth:`mul!`? 
+
+   .. solution:: 
 
       .. code-block:: julia
-      
-         function vadd!(c, a, b)
-             i = thread_position_in_grid_1d()
-             @inbounds c[i] = a[i] + b[i]
-             return
-         end
-      
-         @metal threads=length(A_d) vadd(C_d, A_d, B_d)
 
-But we can parallelize even further. GPUs have a limited number of threads they 
-can run on a single SM, but they also have multiple SMs. 
-To take advantage of them all, we need to run a kernel with multiple blocks: 
+         using CUDA, BenchmarkTools, LinearAlgebra
 
-.. tabs::
+         A = CUDA.rand(2^5, 2^5)
+         B = similar(A)
+         @btime A*A;
+         #  8.803 μs (16 allocations: 384 bytes)  
+         @btime mul!(B, A, A);
+         #  7.282 μs (12 allocations: 224 bytes)
 
-   .. group-tab:: NVIDIA
+         A = CUDA.rand(2^12, 2^12)
+         B = similar(A)
+         @btime A*A;
+         #  12.760 μs (28 allocations: 576 bytes)
+         @btime mul!(B, A, A)
+         #  11.020 μs (24 allocations: 416 bytes)
 
-      .. code-block:: julia
-      
-         function vadd!(c, a, b)
-             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x        
-             if i <= length(a)
-                 @inbounds c[i] = a[i] + b[i]
-             end
-             return
-         end
-
-         # smallest integer larger than or equal to length(A_d)/threads
-         numblocks = cld(length(A_d), 256)
-
-         # run using 256 threads
-         @cuda threads=size(A_d) blocks=numblocks vadd!(C_d, A_d, B_d)
-
-   .. group-tab:: AMD
-
-      .. code-block:: julia
-      
-         # WARNING: this is still untested on AMD GPUs
-         function vadd!(c, a, b)
-             i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x * 
-             if i <= length(a)
-                 @inbounds c[i] = a[i] + b[i]
-             end
-             return
-         end
-      
-         # smallest integer larger than or equal to length(A_d)/threads
-         numblocks = cld(length(A_d), 256)
-      
-         # run using 256 threads
-         @roc groupsize=256 blocks=numblocks vadd!(C_d, A_d, B_d)
-
-   .. group-tab:: Intel
-
-      WRITEME
-
-   .. group-tab:: Apple
-
-      .. code-block:: julia
-      
-         # WARNING: this is still untested on Apple GPUs
-         function vadd!(c, a, b)
-             i = thread_position_in_grid_1d()
-             if i <= length(a)
-                 @inbounds c[i] = a[i] + b[i]
-             end
-             return
-         end
-      
-         # smallest integer larger than or equal to length(A_d)/threads
-         numblocks = cld(length(A_d), 256)
-      
-         # run using 256 threads
-         @metal threads=256 grid=numblocks vadd!(C_d, A_d, B_d)                  
-
-We have been using 256 GPU threads, but this might not be optimal. The more 
-threads we use the better is the performance, but the maximum number depends 
-both on the GPU and the nature of the kernel. To optimize this choice, we can 
-first create the kernel without launching it, query it for the number of threads 
-supported, and then launch the compiled kernel:
-
-.. tabs:: 
-
-   .. group-tab:: NVIDIA 
-
-      .. code-block:: julia
-      
-         # compile kernel
-         kernel = @cuda launch=false vadd!(C_d, A_d, B_d)
-         # extract configuration via occupancy API
-         config = launch_configuration(kernel.fun)
-         # number of threads should not exceed size of array
-         threads = min(length(A), config.threads)
-         # smallest integer larger than or equal to length(A)/threads
-         blocks = cld(length(A), threads)
-
-         # launch kernel with specific configuration
-         kernel(C_d, A_d, B_d; threads, blocks)
-
-   .. group-tab:: AMD 
-
-      WRITEME
-
-   .. group-tab:: Intel
-
-      WRITEME
-
-   .. group-tab:: Apple
-
-      WRITEME
+      :meth:`LinearAlgebra.mul!` is around 15-20% faster!
 
 .. challenge:: Compare broadcasting to kernel
 
@@ -617,64 +917,47 @@ supported, and then launch the compiled kernel:
    - Write a kernel (or use the one shown above) and benchmark it with a moderately large vector.
    - Then benchmark a broadcasted version of the vector addition. How does it compare to the kernel?
 
+   .. solution:: 
 
+      First define the kernel (for NVIDIA):
 
-Profiling
----------
+      .. code-block:: julia
 
-We can not use the regular Julia profilers to profile GPU code. However, 
-we can use NVIDIA's `nvprof` profiler simply by starting Julia like this:
+         function vadd!(C, A, B)
+             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+             if i <= length(A)
+                 @inbounds C[i] = A[i] + B[i]
+             end
+             return nothing
+         end
 
-.. code-block:: bash
+      Define largish vectors:
 
-   nvprof --profile-from-start off julia
+      .. code-block:: julia
 
-To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
+         A = CuArray(ones(2^20))
+         B = CuArray(ones(2^20).*2)
+         C = CuArray(similar(A))
 
-.. code-block:: julia
+      Set nthreads and numblocks and benchmark kernel:
 
-   using CUDA
-   A_d = CuArray(zeros(10) .+ 5.0)
-   B_d = CuArray(ones(10))
-   C_d = CuArray(similar(B_d))
-   # first run it once to force compilation
-   vadd!(C_d, A_d, B_d)  
-   CUDA.@profile vadd!(C_d, A_d, B_d)
+      .. code-block:: julia
 
-When we quit the REPL again, the profiler process will print information about 
-the executed kernels and API calls.
+         @btime C .= A .+ B
+         nthreads = 1024
+         numblocks = cld(length(A), nthreads)
 
+         @btime CUDA.@sync @cuda threads=nthreads blocks=numblocks vadd!(C, A, B)
+         #  18.410 μs (33 allocations: 1.67 KiB)
 
-Neural networks on the GPU
---------------------------
+      Finally compare to the higher-level array interface:
 
-Flux has `inbuilt support for running on GPUs 
-<https://fluxml.ai/Flux.jl/stable/gpu/>`__ and 
-provides simple macros and convenience functions 
-to transfer data and models to the GPU.
-For example:
+      .. code-block:: julia
 
-.. code-block:: julia
+         @btime C .= A .+ B
+         #  5.014 μs (27 allocations: 1.66 KiB)
 
-   (xtrain, xtest), (ytrain, ytest) = partition((X, Y), 0.8, shuffle=true, rng=123, multi=true)
-   xtrain, xtest = Float32.(Array(xtrain)'), Float32.(Array(xtest)')    |> gpu
-   ytrain = Flux.onehotbatch(ytrain, ["Adelie", "Gentoo", "Chinstrap"]) |> gpu
-   ytest = Flux.onehotbatch(ytest, ["Adelie", "Gentoo", "Chinstrap"])   |> gpu
-      
-   n_features, n_classes, n_neurons = 4, 3, 10
-   model = Chain(
-           Dense(n_features, n_neurons),
-           BatchNorm(n_neurons, relu),
-           Dense(n_neurons, n_classes),
-           softmax)  |> gpu
-
-
-
-
-
-
-Exercises
----------
+      The high-level abstraction is significantly faster!
 
 .. exercise:: Port Laplace function to GPU
 
@@ -700,18 +983,16 @@ Exercises
    2. The arrays are two-dimensional, so you will need both the ``.x`` and ``.y`` 
       parts of ``threadIdx()``, ``blockDim()`` and ``blockIdx()``.
 
-      - Does it matter how you match the ``x`` and ``y`` dimensions of the 
-        threads and blocks to the dimensions of the data (i.e. rows and columns)? 
-
    3. You also need to specify tuples 
       for the number of threads and blocks in the ``x`` and ``y`` dimensions, 
       e.g. ``threads = (32, 32)`` and similarly for ``blocks`` (using ``cld``).
 
-      - Note the hardware limitations: the product of x and y threads cannot 
-        exceed it.
+      - **Note the hardware limitations**: the product of ``x`` and ``y`` threads cannot 
+        exceed it!
 
    4. For debugging, you can print from inside a kernel using ``@cuprintln`` 
-      (e.g. to print thread numbers). It will only print during the first 
+      (e.g. to print thread numbers). **But printing is slow so use small matrix sizes**! 
+      It will only print during the first 
       execution - redefine the function again to print again.
       If you get warnings or errors relating to types, you can use the code 
       introspection macro ``@device_code_warntype`` to see the types inferred 
@@ -757,7 +1038,7 @@ Exercises
 
       .. code-block:: julia
 
-         function lap2d!(u::CuArray, unew::CuArray)
+         function lap2d_gpu!(u, unew)
              M, N = size(u)
              i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
              j = (blockIdx().y - 1) * blockDim().y + threadIdx().y
@@ -773,15 +1054,15 @@ Exercises
       .. code-block:: julia
 
          # set number of threads and blocks
-         nthreads = 16
-         numblocks = cld(nx, nthreads)
+         nthreads = (16, 16)
+         numblocks = (cld(size(u, 1), nthreads[1]), cld(size(u, 2), nthreads[2]))
 
          for i in 1:1000
             # call cpu and gpu versions
             lap2d!(u, unew)
             u = copy(unew)
 
-            @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
+            @cuda threads=nthreads blocks=numblocks lap2d_gpu!(u_d, unew_d)
             u_d = copy(unew_d)
          end
 
@@ -794,23 +1075,15 @@ Exercises
 
          using BenchmarkTools
          @btime lap2d!(u, unew)
-         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
+         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d_gpu!(u_d, unew_d)
 
 
-.. exercise:: Port a neural network to the GPU
-
-   Take the neural network model that you trained in the  
-   :ref:`Deep learning exercise <DLexercise>` and GPU-port it!
-
-   Additional reading material that might help:
-
-   - https://fluxml.ai/Flux.jl/stable/gpu/
-   - https://fluxml.ai/tutorials/2020/09/15/deep-learning-flux.html
 
 See also
 --------
 
-- https://juliagpu.org/
-- https://cuda.juliagpu.org/stable/
-- https://github.com/maleadt/juliacon21-gpu_workshop
-- https://fluxml.ai/tutorials/2020/09/15/deep-learning-flux.html
+- `JuliaGPU organisation <https://juliagpu.org/>`__
+- `CUDA.jl documentation <https://cuda.juliagpu.org/stable/>`__
+- `AMDGPU.jl documentation <https://amdgpu.juliagpu.org/stable/>`__
+- `JuliaCon2021 GPU workshop <https://github.com/maleadt/juliacon21-gpu_workshop>`__
+- `Advanced GPU programming tutorials <https://github.com/JuliaComputing/Training/tree/master/AdvancedGPU>`__
