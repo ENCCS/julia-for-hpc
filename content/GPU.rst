@@ -737,6 +737,13 @@ supported, and then launch the compiled kernel:
    that requires the Julia runtime library. This means one cannot allocate memory or perform 
    dynamic function calls, both of which are easy to do accidentally!
 
+.. callout:: 1D, 2D and 3D
+
+   CUDA.jl and AMDGPU.jl support indexing in up to 3 dimensions (x, y and z, e.g. 
+   ``threadIdx().x`` and ``workitemIdx().x``). This is convenient 
+   for multidimensional data where thread blocks can be organised into 1D, 2D or 3D arrays of 
+   threads.
+
 
 Debugging
 ---------
