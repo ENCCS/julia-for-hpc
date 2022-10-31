@@ -770,9 +770,9 @@ Profiling
 We can not use the regular Julia profilers to profile GPU code. However, 
 we can use NVIDIA's Nsight systems profiler simply by starting Julia like this:
 
-.. code-block:: bash
+.. code-block:: console
 
-   nsys launch julia
+   $ nsys launch julia
 
 To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
 
@@ -787,7 +787,12 @@ To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
    CUDA.@profile @cuda threads=length(A) vadd!(C, A, B)
 
 When we quit the REPL again, the profiler process will print information about 
-the executed kernels and API calls.
+the executed kernels and API calls into report files. These can be inspected 
+in a GUI, but summary statistics can also be printed in the terminal:
+
+.. code-block:: console
+
+   $ nsys stats report.nsys-rep
 
 More information on profiling with NVIDIA tools can be found in the 
 `documentation <https://cuda.juliagpu.org/stable/development/profiling/>`__.

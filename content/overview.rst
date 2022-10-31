@@ -322,8 +322,8 @@ integer output and likewise for floats:
 
 Other convenience functions exist to make types consistent, including: 
 
-- ``eltype`` to determine the type of the array elements
-- ``similar`` to create an uninitialized mutable array with 
+- :meth:`eltype` to determine the type of the array elements
+- :meth:`similar` to create an uninitialized mutable array with 
   the given element type and size.
 
 
