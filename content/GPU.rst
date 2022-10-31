@@ -748,40 +748,49 @@ supported, and then launch the compiled kernel:
 Debugging
 ---------
 
-Many things can go wrong with GPU kernel programming and unfortunately error messages are not very 
-useful because of how the GPU compiler works.
+Many things can go wrong with GPU kernel programming and unfortunately error messages are 
+sometimes not very useful because of how the GPU compiler works. 
 
-- @cuprintln
-- @cushow
-- @device_code_warntype
+Conventional print-debugging is often a reasonably effective way to debug GPU code. 
+CUDA.jl provides macros that facilitate this:
 
-WRITEME
+- ``@cushow`` (like ``@show``): visualize an expression and its result, and return that value. 
+- ``@cuprintln`` (like ``println``): to print text and values. 
+- ``@cuaassert`` (like ``@assert``) can also be useful to find issues and abort execution.
 
+GPU code introspection macros also exist, like ``@device_code_warntype``, to track 
+down type instabilities.
+
+More information on debugging can be found in the 
+`documentation <https://cuda.juliagpu.org/stable/development/debugging/>`__.
 
 Profiling
 ---------
 
 We can not use the regular Julia profilers to profile GPU code. However, 
-we can use NVIDIA's `nvprof` profiler simply by starting Julia like this:
+we can use NVIDIA's Nsight systems profiler simply by starting Julia like this:
 
 .. code-block:: bash
 
-   nvprof --profile-from-start off julia
+   nsys launch julia
 
 To then profile a particular function, we prefix by the ``CUDA.@profile`` macro:
 
 .. code-block:: julia
 
    using CUDA
-   A_d = CuArray(zeros(10) .+ 5.0)
-   B_d = CuArray(ones(10))
-   C_d = CuArray(similar(B_d))
+   A = CuArray(zeros(10) .+ 5.0)
+   B = CuArray(ones(10))
+   C = CuArray(similar(B))
    # first run it once to force compilation
-   vadd!(C_d, A_d, B_d)  
-   CUDA.@profile vadd!(C_d, A_d, B_d)
+   @cuda threads=length(A) vadd!(C, A, B)  
+   CUDA.@profile @cuda threads=length(A) vadd!(C, A, B)
 
 When we quit the REPL again, the profiler process will print information about 
 the executed kernels and API calls.
+
+More information on profiling with NVIDIA tools can be found in the 
+`documentation <https://cuda.juliagpu.org/stable/development/profiling/>`__.
 
 Conditional use
 ---------------
