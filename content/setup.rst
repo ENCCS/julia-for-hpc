@@ -73,12 +73,14 @@ To exit the REPL again, hit ``CTRL-d`` or type ``exit()``.
 Installing Visual Studio Code
 -----------------------------
 
+First install VSCode according to the offical documentation: 
 https://code.visualstudio.com/Download
 
 Installing the VSCode Julia extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Click the Extensions button on the left-side menu, type `Julia` and 
+After starting VSCode, 
+click the Extensions button on the left-side menu, type `Julia` and 
 click `Install` to install the Julia extension.
 
 .. figure:: img/vscode_extensionbutton.png
@@ -107,6 +109,63 @@ In this field enter the path to the Julia executable that you have installed.
 
 If you are curious, scroll through the other possible configuration settings!
 
+Installing packages
+-------------------
+
+A number of Julia packages is used in this lesson. These can be installed on-the-fly 
+during a workshop, but you can also follow the instructions below to install all packages 
+in your global Julia environment.
+
+Copy-paste the following code into a Julia session:
+
+.. code-block:: julia
+
+   using Pkg
+
+   Pkg.add("BenchmarkTools")
+   Pkg.add("Distributed")
+   Pkg.add("LinearAlgebra")
+   Pkg.add("MPI")
+   Pkg.add("MPIPreferences")
+   Pkg.add("Plots")
+   Pkg.add("Profile")
+   Pkg.add("SharedArrays")
+   Pkg.add("StaticArrays")
+
+This could take a couple of minutes. After installation completes you should be able to list 
+all installed packages:
+
+.. code-block:: julia 
+
+   Pkg.status()
+
+   # Status `~/julia/julia-for-hpc/foo/Project.toml`
+   #   [6e4b80f9] BenchmarkTools v1.3.1
+   #   [da04e1cc] MPI v0.20.3
+   #   [3da0fdf6] MPIPreferences v0.1.6
+   #   [91a5bcdd] Plots v1.35.6
+   #   [90137ffa] StaticArrays v1.5.9
+   #   [8ba89e20] Distributed
+   #   [37e2e46d] LinearAlgebra
+   #   [9abbd945] Profile
+   #   [1a1011a3] SharedArrays   
+
+Configuring MPI
+^^^^^^^^^^^^^^^
+
+Using MPI in Julia requires an MPI library. On an HPC system it is best to use a preinstalled 
+MPI library, but on personal computers it's best to let the MPI.jl package install its own 
+library and wrapper for the ``mpiexec`` command. Do this by:
+
+.. code-block:: julia
+
+   using MPI
+   MPI.install_mpiexecjl()
+
+This installs a ``mpiexecjl`` under ``~/.julia/bin``, which should be added to your 
+``PATH`` variable. 
+
+
 Using EuroHPC systems
 ---------------------
 
@@ -127,27 +186,7 @@ Using EuroHPC systems
          :language: bash
 
 
-MPI
----
 
-FIXME
-
-https://juliaparallel.org/MPI.jl/latest/usage/#Julia-wrapper-for-mpiexec
-
-.. code-block:: julia
-
-   using Pkg
-   Pkg.add("MPI")
-
-Julia wrapper for ``mpiexec``:
-
-.. code-block:: julia
-
-   using MPI
-   MPI.install_mpiexecjl()
-
-This installs a ``mpiexecjl`` under ``~/.julia/bin``, which should be added to your 
-``PATH`` variable. 
 
 
 (Optional) Installing JupyterLab and a Julia kernel
