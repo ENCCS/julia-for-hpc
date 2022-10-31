@@ -516,7 +516,8 @@ and ``workitemIdx().x`` for AMD):
    .. group-tab:: AMD
 
       .. code-block:: julia
-      
+
+         # WARNING: this is still untested on AMD GPUs
          function vadd!(C, A, B)
              index = workitemIdx().x   # linear indexing, so only use `x`
              @inbounds C[index] = A[index] + B[index]
@@ -534,7 +535,8 @@ and ``workitemIdx().x`` for AMD):
    .. group-tab:: Intel
 
       .. code-block:: julia
-      
+
+         # WARNING: this is still untested on Intel GPUs
          function vadd!(C, A, B)
              index = get_local_id()
              @inbounds C[index] = A[index] + B[index]
@@ -673,7 +675,6 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
 
       .. code-block:: julia
       
-         # WARNING: this is still untested on Apple GPUs
          function vadd!(C, A, B)
              i = thread_position_in_grid_1d()
              if i <= length(A)
@@ -819,7 +820,8 @@ Exercises
           return s
       end
 
-   Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
+   - Use higher-order array abstractions to compute the sqrt-sum operation on a GPU!
+   - If you're interested in how the performance changes, benchmark the CPU and GPU versions with ``@btime``
 
    Hint: You can do it on a single line...
 
@@ -837,6 +839,25 @@ Exercises
       
       GPU porting complete!
 
+      To benchmark:
+
+      .. code-block:: julia
+
+         A=ones(1024,1024);
+         A_d = CuArray(A);
+
+         # benchmark CPU function
+         @btime sqrt_sum(A)
+         #  2.664 ms (1 allocation: 16 bytes)
+
+         # benchmark also broadcast operations on the CPU:
+         @btime reduce(+, map(sqrt,A))
+         #  2.930 ms (4 allocations: 8.00 MiB)
+         #  Slightly slower than the sqrt_sum function call but much larger memory allocations!
+
+         # benchmark GPU broadcast (result is from NVIDIA A100):
+         @btime reduce(+, map(sqrt,A_d))
+         #  59.719 μs (119 allocations: 6.36 KiB)
 
 .. challenge:: Does LinearAlgebra provide acceleration?
 
@@ -880,6 +901,47 @@ Exercises
    - Write a kernel (or use the one shown above) and benchmark it with a moderately large vector.
    - Then benchmark a broadcasted version of the vector addition. How does it compare to the kernel?
 
+   .. solution:: 
+
+      First define the kernel (for NVIDIA):
+
+      .. code-block:: julia
+
+         function vadd!(C, A, B)
+             i = threadIdx().x + (blockIdx().x - 1) * blockDim().x
+             if i <= length(A)
+                 @inbounds C[i] = A[i] + B[i]
+             end
+             return nothing
+         end
+
+      Define largish vectors:
+
+      .. code-block:: julia
+
+         A = CuArray(ones(2^20))
+         B = CuArray(ones(2^20).*2)
+         C = CuArray(similar(A))
+
+      Set nthreads and numblocks and benchmark kernel:
+
+      .. code-block:: julia
+
+         @btime C .= A .+ B
+         nthreads = 1024
+         numblocks = cld(length(A), nthreads)
+
+         @btime CUDA.@sync @cuda threads=nthreads blocks=numblocks vadd!(C, A, B)
+         #  18.410 μs (33 allocations: 1.67 KiB)
+
+      Finally compare to the higher-level array interface:
+
+      .. code-block:: julia
+
+         @btime C .= A .+ B
+         #  5.014 μs (27 allocations: 1.66 KiB)
+
+      The high-level abstraction is significantly faster!
 
 .. exercise:: Port Laplace function to GPU
 
@@ -905,18 +967,16 @@ Exercises
    2. The arrays are two-dimensional, so you will need both the ``.x`` and ``.y`` 
       parts of ``threadIdx()``, ``blockDim()`` and ``blockIdx()``.
 
-      - Does it matter how you match the ``x`` and ``y`` dimensions of the 
-        threads and blocks to the dimensions of the data (i.e. rows and columns)? 
-
    3. You also need to specify tuples 
       for the number of threads and blocks in the ``x`` and ``y`` dimensions, 
       e.g. ``threads = (32, 32)`` and similarly for ``blocks`` (using ``cld``).
 
-      - Note the hardware limitations: the product of x and y threads cannot 
-        exceed it.
+      - **Note the hardware limitations**: the product of ``x`` and ``y`` threads cannot 
+        exceed it!
 
    4. For debugging, you can print from inside a kernel using ``@cuprintln`` 
-      (e.g. to print thread numbers). It will only print during the first 
+      (e.g. to print thread numbers). **But printing is slow so use small matrix sizes**! 
+      It will only print during the first 
       execution - redefine the function again to print again.
       If you get warnings or errors relating to types, you can use the code 
       introspection macro ``@device_code_warntype`` to see the types inferred 
@@ -962,7 +1022,7 @@ Exercises
 
       .. code-block:: julia
 
-         function lap2d!(u::CuArray, unew::CuArray)
+         function lap2d_gpu!(u, unew)
              M, N = size(u)
              i = (blockIdx().x - 1) * blockDim().x + threadIdx().x
              j = (blockIdx().y - 1) * blockDim().y + threadIdx().y
@@ -978,15 +1038,15 @@ Exercises
       .. code-block:: julia
 
          # set number of threads and blocks
-         nthreads = 16
-         numblocks = cld(nx, nthreads)
+         nthreads = (16, 16)
+         numblocks = (cld(size(u, 1), nthreads[1]), cld(size(u, 2), nthreads[2]))
 
          for i in 1:1000
             # call cpu and gpu versions
             lap2d!(u, unew)
             u = copy(unew)
 
-            @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
+            @cuda threads=nthreads blocks=numblocks lap2d_gpu!(u_d, unew_d)
             u_d = copy(unew_d)
          end
 
@@ -999,7 +1059,7 @@ Exercises
 
          using BenchmarkTools
          @btime lap2d!(u, unew)
-         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d!(u_d, unew_d)
+         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d_gpu!(u_d, unew_d)
 
 
 
