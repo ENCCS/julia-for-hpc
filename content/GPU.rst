@@ -436,7 +436,7 @@ Let's take a simple example, adding two vectors:
    vadd!(C, A, B)
 
 We can already run this on the GPU with the ``@cuda`` macro, which 
-will compile ``vadd!`` into a GPU kernel and launch it:
+will compile :meth:`vadd!` into a GPU kernel and launch it:
 
 .. tabs:: 
 
@@ -474,8 +474,8 @@ will compile ``vadd!`` into a GPU kernel and launch it:
 
       .. code-block:: julia
 
-         A_d = MtlArray(A)
-         B_d = MtlArray(B)
+         A_d = MtlArray(Float32.(A))
+         B_d = MtlArray(Float32.(B))
          C_d = similar(B_d)
 
          @metal vadd!(C_d, A_d, B_d)   
@@ -489,7 +489,9 @@ analogous respectively to ``threadid`` and ``nthreads`` for multithreading.
 .. figure:: img/MappingBlocksToSMs.png
    :align: center
 
-We can split work between the GPU threads like this:   
+We can split work between the GPU threads by using a special function which 
+returns the index of the GPU thread which executes it (e.g. ``threadIdx().x`` for NVIDIA 
+and ``workitemIdx().x`` for AMD):  
 
 .. tabs:: 
 
@@ -498,57 +500,74 @@ We can split work between the GPU threads like this:
       .. code-block:: julia
       
          function vadd!(C, A, B)
-             i = threadIdx().x   # linear indexing, so only use `x`
-             @inbounds C[i] = A[i] + B[i]
+             index = threadIdx().x   # linear indexing, so only use `x`
+             @inbounds C[index] = A[index] + B[index]
              return
          end
 
-         A, B = CUDA.ones(2^10)*2, CUDA.ones(2^10)*3
+         A, B = CUDA.ones(2^9)*2, CUDA.ones(2^9)*3
          C = similar(A)
 
          nthreads = length(A)
          @cuda threads=nthreads vadd!(C, A, B)
+
+         @assert all(Array(C) .== 5.0)
 
    .. group-tab:: AMD
 
       .. code-block:: julia
       
          function vadd!(C, A, B)
-             i = workitemIdx().x
-             @inbounds C[i] = A[i] + B[i]
+             index = workitemIdx().x   # linear indexing, so only use `x`
+             @inbounds C[index] = A[index] + B[index]
              return
          end
-            
+
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3)
+         C = similar(A)  
+
          groupsize = length(A)
          @roc groupsize=groupsize vadd!(C, A, B)   
+         
+         @assert all(Array(C) .== 5.0)
 
    .. group-tab:: Intel
 
       .. code-block:: julia
       
          function vadd!(C, A, B)
-             i = get_local_id()
-             @inbounds C[i] = A[i] + B[i]
+             index = get_local_id()
+             @inbounds C[index] = A[index] + B[index]
              return
          end
-      
+
+         A, B = oneArray(ones(2^9)*2), oneArray(ones(2^9)*3)
+         C = similar(A)      
+
          items = length(A)
-         @oneapi items=items vadd!(C, A, B)   
+         @oneapi items=items vadd!(C, A, B) 
+
+         @assert all(Array(C) .== 5.0)  
 
    .. group-tab:: Apple
 
       .. code-block:: julia
       
          function vadd!(C, A, B)
-             i = thread_position_in_grid_1d()
-             @inbounds C[i] = A[i] + B[i]
+             index = thread_position_in_grid_1d()
+             @inbounds C[index] = A[index] + B[index]
              return
          end
       
+         A, B = MtlArray(ones(Float32, 2^9)*2), MtlArray(Float32, ones(2^9)*3)
+         C = similar(A)
+
          nthreads = length(A)
          @metal threads=nthreads vadd!(C, A, B)
 
-Unfortunately, this implementation will **not scale up** to arrays that are larger than the 
+         @assert all(Array(C) .== 5.0)
+
+However, this implementation will **not scale up** to arrays that are larger than the 
 maximum number of threads in a block! We can find out how many threads are supported on the 
 GPU we are using:
 
@@ -580,8 +599,9 @@ GPU we are using:
 
 
 Clearly, GPUs have a limited number of threads they can run on a single SM. 
-But they also have multiple SMs! 
-To parallelise over more SMs, we need to run a kernel with multiple blocks: 
+To parallelise over multiple SMs we need to run a kernel with multiple blocks 
+where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functions 
+(in the case of NVIDIA):
 
 .. tabs::
 
@@ -604,6 +624,8 @@ To parallelise over more SMs, we need to run a kernel with multiple blocks:
          # run using 256 threads
          @cuda threads=nthreads blocks=numblocks vadd!(C, A, B)
 
+         @assert all(Array(C) .== 5.0)
+
    .. group-tab:: AMD
 
       .. code-block:: julia
@@ -624,9 +646,28 @@ To parallelise over more SMs, we need to run a kernel with multiple blocks:
          # run using 256 threads
          @roc groupsize=nthreads blocks=numblocks vadd!(C, A, B)
 
+         @assert all(Array(C) .== 5.0)
+
    .. group-tab:: Intel
 
-      WRITEME
+      .. code-block:: julia
+
+         # WARNING: this is still untested on Intel GPUs
+         function vadd!(C, A, B)
+             i = get_global_id()
+             if i <= length(a)
+                 c[i] = a[i] + b[i]
+             end
+             return
+         end
+   
+         nthreads = 256
+         # smallest integer larger than or equal to length(A)/threads
+         numgroups = cld(length(a),256)
+   
+         @oneapi items=nthreads groups=numgroups vadd!(c, a, b)
+
+         @assert all(Array(C) .== 5.0)
 
    .. group-tab:: Apple
 
@@ -641,16 +682,20 @@ To parallelise over more SMs, we need to run a kernel with multiple blocks:
              return
          end
       
-         nthread = 256
+         nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numblocks = cld(length(A), nthreads)
       
          # run using 256 threads
-         @metal threads=nthreads grid=numblocks vadd!(C, A, B)                  
+         @metal threads=nthreads grid=numblocks vadd!(C, A, B)    
+
+         @assert all(Array(C) .== 5.0)              
 
 We have been using 256 GPU threads, but this might not be optimal. The more 
 threads we use the better is the performance, but the maximum number depends 
-both on the GPU and the nature of the kernel. To optimize this choice, we can 
+both on the GPU and the nature of the kernel. 
+
+To optimize the number of threads, we can 
 first create the kernel without launching it, query it for the number of threads 
 supported, and then launch the compiled kernel:
 
