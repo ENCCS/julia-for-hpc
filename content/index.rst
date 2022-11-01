@@ -51,7 +51,7 @@ computing.
    MPI
    cluster
    GPU
-   outlook
+   conclusions
 
 .. toctree:: 
    :hidden:
