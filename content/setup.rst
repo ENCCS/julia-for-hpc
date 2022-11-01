@@ -173,7 +173,7 @@ Using EuroHPC systems
 
    .. tab:: Meluxina
 
-      To reserve an interactive node (replace PROJECT and QOS (-q) and reservation (--res) 
+      To reserve an interactive node (replace project (-A), QOS (-q) and reservation (--res) 
       as needed):
 
       .. code-block:: console
@@ -185,7 +185,19 @@ Using EuroHPC systems
       .. literalinclude:: code/submit_meluxina.sh
          :language: bash
 
+         #!/bin/bash -l
+         #SBATCH -A p200051
+         #SBATCH -t 00:10:00
+         #SBATCH -q test
+         #SBATCH -p cpu
+         #SBATCH -N 1
+         #SBATCH --ntasks-per-node=8
 
+         module load OpenMPI
+         module load Julia
+
+         n=$SLURM_NTASKS
+         srun -n $n julia mpi_program.jl
 
 
 
