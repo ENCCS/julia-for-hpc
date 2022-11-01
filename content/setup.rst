@@ -196,8 +196,7 @@ Using EuroHPC systems
 
       To run a batch job to run an MPI job, create a job script similar to the following:
 
-      .. literalinclude:: code/submit_meluxina.sh
-         :language: bash
+      .. code-block:: bash
 
          #!/bin/bash -l
          #SBATCH -A p200051
