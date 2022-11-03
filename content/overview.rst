@@ -4,7 +4,7 @@ Special features of Julia
 .. questions::
 
    - How does the type system in Julia work?
-   - How can a language be both dynamically and statically typed?
+   - Is Julia dynamically or statically typed?
    - What is multiple dispatch?
    - What is code introspection?
    - What is metaprogramming?
@@ -38,9 +38,6 @@ types in Julia:
   can be used for variables.
 
 
-
-
-
 Types in Julia form a “type tree”, in which the leaves are concrete
 types.
 
@@ -50,8 +47,8 @@ types.
    licensed under `CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/deed.en>`__.
 
 
-Derived types
-~~~~~~~~~~~~~
+Composite types
+~~~~~~~~~~~~~~~
 
 New types, i.e. new kinds of data structures, can be defined with the
 ``struct`` keyword, or ``mutable struct`` if you want to be able to
@@ -65,7 +62,7 @@ classical example:
         y
     end
 
-A new ``Point`` object can be defined by
+A new ``Point2D`` object can be defined by
 
 .. code-block:: julia
 
@@ -79,11 +76,56 @@ and its elements accessed by
     p.x
 
 
+Constructors
+~~~~~~~~~~~~
+
+Composite type objects also serve as **constructor functions**. These create new instances of themselves 
+when applied to an argument tuple as a function. Composite types have a default constructor 
+which gets called when creating a new object, but it's possible to explicitly define both 
+**inner** and **outer** constructor methods.
+
+If we define an inner constructor method, no default constructor is provided any longer. Inner 
+constructors have access to a special function called :meth:`new` which creates a new object:
+
+.. code-block:: julia
+
+   struct Point2D
+       x
+       y
+       Point2D(c::Complex) = new(c.re, c.im)
+   end   
+
+   Point2D(1, 2)  # only works if first version of Point2D is also defined!
+   # Point2D(1, 2)
+
+   Point2D(1 + 2im)
+   # Point(1, 2)
+
+For this case, it would be better to define an additional outer constructor - just like when 
+methods are added to a function:
+
+.. code-block:: julia
+
+   struct Point2D
+       x
+       y
+   end   
+
+   Point2D(c::Complex) = Point2D(c.re, c.im)
+
+   Point2D(1, 2) 
+   # Point2D(1, 2)
+
+   Point2D(1 + 2im)
+   # Point2D(1, 2)   
+
+
 Parametric types
 ~~~~~~~~~~~~~~~~
 
 A useful feature of Julia’s type system are *type parameters*: the
-ability to use parameters when defining types. For example:
+ability to use parameters when defining types. For example (using a new name since structs 
+can not be redefined):
 
 .. code-block:: julia
 
@@ -507,6 +549,10 @@ It's also reassuring to know that Julia can solve the chicken-and-egg dilemma:
 Exercises
 ---------
 
+.. exercise:: Write a mutable struct
+
+   WRITEME
+
 .. exercise:: Introspect type-stable and type-unstable functions
 
    While the code-introspection macros produce complicated output which 
@@ -644,12 +690,12 @@ Exercises
 See also
 --------
 
-- Aaron Christianson.
-  `Object Orientation and Polymorphism in Julia <https://github.com/ninjaaron/oo-and-polymorphism-in-julia>`__
-- Christopher Rackauckas. 
+- Aaron Christianson:
+  `Object Orientation and Polymorphism in Julia <https://github.com/ninjaaron/oo-and-polymorphism-in-julia>`__.
+- Christopher Rackauckas: 
   `Type-Dispatch Design: Post Object-Oriented Programming for Julia 
-  <https://www.stochasticlifestyle.com/type-dispatch-design-post-object-oriented-programming-julia/>`__
-- `Documentation on metaprogramming <https://docs.julialang.org/en/v1/manual/metaprogramming/>`__
-- `Metaprogramming tutorial from JuliaCon21 <https://github.com/dpsanders/Metaprogramming_JuliaCon_2021>`__
+  <https://www.stochasticlifestyle.com/type-dispatch-design-post-object-oriented-programming-julia/>`__.
+- `Documentation on metaprogramming <https://docs.julialang.org/en/v1/manual/metaprogramming/>`__.
+- `Metaprogramming tutorial from JuliaCon21 <https://github.com/dpsanders/Metaprogramming_JuliaCon_2021>`__.
 - `Full list of supported unicode symbols 
   <https://docs.julialang.org/en/v1/manual/unicode-input/>`__.
