@@ -151,7 +151,15 @@ Sometimes important information is displayed inside boxes with an exclamation ma
 
   Please don't hesitate to ask questions during the workshop!
 
+Discussion
+~~~~~~~~~~
 
+Discussion exercises are conducted either via voice or through a shared workshop document.
+
+.. discussion:: Are these instructions clear?
+
+   Discuss any questions about the lesson format either via the shared workshop document or  
+   in breakout room sessions.
 
 See also
 --------
