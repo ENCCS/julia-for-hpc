@@ -18,7 +18,6 @@ Why was Julia created?
 Julia has been designed to be both fast and dynamic.
 In the words of its developers:
 
-.. discussion:: The vision
 
    *We want a language that's open source, with a liberal license. We
    want the speed of C with the dynamism of Ruby. We want a language
