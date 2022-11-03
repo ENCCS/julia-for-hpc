@@ -544,15 +544,23 @@ Exceptions can be created explicitly with `throw`:
 
 .. code-block:: julia
 
-	  function negexp(x)
-	      if x>=0
-	          return exp(-x)
-	      else
-              throw(DomainError(x, "argument must be non-negative"))
-	      end
-	  end
+   function negexp(x)
+       if x>=0
+           return exp(-x)
+       else
+           throw(DomainError(x, "argument must be non-negative"))
+       end
+   end
 
-	  
+
+The ``@assert`` *macro* can be used to throw an AssertionError if a condition does not hold:
+
+.. code-block:: julia
+
+  @assert iseven(3) "3 is an odd number!"
+  # ERROR: AssertionError: 3 is an odd number!   
+
+
 Scope
 -----
 
