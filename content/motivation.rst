@@ -140,8 +140,8 @@ equation with error bars!
 .. figure:: img/composability.png
 
 
-When not to use Julia
----------------------
+Drawbacks and workarounds
+-------------------------
 
 **Time to first plot**: If you open the Julia REPL and type in a plotting command, it 
 will take a few seconds for the plot to appear because 
@@ -185,7 +185,6 @@ What you will learn
 
 - What's different in Julia compared to most other languages.
 - How to efficiently develop Julia packages and write unit tests.
-- How to work with datasets, make visualizations and create a simple machine learning model.
 - How to benchmark and profile Julia code.
 - How to write efficient serial code.
 - How to use multithreading, multiprocessing and MPI.
@@ -207,7 +206,8 @@ What you will not learn
   sure to go through the recommended additional reading at the end of each 
   episode if you want to learn more.
 - How to interoperate with other languages. Calling code in Python, R, 
-  C/C++ and Fortran is relatively straightforward but is outside the current scope.
+  `C/C++ and Fortran <https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/>`__ 
+  is relatively straightforward but is outside the current scope.
 - Julia has mature packages for scientific computing in many different scientific disciplines.
   An overview of the package ecosystem will be provided in :ref:`scientific_computing` but we 
   will not go into any details except for an appetizer on data science and machine learning.
@@ -219,3 +219,6 @@ See also
 - Lin, Wei-Chen, and Simon McIntosh-Smith. 
   `Comparing Julia to Performance Portable Parallel Programming Models for HPC. <https://ieeexplore.ieee.org/abstract/document/9652798>`_, 
   2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.
+- `Interfacing with C and Fortran <https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/>`__.
+- `Interfacing with Python via PyCall <https://github.com/JuliaPy/PyCall.jl>`__.
+- `Interfacing to various other languages <https://github.com/JuliaInterop>`__.
