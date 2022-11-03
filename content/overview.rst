@@ -62,6 +62,16 @@ classical example:
         y
     end
 
+One can also specify types of the individual fields (but we can't redefine structs, try running 
+this code!):
+
+.. code-block:: julia
+
+    struct Point2D
+        x::Float64
+        y::Float64
+    end
+
 A new ``Point2D`` object can be defined by
 
 .. code-block:: julia
@@ -549,9 +559,64 @@ It's also reassuring to know that Julia can solve the chicken-and-egg dilemma:
 Exercises
 ---------
 
-.. exercise:: Write a mutable struct
+.. exercise:: Write a composite type and a method that acts on it
 
-   WRITEME
+   Write a ``mutable struct`` called `Ship` with two fields: ``name`` (which is a String) and 
+   ``location``, which is a Point (define the Point type if needed).
+
+   Then write a function :meth:`move!` which takes three arguments: a `Ship` object, and 
+   two displacements, `dx` and `dy`.
+
+   Finally create a `Ship` object with a name and initial location, and call the :meth:`move!` 
+   method on it. Print the `Ship` object to see if it has moved.
+
+   Optional 1: Write an outer constructor for `Ship` which, instead of a Point object, takes 
+   `x` and `y` coordinates in separate arguments.
+
+   Optional 2: Write another method for the :meth:`move!` where the x and y displacements are 
+   defined by a Point type.
+
+   .. solution:: 
+
+      .. code-block:: julia
+
+         struct Point{T}
+             x::T
+             y::T
+         end
+   
+         mutable struct Ship
+             name::String
+             location::Point
+         end            
+   
+         function move!(s::Ship, dx, dy)
+             oldloc = s.location
+             s.location = Point(oldloc.x+dx, oldloc.y+dy)
+         end      
+   
+         beagle = Ship("HMS Beagle", Point(1.0,2.0))
+         # Ship("HMS Beagle", Point{Float64}(1.0, 2.0))
+   
+         move!(beagle, 2, 5)
+         print(beagle)
+         # Ship("HMS Beagle", Point{Float64}(3.0, 7.0))
+   
+         # outer constructor
+         Ship(name, x, y) = Ship(name, Point(x,y))
+         vasa = Ship("Vasa", 4.0, 2.0)
+         # Ship("Vasa", Point{Float64}(4.0, 2.0))
+
+         # new method
+         function move!(s::Ship, p::Point)
+             oldloc = s.location
+             s.location = Point(oldloc.x+p.x, oldloc.y+p.y)
+         end
+   
+         move!(beagle, Point(2,2))
+         print(beagle)
+         # Ship("HMS Beagle", Point{Float64}(5.0, 9.0))
+
 
 .. exercise:: Introspect type-stable and type-unstable functions
 
