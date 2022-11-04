@@ -58,7 +58,6 @@ computing.
    :maxdepth: 1
    :caption: Optional episodes  
 
-   scientific-computing
    data-science
    exercises
 
