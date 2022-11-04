@@ -246,6 +246,10 @@ Exercises
    Can it safely be threaded, i.e. is there any risk of race 
    conditions?
 
+   .. solution:: Is it thread-safe?
+
+      Yes, this function is thread-safe since each iteration of the loop accesses a different memory location.
+
    - Insert the ``Threads.@threads`` macro in the right location - 
      note that ``@threads`` currently only works on outermost loops!
    - Measure its effects with ``@benchmark``.
@@ -261,6 +265,90 @@ Exercises
    - Now run with different number of threads from a terminal using 
      ``julia -t <N> laplace.jl`` and observe the scaling.
    - Try increasing the problem size (e.g. ``M=N=8192``). Does it scale better?
+
+
+.. exercise:: Multithread the computation of π
+
+   .. figure:: img/pi_with_darts.png
+      :scale: 7 %
+      :align: right
+
+   Consider the following function which estimates π by "throwing darts", 
+   i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking 
+   if they fall within the unit circle.
+
+   .. literalinclude:: code/estimate_pi.jl
+      :language: julia
+
+   .. code-block:: julia
+
+      num_points = 100_000_000
+      estimate_pi(num_points)  # 3.14147572...
+
+   Can this function be safely threaded, i.e. is there any risk of race 
+   conditions?
+
+   .. solution:: Is it thread-safe?
+
+      No, this function is not thread-safe! The algorithm needs to be rewritten.
+
+   - Define a new function :meth:`threaded_estimate_pi` where you implement the necessary changes 
+     to multithread the loop.
+   - Run some benchmarks to explore the parallel efficiency.
+
+   .. solution:: Hint
+
+      You need to make sure that the different threads are not incrementing the same memory address.
+      One can for example define a ``partial_hits`` array and increment its indices in the for loop:
+
+      .. code-block:: julia
+
+         partial_hits = zeros(Int, nthreads())
+
+   .. solution:: 
+
+      Here is a threaded version:
+
+      .. literalinclude:: code/threaded_estimate_pi.jl
+         :language: julia
+
+      To benchmark it:
+
+      .. code-block:: julia
+
+         using BenchmarkTools
+
+         num_points = 100_000_000
+         # make sure we get an accurate estimate:
+         println("pi = $(threaded_estimate_pi(num_points))")
+
+         bench_results = @benchmark threaded_estimate_pi($num_points)
+         println("time = $(minimum(bench_results.times)/10^6)")
+
+      Results:
+
+      .. code-block:: console
+
+         $ julia -t 1 threaded_estimate_pi.jl
+         # pi = 3.14147464
+         # time = 496.935583
+
+         $ julia -t 2 threaded_estimate_pi.jl
+         # pi = 3.1417046
+         # time = 255.328
+
+         $ julia -t 4 threaded_estimate_pi.jl
+         # pi = 3.14172796
+         # time = 132.892833
+
+      Parallel scaling seems decent, but comparing to the unthreaded version reveals the overhead 
+      from creating and managing threads:
+
+      .. code-block:: console
+
+         $ julia estimate_pi.jl
+         # pi = 3.14147392
+         # time = 228.434583     
 
 
 See also
