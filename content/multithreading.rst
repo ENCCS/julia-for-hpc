@@ -27,7 +27,7 @@ Consider the multiplication of two large array:
 If we run this in a Julia session and monitor the resource usage (e.g. via ``top``) 
 we can see that all cores on our computers are used! 
 
-But to beyond that, Julia supports four main types of parallel programming:
+But to go beyond that, Julia supports four main types of parallel programming:
 
 - **Asynchronous tasks or coroutines**: Tasks allow suspending and resuming 
   computations for I/O, event handling and similar patterns. Not really HPC and 
@@ -39,7 +39,8 @@ But to beyond that, Julia supports four main types of parallel programming:
   spaces on the same or multiple computers. Useful high-level constructs are implemented 
   in the standard library ``Distributed`` module. For those that like MPI there is 
   `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_.
-- **GPU computing**: Covered in the next episode!   
+- **GPU computing**: Ports computation to a graphical processing unit (GPU) via either high-level 
+  or low-level programming. 
   
 Threading
 ---------
@@ -123,7 +124,7 @@ We can now compare the performance:
    # make sure we're getting the correct value
    sqrt_array(A) ≈ threaded_sqrt_array(A)
 
-With 4 threads, the speedup could be between a factor 2 or 3.   
+With 4 threads, the speedup could be about a factor of 3.   
 
 .. callout:: Threading overhead
 
@@ -211,8 +212,8 @@ We will observe that:
 
 Bonus questions: 
 
-- What does ``eltype`` do?
-- What does ``eachindex`` do?
+- What does :meth:`eltype` do?
+- What does :meth:`eachindex` do?
 
 Threading with ``Threads.@threads`` is quite straightforward, 
 but one needs to be careful not to introduce race conditions 
@@ -237,7 +238,11 @@ Exercises
 
 .. exercise:: Multithreading the Laplace function
 
-   Consider the double for loop in the ``lap2d!`` function. 
+   Consider the double for loop in the :meth:`lap2d!` function:
+
+   .. literalinclude:: code/lap2d_inbounds.jl
+      :language: julia
+
    Can it safely be threaded, i.e. is there any risk of race 
    conditions?
 
