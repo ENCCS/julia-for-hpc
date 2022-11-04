@@ -341,9 +341,7 @@ Exercises
       :scale: 7 %
       :align: right
 
-   Consider the following function which estimates π by "throwing darts", 
-   i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking 
-   if they fall within the unit circle.
+   Consider again the :meth:`estimate_pi` function:
 
    .. literalinclude:: code/estimate_pi.jl
       :language: julia
@@ -353,7 +351,7 @@ Exercises
       num_points = 100_000_000
       estimate_pi(num_points)  # 3.14147572...
 
-   Try to parallelise this function using both a parallel mapping with :meth:`pmap` 
+   Now try to parallelise this function using both a parallel mapping with :meth:`pmap` 
    and an ``@everywhere (+)`` construct. Write your code in a script which you can call with 
    ``julia -p N estimate_pi.jl``.
 
