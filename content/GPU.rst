@@ -204,8 +204,8 @@ performance:
          A = rand(2^9, 2^9)
          A_d = CuArray(A)
 
-         @btime A * A
-         @btime A_d * A_d
+         @btime $A * $A
+         @btime $A_d * $A_d
 
    .. group-tab:: AMD
 
@@ -217,8 +217,8 @@ performance:
          A = rand(2^9, 2^9)
          A_d = ROCArray(A)
       
-         @btime A * A
-         @btime A_d * A_d
+         @btime $A * $A
+         @btime $A_d * $A_d
 
    .. group-tab:: Intel
 
@@ -230,8 +230,8 @@ performance:
          A = rand(2^9, 2^9)
          A_d = oneArray(A)
       
-         @btime A * A
-         @btime A_d * A_d
+         @btime $A * $A
+         @btime $A_d * $A_d
 
    .. group-tab:: Apple
 
@@ -243,8 +243,8 @@ performance:
          A = rand(2^9, 2^9)
          A_d = MtlArray(A)
       
-         @btime A * A
-         @btime A_d * A_d
+         @btime $A * $A
+         @btime $A_d * $A_d
 
 
 There should be a considerable speedup!
@@ -264,41 +264,41 @@ There should be a considerable speedup!
 
          A = rand(2^9, 2^9)
          A_d = CuArray(A)
-         @btime A * A
+         @btime $A * $A
          #  1.702 ms (2 allocations: 2.00 MiB)  
-         @btime A_d * A_d
+         @btime $A_d * $A_d
          #  13.000 μs (29 allocations: 592 bytes)  
          #  130 times faster
       
          A = rand(2^10, 2^10)
          A_d = CuArray(A)
-         @btime A * A
+         @btime $A * $A
          #  10.179 ms (2 allocations: 8.00 MiB)
-         @btime A_d * A_d
+         @btime $A_d * $A_d
          #  9.620 μs (29 allocations: 592 bytes)  
          #  1,114 times faster
 
          A = rand(2^11, 2^11)
          A_d = CuArray(A)
-         @btime A * A
+         @btime $A * $A
          #    72.950 ms (2 allocations: 32.00 MiB)
-         @btime A_d * A_d
+         @btime $A_d * $A_d
          #    10.861 μs (29 allocations: 592 bytes)
          # 6,717 times faster
 
          A = rand(2^12, 2^12)
          A_d = CuArray(A)
-         @btime A * A
+         @btime $A * $A
          #  454.483 ms (2 allocations: 128.00 MiB)
-         @btime A * A
+         @btime $A_d * $A_d
          #  12.480 μs (29 allocations: 592 bytes)
          # 36,416 times faster
 
          A = rand(2^13, 2^13)
          A_d = CuArray(A)
-         @btime A * A
+         @btime $A * $A
          #  3.237 s (2 allocations: 512.00 MiB)
-         @btime A * A
+         @btime $A_d * $A_d
          #  15.000 μs (32 allocations: 640 bytes)
          # 216,000 times faster!
 
@@ -868,16 +868,16 @@ Exercises
          A_d = CuArray(A);
 
          # benchmark CPU function
-         @btime sqrt_sum(A)
+         @btime sqrt_sum($A)
          #  2.664 ms (1 allocation: 16 bytes)
 
          # benchmark also broadcast operations on the CPU:
-         @btime reduce(+, map(sqrt,A))
+         @btime reduce(+, map(sqrt,$A))
          #  2.930 ms (4 allocations: 8.00 MiB)
          #  Slightly slower than the sqrt_sum function call but much larger memory allocations!
 
          # benchmark GPU broadcast (result is from NVIDIA A100):
-         @btime reduce(+, map(sqrt,A_d))
+         @btime reduce(+, map(sqrt, $A_d))
          #  59.719 μs (119 allocations: 6.36 KiB)
 
 .. challenge:: Does LinearAlgebra provide acceleration?
@@ -893,16 +893,16 @@ Exercises
 
          A = CUDA.rand(2^5, 2^5)
          B = similar(A)
-         @btime A*A;
+         @btime $A*$A;
          #  8.803 μs (16 allocations: 384 bytes)  
-         @btime mul!(B, A, A);
+         @btime mul!($B, $A, $A);
          #  7.282 μs (12 allocations: 224 bytes)
 
          A = CUDA.rand(2^12, 2^12)
          B = similar(A)
-         @btime A*A;
+         @btime $A*$A;
          #  12.760 μs (28 allocations: 576 bytes)
-         @btime mul!(B, A, A)
+         @btime mul!($B, $A, $A)
          #  11.020 μs (24 allocations: 416 bytes)
 
       :meth:`LinearAlgebra.mul!` is around 15-20% faster!
@@ -948,18 +948,18 @@ Exercises
 
       .. code-block:: julia
 
-         @btime C .= A .+ B
+         @btime $C .= $A .+ $B
          nthreads = 1024
          numblocks = cld(length(A), nthreads)
 
-         @btime CUDA.@sync @cuda threads=nthreads blocks=numblocks vadd!(C, A, B)
+         @btime CUDA.@sync @cuda threads=nthreads blocks=numblocks vadd!($C, $A, $B)
          #  18.410 μs (33 allocations: 1.67 KiB)
 
       Finally compare to the higher-level array interface:
 
       .. code-block:: julia
 
-         @btime C .= A .+ B
+         @btime $C .= $A .+ $B
          #  5.014 μs (27 allocations: 1.66 KiB)
 
       The high-level abstraction is significantly faster!
@@ -1079,8 +1079,8 @@ Exercises
       .. code-block:: julia
 
          using BenchmarkTools
-         @btime lap2d!(u, unew)
-         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d_gpu!(u_d, unew_d)
+         @btime lap2d!($u, $unew)
+         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d_gpu!($u_d, $unew_d)
 
 
 
