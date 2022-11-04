@@ -224,7 +224,7 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
         num_jobs = 100
         chunks = [num_points / num_jobs for i in 1:num_jobs]
 
-        @btime mean(pmap(estimate_pi, chunks))
+        @btime mean(pmap(estimate_pi, $chunks))
 
    - Now add 7 more cores by repeating the :meth:`addprocs` command and benchmark it again. 
      Note that you need to redefine :meth:`estimate_pi` every time you add workers!

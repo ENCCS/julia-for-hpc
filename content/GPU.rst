@@ -1080,7 +1080,7 @@ Exercises
 
          using BenchmarkTools
          @btime lap2d!($u, $unew)
-         @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) lap2d_gpu!($u_d, $unew_d)
+         @btime CUDA.@sync @cuda threads=$nthreads blocks=$numblocks lap2d_gpu!($u_d, $unew_d)
 
 
 
