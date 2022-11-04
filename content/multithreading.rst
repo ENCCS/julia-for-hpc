@@ -266,6 +266,45 @@ Exercises
      ``julia -t <N> laplace.jl`` and observe the scaling.
    - Try increasing the problem size (e.g. ``M=N=8192``). Does it scale better?
 
+   .. solution:: 
+
+      Multithreaded version:
+
+      .. literalinclude:: code/threaded_lap2d.jl
+         :language: julia
+
+      Benchmarking:
+
+      .. code-block:: julia
+
+         function setup(N=4096, M=4096)
+             u = zeros(M, N)
+             # set boundary conditions
+             u[1,:] = u[end,:] = u[:,1] = u[:,end] .= 10.0
+             unew = copy(u);
+             return u, unew
+         end    
+
+         using BenchmarkTools
+
+         u, unew = setup()
+         bench_results = @benchmark lap2d!($u, $unew)
+         println("time = $(minimum(bench_results.times)/10^6)")     
+
+      .. code-block:: console
+
+         $ julia -t 1 laplace.jl
+         # time = 7.440875
+
+         $ julia -t 2 laplace.jl
+         # time = 4.559292
+
+         $ julia -t 4 laplace.jl
+         # time = 3.802625
+
+
+      Increasing the problem size will not improve the parallel efficiency as it does not 
+      increase the computational cost in the loop.
 
 .. exercise:: Multithread the computation of π
 
