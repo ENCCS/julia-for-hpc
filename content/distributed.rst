@@ -20,7 +20,7 @@ the ``Distributed`` module. Its approach is different from other frameworks like
 that communication is generally "one-sided", meaning that the programmer needs to explicitly 
 manage only one process in a two-process operation. 
  
-Julia can be started with a given number of `local` processes using the ``-p``:
+Julia can be started with a given number of `p local` workers using the ``-p``:
 
 .. code-block:: bash
 
@@ -41,7 +41,7 @@ But we can also dynamically add processes in a running Julia session:
 
 
 Note what happens here: there is one `master` process which can create 
-additional `worker` processes, and as we shall see it can also distribute work to these 
+additional `worker` processes, and as we shall see, it can also distribute work to these 
 workers.
 
 For running on a cluster, we instead need to provide the ``--machine-file`` option 
@@ -155,8 +155,8 @@ techniques:
              p = sum(fetch.(futures))
          end
 
-The ``@spawnat`` version is cumbersome to use in this case and the algorithm 
-required to partition the array reminds of MPI. 
+The ``@spawnat`` version looks cumbersome for this case particular case as the algorithm 
+required the explicit partitioning of the array which is common in MPI, for instance. 
 The ``@distributed (+)`` parallel for loop and the ``pmap`` mapping are much simpler,
 but which one is preferable for a given use case?
 
@@ -166,6 +166,8 @@ but which one is preferable for a given use case?
 - ``pmap`` can handle reductions as well as other algorithms. It performs load-balancing
   and since dynamic scheduling introduces some overhead it's best to use ``pmap`` 
   for computationally heavy tasks.
+- In the case of ``@spawnat``, because the `futures` are not inmediately using CPU
+  resources, it opens the possibility of using asynchronous and uneven workloads.
 
 .. callout:: Multiprocessing overhead
 
@@ -235,10 +237,19 @@ using ``@time`` instead of ``@btime``, this time:
    SA = SharedArray(A);
    @time sqrt_array!(SA)
 
-Bonus questions:
 
-- Should the ``@time`` expression be called more than once?
-- How can we check which method is being dispatched for ``A`` and ``SA``?
+.. challenge:: Bonus questions
+   
+  - Should the ``@time`` expression be called more than once?
+  - How can we check which method is being dispatched for ``A`` and ``SA``?
+
+   .. solution::
+
+      It is recommended to use ``@time`` several times to obtain better statistics
+      and undermine the overhead of the initial run.
+
+      One can check the method being displayed with the ``@which`` macro. 
+
 
 We should keep in mind however that every change to a SharedArray causes message 
 passing to keep them in sync between processes, and this can affect performance.
@@ -247,9 +258,9 @@ passing to keep them in sync between processes, and this can affect performance.
 DistributedArrays
 ^^^^^^^^^^^^^^^^^
 
-Another way to approach parallelization over multiple machines is through 
-`DistributedArrays.jl <https://github.com/JuliaParallel/DistributedArrays.jl>`_, 
-which implements a *Global Array* interface. A DArray is distributed across a 
+Another way to approach parallelization over multiple machines is through `DArray`s
+from the `DistributedArrays.jl <https://github.com/JuliaParallel/DistributedArrays.jl>`_ package, 
+which implements a *Global Array* interface. A `DArray` is distributed across a 
 set of workers. Each worker can read and write from its local portion of the 
 array and each worker has read-only access to the portions of the array held 
 by other workers.
