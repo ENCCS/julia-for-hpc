@@ -288,8 +288,8 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
    Try running it with different number of nodes and/or cores. Does it scale well up to a full node?
 
 
-   .. keypoints::
+.. keypoints::
 
-      - Julia can usually be installed and configured without too much hassle on HPC systems.
-      - ClusterManagers is a useful package for working interactively on a cluster through the Julia REPL.
-      - For non-interactive work, Julia jobs can also be submitted through the scheduler.
+   - Julia can usually be installed and configured without too much hassle on HPC systems.
+   - ClusterManagers is a useful package for working interactively on a cluster through the Julia REPL.
+   - For non-interactive work, Julia jobs can also be submitted through the scheduler.
