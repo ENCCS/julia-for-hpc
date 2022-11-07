@@ -1,6 +1,16 @@
 Introduction to Julia syntax
 ============================
 
+.. questions::
+
+   - How do I run Julia?
+   - What does basic Julia syntax look like?
+
+.. instructor-note::
+
+   - 20 min teaching
+   - 20 min exercises
+
 This episodes provides a condensed overview of Julia's main syntax and features.
 
 .. callout:: Video alternative

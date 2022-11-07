@@ -7,8 +7,8 @@ Running on a cluster
 
 .. instructor-note::
 
-   - 10 min teaching
-   - 10 min exercises
+   - 15 min teaching
+   - 15 min exercises
 
 Julia on HPC systems
 --------------------
