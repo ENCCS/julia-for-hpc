@@ -177,7 +177,7 @@ Vectors and arrays
 | Manipulating     | - ``push!(a, 10)``                  Append in-place               |
 | arrays           | - ``insert!(a, 1, 42)``             Insert in given position      |
 |                  | - ``append!(a, [3, 5, 7])``         Append another array          |
-|                  | - ``splice!(a, 3, -1])``            Rm in given pos and replace   |
+|                  | - ``splice!(a, 3, -1)``             Rm in given pos and replace   |
 +------------------+-------------------------------------------------------------------+
 
 We can play around with Vectors and Arrays to get used to their syntax:
@@ -187,7 +187,7 @@ We can play around with Vectors and Arrays to get used to their syntax:
    v1 = [1.0, 2.0, 3.0]
    # 4-element Vector{Int64}:
    m1 = [1.0 2.0 3.0]
-   # 1×4 Matrix{Int64}:
+   # 1×3 Matrix{Int64}:
 
    # broadcasting
    v2 = v1.^2
@@ -645,26 +645,31 @@ Exercises
 
 .. challenge:: Row vs column-major ordering?
 
-   Based on one of the for-loop examples, can you tell whether Julia is row or column-major 
+   Based on the output of the following loop:
+
+   .. code-block:: julia
+
+      A = [1 2; 3 4]
+      # visit each index of A efficiently
+      for i in eachindex(A)
+          println("i = $i, A[i] = $(A[i])")
+      end         
+
+   can you tell whether Julia is row or column-major 
    ordered? (i.e., whether arrays are stacked one row or one column at a time in memory)
 
    .. solution:: 
 
       .. code-block:: julia
 
-         A = [1 2; 3 4]
-         # visit each index of A efficiently
-         for i in eachindex(A)
-             println("i = $i, A[i] = $(A[i])")
-         end         
+         This code produces the following output:
 
-         # output:
          # i = 1, A[i] = 1
          # i = 2, A[i] = 3
          # i = 3, A[i] = 2
          # i = 4, A[i] = 4         
 
-      Julia loops over columns since it's a column-major language!
+      which shows that Julia loops over columns since it's a column-major language!
 
 
 .. challenge:: Reading files
