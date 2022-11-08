@@ -10,7 +10,7 @@ Writing performant Julia code
 .. instructor-note::
 
    - 30 min teaching
-   - 10 min exercises
+   - 20 min exercises
 
 Introducing a toy example
 -------------------------

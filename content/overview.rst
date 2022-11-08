@@ -11,8 +11,8 @@ Special features of Julia
 
 .. instructor-note::
 
-   - 20 min teaching
-   - 20 min exercises
+   - 30 min teaching
+   - 30 min exercises
 
 
 Types
