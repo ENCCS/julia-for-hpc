@@ -209,8 +209,8 @@ What you will not learn
   `C/C++ and Fortran <https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/>`__ 
   is relatively straightforward but is outside the current scope.
 - Julia has mature packages for scientific computing in many different scientific disciplines.
-  An overview of the package ecosystem will be provided in :ref:`scientific_computing` but we 
-  will not go into any details except for an appetizer on data science and machine learning.
+  An overview of the package ecosystem will be provided but we 
+  will not go into any details.
 
 
 See also
