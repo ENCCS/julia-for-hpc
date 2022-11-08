@@ -477,43 +477,42 @@ A *macro* is like a function, except it accepts expressions as arguments,
 manipulates the expressions, and returns a new expression - thus modifying 
 the AST.
 
-We can for example define a macro to 
-`repeat an expression N times <https://gist.github.com/MikeInnes/8299575>`_:
+We can for example define a macro to create a `Wilkinson polynomial <https://en.wikipedia.org/wiki/Wilkinson%27s_polynomial>`_. Note the following pattern, we write a helper function that returns an expression and call that function from the macro. This is very useful for debugging while writing macros!
 
 .. code-block:: Julia
 
-   macro dotimes(n, body)
-       quote
-           for i = 1:$(esc(n))
-               $(esc(body))
-           end
-       end
+   function _make_wilkinson(n)
+     pol = :(x - 1)
+     for i in 2:n
+       pol = :($pol * (x - $i))
+     end
+     name = Symbol(:wilkinson_, n)
+     return :($(name)(x) = $pol)
    end
-
-   # print hello! 5 times
-   @dotimes 5 println("hello!")
+ 
+   macro make_wilkinson(n)
+     return _make_wilkinson(n)
+   end
    
-   # square 2 4 times
-   x = 2
-   @dotimes 4 x = x^2
+   # creates the function wilkinson_5
+   @make_wilkinson 5
+   
+   wilkinson_5(10)   
 
 To see what a macro expands to, we can use another macro:
 
 .. code-block:: julia
 
-   @macroexpand @dotimes 4 x -= 13
+   @macroexpand @make_wilkinson 5
 
 The output shows that a for loop has been generated:
 
 .. code-block:: text
 
-   quote
-       #= REPL[31]:3 =#
-       for var"#11#i" = 1:4
-           #= REPL[31]:4 =#
-           x -= 13
-       end
-   end
+    :(Main.wilkinson_5(var"#21#x") = begin
+        #= REPL[17]:6 =#
+        ((((var"#21#x" - 1) * (var"#21#x" - 2)) * (var"#21#x" - 3)) * (var"#21#x" - 4)) * (var"#21#x" - 5)
+    end)
 
 
 
