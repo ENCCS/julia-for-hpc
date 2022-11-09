@@ -15,5 +15,5 @@ end
 receive_message = MPI.bcast(send_message, comm, root=0)
 
 if rank != 0
-    print("rank $rank received message: $receive_message")
+    println("rank $rank received message: $receive_message")
 end

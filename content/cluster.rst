@@ -167,7 +167,7 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
    using Distributed, ClusterManagers
 
    # request 4 tasks 
-   addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="d2021-135-users")
+   addprocs(SlurmManager(4), partition="cpu", t="00:5:00", A="p200051")
 
    # let workers do some work
    for i in workers()

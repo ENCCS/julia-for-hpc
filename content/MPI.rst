@@ -47,8 +47,9 @@ This is how a hello world MPI program looks like in Python:
 - ``Comm_rank`` returns the individual rank (0, 1, 2, ...) for each task that calls it
 - ``Comm_size`` returns the total number of ranks.
 
-To run this code with a specific number of processes we use the ``mpirun`` command which 
-comes with the MPI library:
+To run this code with a specific number of processes we use the ``mpiexecjl`` command which 
+can be installed as a wrapper of the MPI command ``mpiexec`` 
+(see :doc:`setup`):
 
 .. code-block:: console
 
@@ -100,6 +101,25 @@ In any case, it is good to have a mental model of different communication patter
 
    ``reduce``: ranks send data which are reduced on rank ``root``
 
+.. callout:: Serialised vs buffer-like objects
+
+   Lower-case methods (e.g. :meth:`MPI.send` and :meth:`MPI.recv`) are used to communicate generic 
+   objects between MPI processes. It is also possible to send buffer-like ``isbits`` objects 
+   which provides faster communication, but require the memory space to be allocated for the 
+   receiving buffer prior to communication. These methods start with uppercase letters, 
+   e.g. :meth:`MPI.Send`, :meth:`MPI.Recv`, :meth:`MPI.Gather` etc.   
+
+.. callout:: Mutating vs non-mutating 
+
+   For communication operations which receive data, MPI.jl typically
+   defines two separate functions:
+
+   - One function in which the output buffer is supplied by the user.
+     As it mutates this value, it adopts the Julia convention of suffixing
+     with ``!`` (e.g. :meth:`MPI.Recv!`, :meth:`MPI.Reduce!`).
+   - One function which allocates the buffer for the output
+     (:meth:`MPI.Recv`, :meth:`MPI.Reduce`).
+
 
 Examples
 ~~~~~~~~
@@ -109,41 +129,28 @@ Examples
    .. tab:: send/recv
 
       .. literalinclude:: code/send_recv.jl
+         :language: julia
          
    .. tab:: broadcast
 
       .. literalinclude:: code/broadcast.jl
+         :language: julia
 
    .. tab:: gather
       
       .. literalinclude:: code/gather.jl
+         :language: julia
 
    .. tab:: scatter
 
       .. literalinclude:: code/scatter.jl
+         :language: julia
 
    .. tab:: reduce
 
       .. literalinclude:: code/reduce.jl
+         :language: julia
 
-.. callout:: Serialised vs buffer-like objects
-
-   Lower-case methods (e.g. :meth:`send` and :meth:`recv`) are used to communicate generic 
-   objects between MPI processes. It is also possible to send buffer-like ``isbits`` objects 
-   which provides faster communication, but require the memory space to be allocated for the 
-   receiving buffer prior to communication. These methods start with uppercase letters, 
-   e.g. :meth:`Send`, :meth:`Recv`, :meth:`Gather` etc.   
-
-.. callout:: Mutating vs non-mutating 
-
-   For communication operations which receive data, MPI.jl typically
-   defines two separate functions:
-
-   - One function in which the output buffer is supplied by the user.
-     as it mutates this value, it adopts the Julia convention of suffixing
-     with ``!`` (e.g. :meth:`MPI.Recv!`, :meth:`MPI.Reduce!`).
-   - One function which allocates the buffer for the output
-     (:meth:`MPI.Recv`, :meth:`MPI.Reduce`).
 
 Blocking and non-blocking communication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,8 +257,6 @@ Exercises
          stats = MPI.Waitall!([rreq, sreq])
 
          print("$rank: Received $src -> $rank = $recv_mesg\n")
-
-         MPI.Barrier(comm)
 
 .. challenge:: MPI-parallelise :meth:`compute_pi` function
 

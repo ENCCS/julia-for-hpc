@@ -30,4 +30,4 @@ rreq = MPI.Irecv!(recv_message, comm, source=neighbour, tag=0)
 
 stats = MPI.Waitall!([rreq, sreq])
 
-print("Message received by rank $rank")
+print("Message received by rank $rank\n")

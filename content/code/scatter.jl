@@ -13,4 +13,4 @@ else
 end
 
 recvbuf = MPI.Scatter(sendbuf, Int64, comm, root=0)
-println("rank $rank received message: $recvbuf")
+print("rank $rank received message: $recvbuf\n")
