@@ -79,8 +79,32 @@ To use the Julia GPU stack, one needs to have the relevant GPU drivers and
 programming toolkits installed. GPU drivers are already installed on HPC systems 
 while on your own machine you will need to install them yourself (see e.g.  these 
 `instructions from NVIDIA <https://www.nvidia.com/Download/index.aspx>`_). 
-Programming toolkits (e.g. CUDA, ROCm etc.) can be installed automatically through 
-Julia's artifact system upon the first import (e.g. ``using CUDA``).
+Programming toolkits for CUDA can be installed automatically through 
+Julia's artifact system upon the first usage:
+
+.. tabs::
+
+   .. group-tab:: NVIDIA
+
+      Installing CUDA toolkit:
+
+      .. code-block:: julia
+      
+         using CUDA
+         CUDA.versioninfo()
+
+   .. group-tab:: AMD
+
+      The ROCm software stack needs to be installed beforehand.
+
+   .. group-tab:: Intel
+
+      The oneAPI software stack needs to be installed beforehand.
+
+   .. group-tab:: Apple
+
+      The Metal  software stack needs to be installed beforehand.
+
 
 Access to GPUs
 --------------
