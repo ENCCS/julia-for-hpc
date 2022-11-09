@@ -142,7 +142,7 @@ Let's go ahead and profile the `lap2d!` function:
    We can also look at the same information in a flamegraph by clicking the little fire 
    button next to the search area. 
    We should now be able to conclude that ``setindex!`` and ``getindex`` functions 
-   inside ``evolve!`` take most of the time.
+   inside ``lap2d!`` take most of the time.
 
 Several packages are available for more advanced visualization of profiling results:
 
@@ -170,7 +170,7 @@ as in Fortran, Matlab and R, but opposite to that of C/C++ and Python (numpy).
 To avoid cache-misses it is  crucial to order one's loops such that memory is 
 accessed in a contiguous way!
 
-We can verify this by swapping the loop order in the ``evolve!`` function and 
+We can verify this by swapping the loop order in the ``lap2d!`` function and 
 measure the performance:
 
 .. code-block:: julia

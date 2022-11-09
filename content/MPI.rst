@@ -52,9 +52,7 @@ comes with the MPI library:
 
 .. code-block:: console
 
-   # on some HPC systems you might need 'srun -n 4' instead of 'mpirun -np 4'
-   # on Vega, add this module for MPI libraries: ml add foss/2020b  
-   $ mpirun -np 4 julia hello.jl
+   $ mpiexecjl -np 4 julia hello.jl
 
    # Hello from process 1 out of 4
    # Hello from process 0 out of 4

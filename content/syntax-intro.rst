@@ -104,7 +104,7 @@ Basic syntax
 |                  | - ``D = true``                      Boolean                       |
 |                  | - ``typeof(A)``                     Find type                     |
 |                  | - ``supertype(Integer)``            Find supertypes               |
-|                  | - ``subtype(Integer)``              Find subtypes                 |
+|                  | - ``subtypes(Integer)``             Find subtypes                 |
 |                  | - ``Integer <: Real``               "Subtype of", returns True    |
 |                  | - ``struct``                        Immutable composite type      |
 |                  | - ``mutable struct``                Mutable composite type        |
