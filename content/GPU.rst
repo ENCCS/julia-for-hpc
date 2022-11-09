@@ -225,11 +225,11 @@ performance:
          using BenchmarkTools
          using CUDA
 
-         A = rand(2^9, 2^9)
-         A_d = CuArray(A)
+         A = rand(2^9, 2^9);
+         A_d = CuArray(A);
 
-         @btime $A * $A
-         @btime $A_d * $A_d
+         @btime $A * $A;
+         @btime $A_d * $A_d;
 
    .. group-tab:: AMD
 
@@ -238,11 +238,11 @@ performance:
          using BenchmarkTools
          using AMDGPU
       
-         A = rand(2^9, 2^9)
-         A_d = ROCArray(A)
+         A = rand(2^9, 2^9);
+         A_d = ROCArray(A);
       
-         @btime $A * $A
-         @btime $A_d * $A_d
+         @btime $A * $A;
+         @btime $A_d * $A_d;
 
    .. group-tab:: Intel
 
@@ -251,11 +251,11 @@ performance:
          using BenchmarkTools
          using oneAPI
       
-         A = rand(2^9, 2^9)
-         A_d = oneArray(A)
+         A = rand(2^9, 2^9);
+         A_d = oneArray(A);
       
-         @btime $A * $A
-         @btime $A_d * $A_d
+         @btime $A * $A;
+         @btime $A_d * $A_d;
 
    .. group-tab:: Apple
 
@@ -264,11 +264,11 @@ performance:
          using BenchmarkTools
          using Metal         
       
-         A = rand(2^9, 2^9)
-         A_d = MtlArray(A)
+         A = rand(2^9, 2^9);
+         A_d = MtlArray(A);
       
-         @btime $A * $A
-         @btime $A_d * $A_d
+         @btime $A * $A;
+         @btime $A_d * $A_d;
 
 
 There should be a considerable speedup!
@@ -340,8 +340,8 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
 .. code-block:: julia
 
    # create a 100x100 Float32 random array and an uninitialized array
-   A = CUDA.rand(2^9, 2^9)
-   B = CuArray{Float32, 2}(undef, 2^9, 2^9)
+   A = CUDA.rand(2^9, 2^9);
+   B = CuArray{Float32, 2}(undef, 2^9, 2^9);
 
    # regular matrix multiplication uses cuBLAS under the hood
    A * A
@@ -454,9 +454,9 @@ Let's take a simple example, adding two vectors:
        end
    end
 
-   A = zeros(10) .+ 5.0
-   B = ones(10)
-   C = similar(B)
+   A = zeros(10) .+ 5.0;
+   B = ones(10);
+   C = similar(B);
    vadd!(C, A, B)
 
 We can already run this on the GPU with the ``@cuda`` macro, which 
@@ -468,9 +468,9 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
       .. code-block:: julia
 
-         A_d = CuArray(A)
-         B_d = CuArray(B)
-         C_d = similar(B_d)
+         A_d = CuArray(A);
+         B_d = CuArray(B);
+         C_d = similar(B_d);
 
          @cuda vadd!(C_d, A_d, B_d)
 
@@ -478,9 +478,9 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
       .. code-block:: julia
 
-         A_d = ROCArray(A)
-         B_d = ROCArray(B)
-         C_d = similar(B_d)
+         A_d = ROCArray(A);
+         B_d = ROCArray(B);
+         C_d = similar(B_d);
 
          @roc vadd!(C_d, A_d, B_d)         
 
@@ -488,9 +488,9 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
       .. code-block:: julia
 
-         A_d = oneArray(A)
-         B_d = oneArray(B)
-         C_d = similar(B_d)
+         A_d = oneArray(A);
+         B_d = oneArray(B);
+         C_d = similar(B_d);
 
          @oneapi vadd!(C_d, A_d, B_d)   
 
@@ -498,9 +498,9 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
       .. code-block:: julia
 
-         A_d = MtlArray(Float32.(A))
-         B_d = MtlArray(Float32.(B))
-         C_d = similar(B_d)
+         A_d = MtlArray(Float32.(A));
+         B_d = MtlArray(Float32.(B));
+         C_d = similar(B_d);
 
          @metal vadd!(C_d, A_d, B_d)   
 
