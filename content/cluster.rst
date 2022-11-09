@@ -182,30 +182,6 @@ script uses the ``SlurmManager`` for HPC systems using the SLURM scheduler:
        rmprocs(i)
    end
 
-.. callout:: Cluster-specifics
-
-   .. tabs:: 
-
-      .. tab:: Meluxina
-
-         One unusual feature of Meluxina is that environment modules are not mounted on the login node. 
-         Thus, to use Julia on the login node one needs to install it oneself. Fortunately this is 
-         straightforward:
-
-         .. code-block:: console
-
-            $ curl -fsSL https://install.julialang.org | sh 
-
-         Since your home directory on Meluxina is mounted on the high performance parallel Lustre 
-         file system, you can safely install Julia in the default location under ``/home/users/``.
-
-         To add parallel workers through ClusterManagers (replace the fields as needed):
-
-         .. code-block:: julia
-
-            using ClusterManagers
-            addprocs(SlurmManager(8), partition="cpu", t="00:15:00", A="p200051", reservation="cpudev", q="dev")
-
 
 .. challenge:: Use ClusterManagers.jl to launch parallel job
 
