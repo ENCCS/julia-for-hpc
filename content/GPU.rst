@@ -529,8 +529,8 @@ and ``workitemIdx().x`` for AMD):
              return
          end
 
-         A, B = CUDA.ones(2^9)*2, CUDA.ones(2^9)*3
-         C = similar(A)
+         A, B = CUDA.ones(2^9)*2, CUDA.ones(2^9)*3;
+         C = similar(A);
 
          nthreads = length(A)
          @cuda threads=nthreads vadd!(C, A, B)
@@ -548,8 +548,8 @@ and ``workitemIdx().x`` for AMD):
              return
          end
 
-         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3)
-         C = similar(A)  
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
 
          groupsize = length(A)
          @roc groupsize=groupsize vadd!(C, A, B)   
@@ -567,8 +567,8 @@ and ``workitemIdx().x`` for AMD):
              return
          end
 
-         A, B = oneArray(ones(2^9)*2), oneArray(ones(2^9)*3)
-         C = similar(A)      
+         A, B = oneArray(ones(2^9)*2), oneArray(ones(2^9)*3);
+         C = similar(A);
 
          items = length(A)
          @oneapi items=items vadd!(C, A, B) 
@@ -585,8 +585,8 @@ and ``workitemIdx().x`` for AMD):
              return
          end
       
-         A, B = MtlArray(ones(Float32, 2^9)*2), MtlArray(Float32, ones(2^9)*3)
-         C = similar(A)
+         A, B = MtlArray(ones(Float32, 2^9)*2), MtlArray(Float32, ones(2^9)*3);
+         C = similar(A);
 
          nthreads = length(A)
          @metal threads=nthreads vadd!(C, A, B)
