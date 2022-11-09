@@ -170,21 +170,16 @@ it's more conveniently solved by using non-blocking send and receive.
 
       .. literalinclude:: code/deadlock.jl
          :language: julia
-         :emphasize-lines: 23, 26
-
 
    .. tab:: Workaround with blocking communication
 
       .. literalinclude:: code/deadlock_blocking_workaround.jl
          :language: julia
-         :emphasize-lines: 25, 30, 35, 39
-
     
    .. tab:: Non-blocking solution
 
       .. literalinclude:: code/deadlock_nonblocking_solution.jl
          :language: julia
-         :emphasize-lines: 23, 26, 29, 31
 
 
 Exercises
