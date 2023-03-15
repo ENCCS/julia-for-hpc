@@ -73,7 +73,7 @@ To exit the REPL again, hit ``CTRL-d`` or type ``exit()``.
 Installing Visual Studio Code
 -----------------------------
 
-First install VSCode according to the offical documentation: 
+First install VSCode according to the official documentation: 
 https://code.visualstudio.com/Download
 
 Installing the VSCode Julia extension

@@ -310,7 +310,7 @@ Exercises
                ranks get ``count + 1`` tasks each, remaining ``num_jobs - remainder`` ranks get 
                ``count`` tasks each.
             3. ``{rank 0 : [1,2,3], rank 1 : [4,5,6], rank 2 : [7,8], rank 3 : [9,10]}``
-            4. Yes, load balancing is an issue becase all ranks do not get equal amount of work.
+            4. Yes, load balancing is an issue because all ranks do not get equal amount of work.
             5. It will depend on the load balancing! With e.g. 2 ranks, both ranks will have equal work and the performance 
                will be very close to the :meth:`pmap` solution with 2 workers. With 4 ranks, the 
                load-balancing will be poorer for this MPI solution and it will perform worse than :meth:`pmap`.

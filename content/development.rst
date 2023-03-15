@@ -5,7 +5,7 @@ Developing in Julia
 
    - What development tools exist for Julia?
    - How can I write modules and packages in Julia?
-   - How can reprodubible environments be created?
+   - How can reproducible environments be created?
    - How are tests written in Julia?
           
 .. instructor-note::
@@ -20,7 +20,7 @@ Tooling
 We will now switch from the Julia REPL to 
 `Visual Studio Code (VSCode) <https://code.visualstudio.com/>`_.
 While VSCode with the `Julia extension <https://code.visualstudio.com/docs/languages/julia>`_ 
-is the prefered development environment for many Julia programmers, there 
+is the preferred development environment for many Julia programmers, there 
 are some alternatives:
 
 - `Jupyter <https://jupyter.org/>`_:
@@ -132,7 +132,7 @@ another editor you will need to install ``Revise`` and when developing a
 package always do ``using Revise`` before ``using MyPackage``.
 
 A caveat when using VSCode is that when developing a script (i.e. not a full package), 
-files need to be included in Revise-tracked mode with ``includet("MyScript")``.
+files need to be included in Revise-tracked mode with ``include("MyScript")``.
 When developing packages everything works automatically.
 
 Structure of a Julia package

@@ -140,7 +140,7 @@ Some key aspects of GPUs that need to be kept in mind:
 
 - The large number of compute elements on a GPU (in the thousands) can enable 
   extreme scaling for `data parallel` tasks (single-program multiple-data, SPMD)
-- GPUs have their own memory. This means that data needs to be transfered to 
+- GPUs have their own memory. This means that data needs to be transferred to 
   and from the GPU during the execution of a program.
 - Cores in a GPU are arranged into a particular structure. At the highest level 
   they are divided into "streaming multiprocessors" (SMs). Some of these details are 

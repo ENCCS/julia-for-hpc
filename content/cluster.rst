@@ -29,7 +29,7 @@ Installing Julia yourself
 
 If you want or need to install Julia yourself on an HPC system, keep the following points in mind:
 
-- Install Julia on the cluster's high-peformance parallel file system as this will improve 
+- Install Julia on the cluster's high-performance parallel file system as this will improve 
   performance of large parallel Julia jobs.
 - Installation of Julia packages can take up significant disk space and include a large number 
   of files - make sure to use a file system with sufficiently high quotas for both disk space 
