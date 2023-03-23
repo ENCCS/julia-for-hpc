@@ -132,7 +132,7 @@ another editor you will need to install ``Revise`` and when developing a
 package always do ``using Revise`` before ``using MyPackage``.
 
 A caveat when using VSCode is that when developing a script (i.e. not a full package), 
-files need to be included in Revise-tracked mode with ``include("MyScript")``.
+files need to be included in Revise-tracked mode with ``includet("MyScript")``.
 When developing packages everything works automatically.
 
 Structure of a Julia package
