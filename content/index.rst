@@ -91,7 +91,7 @@ About the course
 
 This lesson material is developed by the `EuroCC National Competence Center
 Sweden (ENCCS) <https://enccs.se/>`_ and taught in ENCCS workshops. It is aimed
-at researchers and developers who want to learn a modern, high-level, high-performace 
+at researchers and developers who want to learn a modern, high-level, high-performance 
 programming language suitable for scientific computing, data science, machine learning
 and high-performance computing on CPUs or GPUs.
 Each lesson episode has clearly defined questions that will be addressed and includes
@@ -185,7 +185,7 @@ most of their license text.
 Several examples and formulations are inspired by other Julia
 lessons, particularly:
 
-- `Educational prallelization/GPU-porting repository with C/C++/Fortran examples <https://github.com/cschpc/heat-equation>`__ developed by CSC
+- `Educational parallelization/GPU-porting repository with C/C++/Fortran examples <https://github.com/cschpc/heat-equation>`__ developed by CSC
 - `Introduction to Julia <https://github.com/csc-training/julia-introduction/>`__ provided by CSC and Aalto
 - `Tim Besard's JuliaCon 2021 GPU tutorial <https://github.com/maleadt/juliacon21-gpu_workshop>`__
 - `Carsten Bauer's 3-day Julia workshop <https://github.com/carstenbauer/JuliaCologne21>`__

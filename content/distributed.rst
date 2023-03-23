@@ -166,7 +166,7 @@ but which one is preferable for a given use case?
 - ``pmap`` can handle reductions as well as other algorithms. It performs load-balancing
   and since dynamic scheduling introduces some overhead it's best to use ``pmap`` 
   for computationally heavy tasks.
-- In the case of ``@spawnat``, because the `futures` are not inmediately using CPU
+- In the case of ``@spawnat``, because the `futures` are not immediately using CPU
   resources, it opens the possibility of using asynchronous and uneven workloads.
 
 .. callout:: Multiprocessing overhead

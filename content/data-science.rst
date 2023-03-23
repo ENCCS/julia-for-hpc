@@ -312,7 +312,7 @@ Multiple subplots can be created by:
       # then re-execute the scatter function
 
    We can add a dimension to the plot by grouping by another column. Let's see if 
-   the different penguin species can be distiguished based on their bill length 
+   the different penguin species can be distinguished based on their bill length 
    and bill depth. We also set different marker shapes and colors based on the 
    grouping, and adjust the markersize and transparency (``alpha``):
 

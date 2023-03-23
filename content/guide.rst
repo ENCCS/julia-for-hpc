@@ -35,7 +35,7 @@ explain what is being written. It should be clear that learners are not expected
 to type-along during these sessions. The instructor can either type things out or 
 copy-paste from the code blocks.
 
-Most episodes have type-along sections demarkated with light-green boxes with a keyboard 
+Most episodes have type-along sections demarcated with light-green boxes with a keyboard 
 emoji. It should be clearly explained that learners are expected to type-along during 
 these sessions. Here's it's better for the instructor to type things out rather than 
 copy-pasting everything, although larger code blocks should be copy-pasted to avoid 

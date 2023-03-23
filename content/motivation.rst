@@ -191,7 +191,7 @@ What you will learn
 - How to write Julia code for GPUs.
 
 We will be focusing on high-level performance considerations and parallelization 
-approaces and not dig deep into low-level aspects. There is always a tradeoff; 
+approaches and not dig deep into low-level aspects. There is always a tradeoff; 
 to squeeze as much performance out of a code as possible one often needs to drop 
 down to lower levels of memory management, interprocess communication etc.
 But using higher-level approaches can lead to significant performance gain 
