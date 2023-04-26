@@ -2,4 +2,4 @@
 
 # Julia for High Performance Scientific Computing
 
-Lesson on Julia for scientific computing
+Lesson on Julia for scientific computing.
