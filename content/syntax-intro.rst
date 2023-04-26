@@ -91,7 +91,7 @@ Basic syntax
 |                  | - ``2^3``                           Power                         |
 |                  | - ``sqrt(9)``                       Square root                   |
 |                  | - ``40 / 5``                        ``8.0`` (Float)               |
-|                  | - ``12 % 2``                        ``2`` (remainder)             |
+|                  | - ``12 % 5``                        ``2`` (remainder)             |
 |                  | - ``10^19``                         Results in integer overflow!  |
 |                  | - ``1e19`` or ``big(10)^19``        -> solves the problem         |
 |                  | - ``exp(pi*im)``                    Exponentiation, imaginary nr. |
