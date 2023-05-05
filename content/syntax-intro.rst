@@ -53,7 +53,7 @@ We can write Julia code in various ways:
 
 3. `Pluto.jl <https://github.com/fonsp/Pluto.jl>`_:
    Pluto offers a similar notebook experience to Jupyter, but in contrast
-   to Jupyter
+   to Jupyter,
    Pluto understands global references between cells, and
    reactively re-evaluates cells affected by a code change.
 
@@ -160,7 +160,7 @@ Vectors and arrays
 |                  | - ``rand(Int, 5)``                  random vector with integers   |
 |                  | - ``ones(5)``                       5-elem vector with FP64 ones  |
 |                  | - ``zeros(5)``                      5-elem vector with FP64 zeros |
-|                  | - ``[1,2,3].^2``                    Element-wise dot-operation    |
+|                  | - ``[1,2,3].^2``                    Element-wise operation        |
 +------------------+-------------------------------------------------------------------+
 | Indexing and     | - ``a[1]``                          first element                 |
 | slicing          | - ``a[1:3]``                        3-element vector              |
