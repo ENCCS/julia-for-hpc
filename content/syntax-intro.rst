@@ -195,7 +195,7 @@ We can play around with Vectors and Arrays to get used to their syntax:
 .. code-block:: julia
 
    v1 = [1.0, 2.0, 3.0]
-   # 4-element Vector{Int64}:
+   # 3-element Vector{Int64}:
    m1 = [1.0 2.0 3.0]
    # 1×3 Matrix{Int64}:
 
