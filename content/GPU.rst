@@ -279,52 +279,72 @@ There should be a considerable speedup!
 
    .. solution::
 
-      For example, on an A100 NVIDIA GPU:
+      For example, on an Mi250X AMD GPU:
 
       .. code-block:: julia
 
-         using CUDA
+         using AMDGPU
          using BenchmarkTools
 
-         A = rand(2^9, 2^9)
-         A_d = CuArray(A)
-         @btime $A * $A
-         #  1.702 ms (2 allocations: 2.00 MiB)  
-         @btime $A_d * $A_d
-         #  13.000 μs (29 allocations: 592 bytes)  
-         #  130 times faster
-      
-         A = rand(2^10, 2^10)
-         A_d = CuArray(A)
-         @btime $A * $A
-         #  10.179 ms (2 allocations: 8.00 MiB)
-         @btime $A_d * $A_d
-         #  9.620 μs (29 allocations: 592 bytes)  
-         #  1,114 times faster
+         A = rand(2^9, 2^9); A_d = ROCArray(A);
 
-         A = rand(2^11, 2^11)
-         A_d = CuArray(A)
+         # 1 CPU core:
          @btime $A * $A
-         #    72.950 ms (2 allocations: 32.00 MiB)
+         # 5.472 ms (2 allocations: 2.00 MiB)
+         # 64 CPU cores:
+         @btime $A * $A
+         # 517.722 μs (2 allocations: 2.00 MiB)
+         # GPU
          @btime $A_d * $A_d
-         #    10.861 μs (29 allocations: 592 bytes)
-         # 6,717 times faster
+         # 115.805 μs (21 allocations: 1.06 KiB)
 
-         A = rand(2^12, 2^12)
-         A_d = CuArray(A)
-         @btime $A * $A
-         #  454.483 ms (2 allocations: 128.00 MiB)
-         @btime $A_d * $A_d
-         #  12.480 μs (29 allocations: 592 bytes)
-         # 36,416 times faster
+         # ~47 times faster than 1 CPU core, ~5 times faster than 64 cores
 
-         A = rand(2^13, 2^13)
-         A_d = CuArray(A)
+         A = rand(2^10, 2^10); A_d = ROCArray(A);
+
+         # 1 CPU core
          @btime $A * $A
-         #  3.237 s (2 allocations: 512.00 MiB)
+         # 43.364 ms (2 allocations: 8.00 MiB)
+         # 64 CPU cores
+         @btime $A*$A;
+         # 2.929 ms (2 allocations: 8.00 MiB)
+         @btime begin
+            $A_d * $A_d
+            AMDGPU.synchronize()
+         end
+         # 173.316 μs (21 allocations: 1.06 KiB)
+   
+         # ~250 times faster than one CPU core, ~17 times faster than 64 cores
+
+         A = rand(2^11, 2^11); A_d = ROCArray(A);
+
+         # 1 CPU core
+         @btime $A * $A
+         # 344.364 ms (2 allocations: 32.00 MiB)
+         # 64 CPU cores
+         @btime $A * $A
+         # 30.081 ms (2 allocations: 32.00 MiB)
          @btime $A_d * $A_d
-         #  15.000 μs (32 allocations: 640 bytes)
-         # 216,000 times faster!
+         # 866.348 μs (21 allocations: 1.06 KiB)
+
+         # ~400 times faster than 1 core, 35 times faster than 64 cores
+
+         A = rand(2^12, 2^12); A_d = ROCArray(A);
+
+         # 1 CPU core
+         @btime $A*$A;
+         # 3.221 s (2 allocations: 128.00 MiB)
+         # 64 CPU cores
+         @btime $A*$A;
+         # 159.563 ms (2 allocations: 128.00 MiB)
+         # GPU
+         @btime begin
+            $A_d * $A_d
+            AMDGPU.synchronize()
+         end
+         # 5.910 ms (21 allocations: 1.06 KiB)
+
+         # ~550 times faster than 1 CPU core, 27 times faster than 64 CPU cores
 
 
 Vendor libraries
