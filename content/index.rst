@@ -14,16 +14,23 @@ to install and manage their dependencies. Julia is also gaining ground
 in HPC as it supports both threading and distributed-memory
 parallelisation as well as GPU computing.
 
-This lesson starts with the basics of Julia, its syntax,
-multiple-dispatch paradigm, package development and best practices. It
-then moves on to topics relevant to high-performance scientific
-computing, including an overview of powerful libraries for modeling
-and machine learning, visualization, parallelization and GPU
-computing.
+After motivating why Julia can be a good option for your next HPC project, 
+this lesson goes through various approaches for writing performant and parallel 
+code, including how to write fast serial code, how to write multithreaded and 
+distributed code, how to run Julia on an HPC system, and how to port Julia code 
+to GPUs.
+
+If you are new to the Julia language, please make sure to go through this 
+`introductory Julia lesson <https://enccs.github.io/julia-intro/>`__ before 
+going through this HPC lesson independently or attending a workshop where  
+it is taught.
+
 
 .. prereq::
 
    - Experience in one or more programming languages.
+   - Understanding of basic Julia syntax, best practices and development tools, 
+     corresponding to what is covered in the `ENCCS Julia-intro lesson <https://enccs.github.io/julia-intro/>`__
    - Familiarity with basic concepts in high-performance computing (HPC) 
      (including parallelization by threading or multiprocessing) 
      and programming graphical processing units (GPUs). No direct experience 
@@ -42,9 +49,6 @@ computing.
    :caption: The lesson
 
    motivation
-   syntax-intro
-   overview
-   development
    performant-code
    multithreading
    distributed
