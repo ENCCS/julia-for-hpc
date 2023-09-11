@@ -62,7 +62,6 @@ it is taught.
    :maxdepth: 1
    :caption: Optional episodes  
 
-   data-science
    exercises
 
 

@@ -1,5 +1,5 @@
-Extra exercises
-===============
+Advanced exercises
+==================
 
 .. instructor-note::
 
