@@ -9,7 +9,7 @@ Multithreading
 .. instructor-note::
 
    - 20 min teaching
-   - 15 min exercises
+   - 20 min exercises
 
 
 Overview
