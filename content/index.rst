@@ -25,6 +25,10 @@ If you are new to the Julia language, please make sure to go through this
 going through this HPC lesson independently or attending a workshop where  
 it is taught.
 
+To learn about using Julia for problems in data science, please visit the lesson 
+`Julia for high-performance data analysis <https://enccs.github.io/julia-for-hpda/>`__.
+
+
 
 .. prereq::
 
