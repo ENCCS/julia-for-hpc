@@ -122,7 +122,7 @@ The source files listed below represent a simplification of this `HeatEquation p
       but it seems to scale better with larger arrays.
 
 
-.. exercise:: Using SharedArrays with HeatEquation
+.. exercise:: Using SharedArrays with stencil problem
 
    Look again at the double for loop in the ``evolve!`` function 
    and think about how you could use SharedArrays.
@@ -223,26 +223,16 @@ The source files listed below represent a simplification of this `HeatEquation p
          #   578.060 ms (722 allocations: 32.72 KiB)
 
 
-.. exercise:: Port HeatEquation.jl to GPU
+.. challenge:: Exercise: Julia port to GPUs
 
-   Write a kernel for the ``evolve!`` function!
+   Carefully inspect all Julia source files and consider the following questions:
 
-   Start with this refactored function which accepts arrays:
+   1. Which functions should be ported to run on GPU?
+   2. Look at the :meth:`initialize!` function and how it uses the ``arraytype`` argument. This could be done more compactly and elegantly, but this solution solves scalar indexing errors. What are scalar indexing errors?
+   3. Try to start sketching GPU-ported versions of the key functions.
+   4. When you have a version running on a GPU (your own or the solution provided below), try benchmarking it by adding ``@btime`` in front of :meth:`simulate!` in ``main.jl``. Benchmark also the CPU version, and compare.
 
-   .. code-block:: julia
-
-      function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
-          nx, ny = size(currdata) .- 2
-          for j = 2:ny+1
-              for i = 2:nx+1
-                  @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                  @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                  @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
-              end 
-          end
-      end
-
-   Now start implementing a GPU kernel version ``evolve_gpu!``.
+   Further considerations:
 
    1. The kernel function needs to end with ``return`` or ``return nothing``.
 
@@ -269,6 +259,41 @@ The source files listed below represent a simplification of this `HeatEquation p
    5. Check correctness of your results! To test that ``evolve!`` and ``evolve_gpu!`` 
       give (approximately) the same results, for example:
 
+
+   .. solution:: Hints
+
+      - create a new function :meth:`evolve_gpu!` which contains the GPU kernelized version of :meth:`evolve!`
+      - in the loop over timesteps in :meth:`simulate!`, you will need a conditional like ``if typeof(curr.data) <: ROCArray`` to call your GPU-ported function
+      - you cannot pass the struct ``Field`` to the kernel. You will instead need to directly pass the array ``Field.data``. This also necessitates passing in other variables like ``curr.dx^2``, etc.
+
+   .. solution:: More hints
+
+      - since the data is two-dimensional, you'll need ``i = (blockIdx().x - 1) * blockDim().x + threadIdx().x`` and ``j = (blockIdx().y - 1) * blockDim().y + threadIdx().y``
+      - to not overindex the 2D array, you can use a conditional like ``if i > 1 && j > 1 && i < nx+2 && j < ny+2``
+      - when calling the kernel, you can set the number of threads and blocks like ``xthreads = ythreads = 16`` and ``xblocks, yblocks = cld(curr.nx, xthreads), cld(curr.ny, ythreads)``, and then call it with, e.g., ``@roc threads=(xthreads, ythreads) blocks = (xblocks, yblocks) evolve_rocm!(curr.data, prev.data, curr.dx^2, curr.dy^2, nx, ny, a, dt)``.
+
+   .. solution:: 
+
+      1. The :meth:`evolve!` and :meth:`simulate!` functions need to be ported. The ``main.jl`` file also needs to be updated to work with GPU arrays.
+      2. "Scalar indexing" is where you iterate over a GPU array, which would be excruciatingly slow and is indeed only allowed in interactive REPL sessions. Without the if-statements in the :meth:`initialize!` function, the :meth:`generate_field!` method would be doing disallowed scalar indexing if you were running on a GPU.
+      3. The GPU-ported version is found below. Try it out on both CPU and GPU and observe the speedup. Play around with array size to see if the speedup is affected. You can also play around with the ``xthreads`` and ``ythreads`` variables to see if it changes anything.
+
+      .. tabs::
+
+         .. tab:: main_gpu.jl
+
+            .. literalinclude:: code/stencil/main_gpu.jl
+               :language: julia
+
+         .. tab:: core_gpu.jl
+
+            .. literalinclude:: code/stencil/core_gpu.jl
+               :language: julia
+
+
+
+
+
       .. code-block:: julia
 
          dx = dy = 0.01
@@ -286,7 +311,7 @@ The source files listed below represent a simplification of this `HeatEquation p
 
          all(A1 .≈ Array(A1_d))
    
-   6. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
+   1. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
       functions for arrays of various sizes and with different choices 
       of ``nthreads``. You will need to prefix the 
       kernel execution with the ``CUDA.@sync`` macro 
@@ -294,7 +319,7 @@ The source files listed below represent a simplification of this `HeatEquation p
       would be measuring the time it takes to only launch the kernel):
 
    
-   7. Compare your Julia code with the 
+   2. Compare your Julia code with the 
       `corresponding CUDA version <https://github.com/cschpc/heat-equation/blob/main/cuda/core_cuda.cu>`__
       to enjoy the (relative) simplicity of Julia!
 
