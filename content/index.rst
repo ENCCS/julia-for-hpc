@@ -59,6 +59,7 @@ To learn about using Julia for problems in data science, please visit the lesson
    MPI
    cluster
    GPU
+   interfacing
    conclusions
 
 .. toctree:: 
@@ -179,6 +180,9 @@ and an assortment of tutorials and books.
 
 A recent talk given by Kristoffer Carlsson, developer at Julia Computing in Sweden, gives an 
 `excellent overview on using Julia for HPC <https://www.youtube.com/watch?v=bXHe7Kj3Xxg>`__.
+
+`This repository <https://github.com/carstenbauer/JuliaHLRS22>`__ is from the Julia for High Performance Computing Course @ HLRS
+developed by Carsten Bauer.
 
 Credits
 -------

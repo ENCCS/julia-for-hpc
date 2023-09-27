@@ -216,6 +216,7 @@ What you will not learn
 See also
 --------
 
+- Jeffrey M. Perkel. `Julia: come for the syntax, stay for the speed <https://www.nature.com/articles/d41586-019-02310-3>`__
 - Lin, Wei-Chen, and Simon McIntosh-Smith. 
   `Comparing Julia to Performance Portable Parallel Programming Models for HPC. <https://ieeexplore.ieee.org/abstract/document/9652798>`_, 
   2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.
