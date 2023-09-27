@@ -6,85 +6,66 @@ Advanced exercises
    - 0 min teaching
    - 30 min exercises
 
-Introducing HeatEquation.jl
----------------------------
+Example use case: heat flow in two-dimensional area
+---------------------------------------------------
 
-This series of exercises uses a realistic Julia package
-based on a minimal heat equation solver, inspired by 
-`this educational repository containing C/C++/Fortran versions with different 
-parallelization strategies <https://github.com/cschpc/heat-equation>`_ (credits to 
-CSC Finland). The Julia version of this package can be found at 
-https://github.com/enccs/HeatEquation.jl but the source files are also displayed 
-below.
+Heat flows in objects according to local temperature differences, as if seeking local equilibrium. The following example defines a rectangular area with two always-warm sides (temperature 70 and 85), two cold sides (temperature 20 and 5) and a cold disk at the center. Because of heat diffusion, temperature of neighboring patches of the area is bound to equalize, changing the overall distribution:
+
+.. figure:: img/heat_montage.png
+   :align: center
+   
+   Over time, the temperature distribution progresses from the initial state toward an end state where upper triangle is warm and lower is cold. The average temperature tends to (70 + 85 + 20 + 5) / 4 = 45.
+
+Technique: stencil computation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Heat transfer in the system above is governed by the partial differential equation(s) describing local variation of the temperature field in time and space. That is, the rate of change of the temperature field :math:`u(x, y, t)` over two spatial dimensions :math:`x` and :math:`y` and time :math:`t` (with rate coefficient :math:`\alpha`) can be modelled via the equation
+
+.. math::
+   \frac{\partial u}{\partial t} = \alpha \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial x^2}\right)
+   
+The standard way to numerically solve differential equations is to *discretize* them, i. e. to consider only a set/ grid of specific area points at specific moments in time. That way, partial derivatives :math:`{\partial u}` are converted into differences between adjacent grid points :math:`u^{m}(i,j)`, with :math:`m, i, j` denoting time and spatial grid points, respectively. Temperature change in time at a certain point can now be computed from the values of neighboring points at earlier time; the same expression, called *stencil*, is applied to every point on the grid.
+
+.. figure:: img/stencil.svg
+   :align: center
+
+   This simplified model uses an 8x8 grid of data in light blue in state
+   :math:`m`, each location of which has to be updated based on the
+   indicated 5-point stencil in yellow to move to the next time point
+   :math:`m+1`.
+
+The following series of exercises uses this stencil example implemented in Julia. 
+The source files listed below represent a simplification of this `HeatEquation package <https://github.com/ENCCS/HeatEquation.jl>`__, which in turn is inspired by `this educational repository containing C/C++/Fortran versions with different parallelization strategies <https://github.com/cschpc/heat-equation>`_ (credits to CSC Finland) (you can also find the source files in the content/code/stencil/ directory of this repository).
 
 .. tabs:: 
 
-   .. tab:: HeatEquation.jl
+   .. tab:: main.jl
 
-      .. literalinclude:: code/HeatEquation/src/HeatEquation.jl
-         :language: julia
-
-   .. tab:: setup.jl
-
-      .. literalinclude:: code/HeatEquation/src/setup.jl
-         :language: julia
-
-   .. tab:: io.jl
-
-      .. literalinclude:: code/HeatEquation/src/io.jl
+      .. literalinclude:: code/stencic/main.jl
          :language: julia
 
    .. tab:: core.jl
 
-      .. literalinclude:: code/HeatEquation/src/core.jl
+      .. literalinclude:: code/stencil/core.jl
+         :language: julia
+
+   .. tab:: heat.jl
+
+      .. literalinclude:: code/stencil/heat.jl
          :language: julia
 
    .. tab:: Project.toml
 
-      .. literalinclude:: code/HeatEquation/Project.toml
+      .. literalinclude:: code/stencil/Project.toml
          :language: julia         
 
 
-.. challenge:: Download and run HeatEquation.jl 
+.. challenge:: Run the code
 
-   - Clone the repository at https://github.com/enccs/HeatEquation.jl into a new directory.
+   - Copy the source files from the code box above or from the `content/code/stencil/ <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code/stencil>`__ directory of this repository.
    - Activate the environment found in the Project.toml file
+   - Run the main.jl code and (optionally) visualise the result by uncommenting the relevant line.
 
-   If you don't have Git installed, you can also 
-   `download a zipfile <https://github.com/ENCCS/HeatEquation.jl/archive/refs/heads/main.zip>`__.
-
-   - Next open a new VSCode window and navigate to the new directory. 
-   - Open up a Julia REPL inside VSCode and activate the `HeatEquation` environment.
-
-   When everything has been set up, import `HeatEquation` and begin by 
-   testing the package: 
-
-   .. code-block:: julia
-
-      using HeatEquation
-      using BenchmarkTools
-
-      ncols, nrows, nsteps = 1000, 1000, 500
-      curr, prev = initialize(ncols, nrows)
-      visualize(curr)
-
-      simulate!(curr, prev, nsteps)
-
-      visualize(curr)
-
-   .. solution::
-
-      .. code-block:: shell
-
-         cd $HOME/julia
-         git clone https://github.com/enccs/HeatEquation.jl
-         cd HeatEquation
-   
-      In a new VSCode window (or in the Julia REPL), activate the environment:
-
-      .. code-block:: julia
-
-         Pkg.activate(".")
 
 .. challenge:: Optimise and benchmark
 
@@ -96,7 +77,7 @@ below.
 .. challenge:: Multithread 
 
    - Multithread the :meth:`evolve!` function
-   - Benchmark HeatEquation with different number of threads. How does it scale?
+   - Benchmark again with different number of threads. How does it scale?
 
    .. solution::
 
