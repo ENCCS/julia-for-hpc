@@ -41,7 +41,7 @@ The source files listed below represent a simplification of this `HeatEquation p
 
    .. tab:: main.jl
 
-      .. literalinclude:: code/stencic/main.jl
+      .. literalinclude:: code/stencil/main.jl
          :language: julia
 
    .. tab:: core.jl
