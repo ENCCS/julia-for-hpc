@@ -6,85 +6,66 @@ Advanced exercises
    - 0 min teaching
    - 30 min exercises
 
-Introducing HeatEquation.jl
----------------------------
+Example use case: heat flow in two-dimensional area
+---------------------------------------------------
 
-This series of exercises uses a realistic Julia package
-based on a minimal heat equation solver, inspired by 
-`this educational repository containing C/C++/Fortran versions with different 
-parallelization strategies <https://github.com/cschpc/heat-equation>`_ (credits to 
-CSC Finland). The Julia version of this package can be found at 
-https://github.com/enccs/HeatEquation.jl but the source files are also displayed 
-below.
+Heat flows in objects according to local temperature differences, as if seeking local equilibrium. The following example defines a rectangular area with two always-warm sides (temperature 70 and 85), two cold sides (temperature 20 and 5) and a cold disk at the center. Because of heat diffusion, temperature of neighboring patches of the area is bound to equalize, changing the overall distribution:
+
+.. figure:: img/heat_montage.png
+   :align: center
+   
+   Over time, the temperature distribution progresses from the initial state toward an end state where upper triangle is warm and lower is cold. The average temperature tends to (70 + 85 + 20 + 5) / 4 = 45.
+
+Technique: stencil computation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Heat transfer in the system above is governed by the partial differential equation(s) describing local variation of the temperature field in time and space. That is, the rate of change of the temperature field :math:`u(x, y, t)` over two spatial dimensions :math:`x` and :math:`y` and time :math:`t` (with rate coefficient :math:`\alpha`) can be modelled via the equation
+
+.. math::
+   \frac{\partial u}{\partial t} = \alpha \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial x^2}\right)
+   
+The standard way to numerically solve differential equations is to *discretize* them, i. e. to consider only a set/ grid of specific area points at specific moments in time. That way, partial derivatives :math:`{\partial u}` are converted into differences between adjacent grid points :math:`u^{m}(i,j)`, with :math:`m, i, j` denoting time and spatial grid points, respectively. Temperature change in time at a certain point can now be computed from the values of neighboring points at earlier time; the same expression, called *stencil*, is applied to every point on the grid.
+
+.. figure:: img/stencil.svg
+   :align: center
+
+   This simplified model uses an 8x8 grid of data in light blue in state
+   :math:`m`, each location of which has to be updated based on the
+   indicated 5-point stencil in yellow to move to the next time point
+   :math:`m+1`.
+
+The following series of exercises uses this stencil example implemented in Julia. 
+The source files listed below represent a simplification of this `HeatEquation package <https://github.com/ENCCS/HeatEquation.jl>`__, which in turn is inspired by `this educational repository containing C/C++/Fortran versions with different parallelization strategies <https://github.com/cschpc/heat-equation>`_ (credits to CSC Finland) (you can also find the source files in the content/code/stencil/ directory of this repository).
 
 .. tabs:: 
 
-   .. tab:: HeatEquation.jl
+   .. tab:: main.jl
 
-      .. literalinclude:: code/HeatEquation/src/HeatEquation.jl
-         :language: julia
-
-   .. tab:: setup.jl
-
-      .. literalinclude:: code/HeatEquation/src/setup.jl
-         :language: julia
-
-   .. tab:: io.jl
-
-      .. literalinclude:: code/HeatEquation/src/io.jl
+      .. literalinclude:: code/stencil/main.jl
          :language: julia
 
    .. tab:: core.jl
 
-      .. literalinclude:: code/HeatEquation/src/core.jl
+      .. literalinclude:: code/stencil/core.jl
+         :language: julia
+
+   .. tab:: heat.jl
+
+      .. literalinclude:: code/stencil/heat.jl
          :language: julia
 
    .. tab:: Project.toml
 
-      .. literalinclude:: code/HeatEquation/Project.toml
+      .. literalinclude:: code/stencil/Project.toml
          :language: julia         
 
 
-.. challenge:: Download and run HeatEquation.jl 
+.. challenge:: Run the code
 
-   - Clone the repository at https://github.com/enccs/HeatEquation.jl into a new directory.
+   - Copy the source files from the code box above or from the `content/code/stencil/ <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code/stencil>`__ directory of this repository.
    - Activate the environment found in the Project.toml file
+   - Run the main.jl code and (optionally) visualise the result by uncommenting the relevant line.
 
-   If you don't have Git installed, you can also 
-   `download a zipfile <https://github.com/ENCCS/HeatEquation.jl/archive/refs/heads/main.zip>`__.
-
-   - Next open a new VSCode window and navigate to the new directory. 
-   - Open up a Julia REPL inside VSCode and activate the `HeatEquation` environment.
-
-   When everything has been set up, import `HeatEquation` and begin by 
-   testing the package: 
-
-   .. code-block:: julia
-
-      using HeatEquation
-      using BenchmarkTools
-
-      ncols, nrows, nsteps = 1000, 1000, 500
-      curr, prev = initialize(ncols, nrows)
-      visualize(curr)
-
-      simulate!(curr, prev, nsteps)
-
-      visualize(curr)
-
-   .. solution::
-
-      .. code-block:: shell
-
-         cd $HOME/julia
-         git clone https://github.com/enccs/HeatEquation.jl
-         cd HeatEquation
-   
-      In a new VSCode window (or in the Julia REPL), activate the environment:
-
-      .. code-block:: julia
-
-         Pkg.activate(".")
 
 .. challenge:: Optimise and benchmark
 
@@ -96,7 +77,7 @@ below.
 .. challenge:: Multithread 
 
    - Multithread the :meth:`evolve!` function
-   - Benchmark HeatEquation with different number of threads. How does it scale?
+   - Benchmark again with different number of threads. How does it scale?
 
    .. solution::
 
@@ -141,7 +122,7 @@ below.
       but it seems to scale better with larger arrays.
 
 
-.. exercise:: Using SharedArrays with HeatEquation
+.. exercise:: Using SharedArrays with stencil problem
 
    Look again at the double for loop in the ``evolve!`` function 
    and think about how you could use SharedArrays.
@@ -242,26 +223,16 @@ below.
          #   578.060 ms (722 allocations: 32.72 KiB)
 
 
-.. exercise:: Port HeatEquation.jl to GPU
+.. challenge:: Exercise: Julia port to GPUs
 
-   Write a kernel for the ``evolve!`` function!
+   Carefully inspect all Julia source files and consider the following questions:
 
-   Start with this refactored function which accepts arrays:
+   1. Which functions should be ported to run on GPU?
+   2. Look at the :meth:`initialize!` function and how it uses the ``arraytype`` argument. This could be done more compactly and elegantly, but this solution solves scalar indexing errors. What are scalar indexing errors?
+   3. Try to start sketching GPU-ported versions of the key functions.
+   4. When you have a version running on a GPU (your own or the solution provided below), try benchmarking it by adding ``@btime`` in front of :meth:`simulate!` in ``main.jl``. Benchmark also the CPU version, and compare.
 
-   .. code-block:: julia
-
-      function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
-          nx, ny = size(currdata) .- 2
-          for j = 2:ny+1
-              for i = 2:nx+1
-                  @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                  @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                  @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
-              end 
-          end
-      end
-
-   Now start implementing a GPU kernel version ``evolve_gpu!``.
+   Further considerations:
 
    1. The kernel function needs to end with ``return`` or ``return nothing``.
 
@@ -288,6 +259,41 @@ below.
    5. Check correctness of your results! To test that ``evolve!`` and ``evolve_gpu!`` 
       give (approximately) the same results, for example:
 
+
+   .. solution:: Hints
+
+      - create a new function :meth:`evolve_gpu!` which contains the GPU kernelized version of :meth:`evolve!`
+      - in the loop over timesteps in :meth:`simulate!`, you will need a conditional like ``if typeof(curr.data) <: ROCArray`` to call your GPU-ported function
+      - you cannot pass the struct ``Field`` to the kernel. You will instead need to directly pass the array ``Field.data``. This also necessitates passing in other variables like ``curr.dx^2``, etc.
+
+   .. solution:: More hints
+
+      - since the data is two-dimensional, you'll need ``i = (blockIdx().x - 1) * blockDim().x + threadIdx().x`` and ``j = (blockIdx().y - 1) * blockDim().y + threadIdx().y``
+      - to not overindex the 2D array, you can use a conditional like ``if i > 1 && j > 1 && i < nx+2 && j < ny+2``
+      - when calling the kernel, you can set the number of threads and blocks like ``xthreads = ythreads = 16`` and ``xblocks, yblocks = cld(curr.nx, xthreads), cld(curr.ny, ythreads)``, and then call it with, e.g., ``@roc threads=(xthreads, ythreads) blocks = (xblocks, yblocks) evolve_rocm!(curr.data, prev.data, curr.dx^2, curr.dy^2, nx, ny, a, dt)``.
+
+   .. solution:: 
+
+      1. The :meth:`evolve!` and :meth:`simulate!` functions need to be ported. The ``main.jl`` file also needs to be updated to work with GPU arrays.
+      2. "Scalar indexing" is where you iterate over a GPU array, which would be excruciatingly slow and is indeed only allowed in interactive REPL sessions. Without the if-statements in the :meth:`initialize!` function, the :meth:`generate_field!` method would be doing disallowed scalar indexing if you were running on a GPU.
+      3. The GPU-ported version is found below. Try it out on both CPU and GPU and observe the speedup. Play around with array size to see if the speedup is affected. You can also play around with the ``xthreads`` and ``ythreads`` variables to see if it changes anything.
+
+      .. tabs::
+
+         .. tab:: main_gpu.jl
+
+            .. literalinclude:: code/stencil/main_gpu.jl
+               :language: julia
+
+         .. tab:: core_gpu.jl
+
+            .. literalinclude:: code/stencil/core_gpu.jl
+               :language: julia
+
+
+
+
+
       .. code-block:: julia
 
          dx = dy = 0.01
@@ -305,7 +311,7 @@ below.
 
          all(A1 .≈ Array(A1_d))
    
-   6. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
+   1. Perform some benchmarking of the ``evolve!`` and ``evolve_gpu!`` 
       functions for arrays of various sizes and with different choices 
       of ``nthreads``. You will need to prefix the 
       kernel execution with the ``CUDA.@sync`` macro 
@@ -313,7 +319,7 @@ below.
       would be measuring the time it takes to only launch the kernel):
 
    
-   7. Compare your Julia code with the 
+   2. Compare your Julia code with the 
       `corresponding CUDA version <https://github.com/cschpc/heat-equation/blob/main/cuda/core_cuda.cu>`__
       to enjoy the (relative) simplicity of Julia!
 
