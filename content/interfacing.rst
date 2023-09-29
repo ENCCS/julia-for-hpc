@@ -57,15 +57,17 @@ are passed as a tuple in the first argument, followed by the return type of the 
 of the function arguments, and finally the argument themselves. It’s a bit klunky, but it works!
 
 Here is one example to calculate the square root of a number (herein, it is 64.0).
-```
-ccall((:sqrt, "libm"), Float64, (Float64,), 64.0)
-8.0
-```
+.. code-block:: julia
+
+    ccall((:sqrt, "libm"), Float64, (Float64,), 64.0)
+    8.0
+
 It also makes sense to wrap a call like that in a native Julia function.
-```
-csqrt(x) = ccall((:sqrt, "libm"), Float64, (Float64,), x);
-csqrt(81.0)
-```
+.. code-block:: julia
+
+    csqrt(x) = ccall((:sqrt, "libm"), Float64, (Float64,), x);
+    csqrt(81.0)
+
 
 
 The following example is adapted from `Calling C from Julia <https://craftofcoding.wordpress.com/2017/02/08/calling-c-from-julia-i-simple-arrays/>`_ by `The Craft of Coding`.
