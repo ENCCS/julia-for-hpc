@@ -16,25 +16,31 @@ Task Graphs
 We can use a `Directed Acyclic Graph` (DAG) to model dependencies between computational tasks.
 In the graph, the vertices are `tasks` and the directed edges are `dependencies` between the tasks.
 Dependecies arise when the output of one task is an input to other task.
+Task graphs are commonly used to represent scientific workflows.
 
 .. figure:: img/dag.png
    :align: center
 
-   Directed acyclic graph with vertices :math:`V=\{1,2,3,4\}` and directed edges :math:`E=\{(1,2), (1,3), (2,4), (3, 4)\}.`
-   There are two paths :math:`(1,2,4)` and :math:`(1,3,4).`
-   Vertices :math:`2` and :math:`3` are independent because there no path between them.
+   An example of a directed acyclic graph with vertices :math:`V=\{1,2,3,4\}` and directed edges :math:`E=\{(1,2), (1,3), (2,4), (3, 4)\}.`
+   The graph has two paths :math:`(1,2,4)` and :math:`(1,3,4).`
+   We can see that the vertices :math:`2` and :math:`3` are independent because there no path between them.
 
-Formally, we a directed acyclic graph consist of set of vertices :math:`V=\{1,2,...,n\}` and set of directed edges :math:`E\subseteq \{(i,j) \mid i\in V, j\in V, i<j \}.`
+Formally, we a directed acyclic graph consist of set of vertices :math:`V=\{1,2,...,n\}` called tasks and set of directed edges :math:`E\subseteq \{(i,j) \mid i\in V, j\in V, i<j \}` called dependencies.
 We say that a task :math:`j` `depends` on task :math:`i` if there is a path from :math:`i` to :math:`j.`
 Otherwise, the tasks are `independent`.
 **Independent tasks can be executed in parallel.**
-Task execution frameworks can express task graphs and automatically execute independent tasks in parallel.
+
+We also focus on task graphs that are **dynamically generated** such that a task can create new tasks and dependencies based on the inputs it receives.
+In these cases, the full task graph is not know before computing it.
+
+There are frameworks, such as `Dask` for Python and `Dagger.jl` for Julia, that can express task graphs and automatically execute independent tasks in parallel.
+Furthermore, they may support features such as out-of-core execution to process data that is larger than the memory and checkpointing for saving intermediate result to disk.
+We focus on defining task graphs and parallel execution.
 
 
-Parallel computing with Dagger
-------------------------------
-Similar to Dask in Python, `Dagger.jl` can dynamically execute tasks on a task graph such that it executes independent tasks in parallel with available threads and distributed workers.
-
+Dagger
+------
+`Dagger.jl` can dynamically execute tasks on a task graph such that it executes independent tasks in parallel with available threads and distributed workers.
 We can install dagger with the package manager:
 
 .. code-block:: julia
@@ -90,9 +96,7 @@ Next, we would like to define and execute a task graph using Dagger.
 
 We can see that Dagger thread 1 on worker 1 for scheduling tasks and the other Dagger processors to execute the tasks.
 
-We can also specify more complex tasks graph.
-Furthermore task graphs can be dynamic, that is, the graph can depend on the output of tasks because Dagger executes task dynamically.
-Also, Dagger allows nesting, that is, we can spawn new task from another task.
+We can also specify more complex, dynamic tasks graphs since Dagger uses a dynamic scheduler and allows nesting tasks.
 Here is an example of dynamic task graph:
 
 .. code-block:: julia
