@@ -56,6 +56,7 @@ To learn about using Julia for problems in data science, please visit the lesson
    performant-code
    multithreading
    distributed
+   dagger
    MPI
    cluster
    GPU
