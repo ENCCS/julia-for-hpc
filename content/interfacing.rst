@@ -35,9 +35,6 @@ Extensive description of all provided functionality can be found in the `officia
 
 Interfacing Julia with C
 ------------------------
-Interfacing to C from Julia is relatively easy and overhead is same as calling a library function from C.
-The interface uses Julia's `ccall` function.
-
 The following example is adapted from `Calling C from Julia <https://craftofcoding.wordpress.com/2017/02/08/calling-c-from-julia-i-simple-arrays/>`_ by `The Craft of Coding`.
 Let's conside the following C function which computes the mean from an array of integer values.
 We will name the file as :code:`mean.c`.
