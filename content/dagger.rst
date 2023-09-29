@@ -11,17 +11,28 @@ Dagger
    - 30 min teaching
    - 30 min exercises
 
-Overview
---------
-We can use a `Directed Acyclic Graph` (DAG) to model dependencies between computation tasks.
-In the graph, the nodes are tasks and the directed edges are dependencies between the tasks.
+Task Graphs
+-----------
+We can use a `Directed Acyclic Graph` (DAG) to model dependencies between computational tasks.
+In the graph, the vertices are `tasks` and the directed edges are `dependencies` between the tasks.
 Dependecies arise when the output of one task is an input to other task.
 
-Formally, we a directed acyclic graph consist of set of nodes :math:`V=\{1,2,...,n\}` and set of directed edges :math:`E\subseteq \{(i,j) \mid i\in V, j\in V, i<j \}.`
-We say that a task :math:`j` depends on task :math:`i` if there is a path from :math:`i` to :math:`j.`
-Otherwise, the tasks are independent.
-Independent tasks can be executed in parallel.
+.. figure:: img/dag.png
+   :align: center
 
+   Directed acyclic graph with vertices :math:`V=\{1,2,3,4\}` and directed edges :math:`E=\{(1,2), (1,3), (2,4), (3, 4)\}.`
+   There are two paths :math:`(1,2,4)` and :math:`(1,3,4).`
+   Vertices :math:`2` and :math:`3` are independent because there no path between them.
+
+Formally, we a directed acyclic graph consist of set of vertices :math:`V=\{1,2,...,n\}` and set of directed edges :math:`E\subseteq \{(i,j) \mid i\in V, j\in V, i<j \}.`
+We say that a task :math:`j` `depends` on task :math:`i` if there is a path from :math:`i` to :math:`j.`
+Otherwise, the tasks are `independent`.
+**Independent tasks can be executed in parallel.**
+Task execution frameworks can express task graphs and automatically execute independent tasks in parallel.
+
+
+Parallel computing with Dagger
+------------------------------
 Similar to Dask in Python, `Dagger.jl` can dynamically execute tasks on a task graph such that it executes independent tasks in parallel with available threads and distributed workers.
 
 We can install dagger with the package manager:
@@ -82,6 +93,7 @@ We can see that Dagger thread 1 on worker 1 for scheduling tasks and the other D
 We can also specify more complex tasks graph.
 Furthermore task graphs can be dynamic, that is, the graph can depend on the output of tasks because Dagger executes task dynamically.
 Also, Dagger allows nesting, that is, we can spawn new task from another task.
+Here is an example of dynamic task graph:
 
 .. code-block:: julia
 
@@ -89,9 +101,19 @@ Also, Dagger allows nesting, that is, we can spawn new task from another task.
        return [Dagger.@spawn b+i for i in 1:a]
    end
 
+   # Define and execute a task graph
    a = Dagger.@spawn rand(4:8)
    b = Dagger.@spawn rand(10:20)
+   # The value of `a` determines how many nested tasks are spawned
    c = Dagger.@spawn task_nested(a, b)
    d = Dagger.@spawn rand(10:20)
+   # We use fetch inside @spawn so it does not block
    f = Dagger.@spawn +(fetch(c)..., d)
+
+   # Fetch the final result
    fetch(f)
+
+
+Exercises
+---------
+
