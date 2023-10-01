@@ -262,20 +262,22 @@ Interfacing Julia with other languages
 Besides C and Fortran that can be called directly using `ccall` function, it is possible for Julia to interact with other programming languages using third-party packages.
 The following table shows an overview of those packages.
 
-+----------+--------------------+---------------+
-| Language | Calling from Julia | Calling Julia |
-+==========+====================+===============+
-| Python   | `PyCall.jl <https://github.com/JuliaPy/PyCall.jl>`_ | `PyJulia <https://github.com/JuliaPy/pyjulia>`_ |
-+----------+--------------------+---------------+
-| R        | `RCall.jl <https://github.com/JuliaInterop/RCall.jl>`_ | `JuliaCall <https://github.com/Non-Contradiction/JuliaCall>`_ |
-+----------+--------------------+---------------+
-| MATLAB   | `MATLAB.jl <https://github.com/JuliaInterop/MATLAB.jl>`_ | `Mex.jl <https://github.com/jebej/Mex.jl/>`_|
-+----------+--------------------+---------------+
-| Java     | `JavaCall.jl <https://github.com/JuliaInterop/JavaCall.jl>`_ | `JuliaCaller <https://github.com/jbytecode/juliacaller>`_ |
-+----------+--------------------+---------------+
+.. table:: Software mapping naming
+   :align: center
+
+   +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
+   | Language  | Calling from Julia                                           | Calling Julia                                                 |
+   +===========+==============================================================+===============================================================+
+   | Python    |  `PyCall.jl <https://github.com/JuliaPy/PyCall.jl>`_         |  `PyJulia <https://github.com/JuliaPy/pyjulia>`_              |
+   +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
+   | R         | `RCall.jl <https://github.com/JuliaInterop/RCall.jl>`_       | `JuliaCall <https://github.com/Non-Contradiction/JuliaCall>`_ |
+   +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
+   | MATLAB    | `MATLAB.jl <https://github.com/JuliaInterop/MATLAB.jl>`_     | `Mex.jl <https://github.com/jebej/Mex.jl/>`_                  |
+   +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
+   | Java      | `JavaCall.jl <https://github.com/JuliaInterop/JavaCall.jl>`_ | `JuliaCaller <https://github.com/jbytecode/juliacaller>`_     |
+   +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
 
 Moreover, other Julia packages provide Julia interface for some well-known libraries from other languages. As an example, we can mention `ScikitLear.jl <https://github.com/cstjean/ScikitLearn.jl>`_, which provides an interface for the `scikit-learn <https://scikit-learn.org/>`_ library from Python or the `RDatasets.jl <https://github.com/JuliaStats/RDatasets.jl>`_ that provides an easy way to load famous R datasets.
-
 
 
 See also
