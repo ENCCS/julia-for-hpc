@@ -3,8 +3,8 @@ Interfacing to C and Fortran
 
 .. questions::
 
-   - 1
-   - 2
+   - 1.
+   - 2.
 
 .. instructor-note::
 
@@ -60,14 +60,14 @@ Here is one example to calculate the square root of a number (herein, it is 64.0
 
 .. code-block:: julia
 
-    ccall((:sqrt, "libm"), Float64, (Float64,), 64.0)
+    julia> ccall((:sqrt, "libm"), Float64, (Float64,), 64.0)
 
 It also makes sense to wrap a call like that in a native Julia function.
 
 .. code-block:: julia
 
-    csqrt(x) = ccall((:sqrt, "libm"), Float64, (Float64,), x);
-    csqrt(81.0)
+    julia> csqrt(x) = ccall((:sqrt, "libm"), Float64, (Float64,), x);
+    julia> csqrt(81.0)
 
 
 
@@ -114,8 +114,146 @@ follows:
    ccall((:vectorMean, "./mean.so"), Cdouble, (Ptr{Cint}, Cint), arr_c, n_c)
 
 
+
 Interfacing Julia with Fortran
 ------------------------------
+
+During the compilation, the Fortran compilers usually generate mangled names by appending an underscore to the lowercased/uppercased function names.
+Therefore, if you want to call a Fortran function using Julia, you must pass the mangled identifier corresponding to the rule followed by your Fortran compiler.
+In addition, all inputs must be passed by reference when calling a Fortran function.
+
+Below we provide an example for interfacing Julia with Frotran.
+
+.. code-block:: fortran
+
+   # fortran_julia.f90
+   module fortran_julia
+      implicit none
+      public
+      contains
+
+      real(8) function add(a, b)
+         implicit none
+         real(8), intent(in)  :: a, b
+         add = a + b
+         return
+      end function add
+
+      subroutine addsub(x, y, a, b)
+         implicit none
+         real(8), intent(out) :: x, y
+         real(8), intent(in)  :: a, b
+         x = a + b
+         y = a - b
+         return
+      end subroutine addsub
+
+      subroutine concatenate(x, a, b)
+         implicit none
+         character(*), intent(out) :: x
+         character(*), intent(in)  :: a, b
+         x = a // b
+         return
+      end subroutine concatenate
+
+      subroutine add_array(x, a, b, n)
+         implicit none
+         integer, intent(in)  :: n
+         real(8), intent(out) :: x(n)
+         real(8), intent(in)  :: a(n), b(n)
+         x = a + b
+         return
+      end subroutine add_array
+
+   end module fortran_julia
+
+Then we compile the code :code:`fortran_julia.f90` using  into a shared object named as :code:`fortran_julia.so`.
+The flags 
+
+.. code-block:: bash
+
+   gfortran fortran_julia.f90 -O3 -shared -fPIC -o fortran_julia.so
+
+Next we can call the shared object from Julia using the :code:`ccall` function:
+
+.. code-block:: julia
+
+   julia> ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), 3.0, 4.0)
+
+In addition, the `add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convension.
+
+.. code-block:: julia
+
+   julia> function add(a::Float64, b::Float64)
+              ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), a, b)
+          end
+   add (generic function with 1 method)
+
+   julia> add(3.0, 4.0)
+   7.0
+
+
+Calling a Fortran subroutine is similar to calling a Fortran function. In fact, the subroutine in Fortran can be regarded as a special function, and its return value is void (corresponding to the `Nothing` type in Julia).
+Here is another Fortran wrapper example.
+
+.. code-block:: julia
+
+   julia> function addsub(a::Float64, b::Float64)
+          x = Ref{Float64}()
+          y = Ref{Float64}()
+          ccall((:__fortran_julia_MOD_addsub, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Float64}), x, y, a, b)
+          x[], y[]
+          end
+   addsub (generic function with 1 method)
+
+   julia> addsub(3.0, 4.0)
+   (7.0, -1.0)
+
+
+The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters. 
+In this example, x and y are the output results to the caller.
+Therefore two pointers should be defined using `Ref{Float64}()` and then passed to the Fortran subroutine.
+After calling the Fortran subroutine, we will use `x[]` and `y[]` to extract the results from the addresses the pre-defined pointers pointing to.
+The rest of the this process is similar as calling the Fortran function.
+
+
+Here is another example to concatenate two strings via calling a Fortran subroutine.
+
+.. code-block:: julia
+
+   julia> function concatenate(a::String, b::String)
+          x = Vector{UInt8}(undef, sizeof(a) + sizeof(b))
+          ccall((:__fortran_julia_MOD_concatenate, "fortran_julia.so"), Nothing, (Ref{UInt8}, Ref{UInt8}, Ptr{UInt8}, UInt, UInt, UInt), x, Vector{UInt8}(a), b, sizeof(x), sizeof(a), sizeof(b))
+          String(x)
+          end
+   concatenate (generic function with 1 method)
+
+   julia> concatenate("Hello ", "World!!!")
+   "Hello World!!!"
+
+
+Finally, we have the sample to passing to and fetching an output array from the Fourtran subroutine.
+
+.. code-block:: julia
+
+   julia> function add_array(a::Array{Float64,1}, b::Array{Float64,1})
+          x = Array{Float64,1}(undef, length(a))
+          ccall((:__fortran_julia_MOD_add_array, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{UInt32}), x, a, b, length(x))
+          x
+          end
+   add_array (generic function with 1 method)
+
+   julia> add_array([1.1, 1,3, 1.6, 1.9], [-1.9, -0.3, 1.1, 2.4])
+   5-element Vector{Float64}:
+    -0.7999999999999998
+     0.7
+     4.1
+     4.0
+     1.9
+
+
+The :code:`fortran_julia.f90` file and an Jupyter notebook file containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`__.
+
 
 
 Interfacing Julia with other languages
