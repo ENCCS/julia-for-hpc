@@ -178,7 +178,8 @@ Next we can call the shared object from Julia using the :code:`ccall` function:
 
 .. code-block:: julia
 
-   julia> ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), 3.0, 4.0)
+   julia> ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
+   4.6
 
 In addition, the `add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convension.
 
@@ -189,8 +190,8 @@ In addition, the `add` function in the Fortran module can be further wrapped in 
           end
    add (generic function with 1 method)
 
-   julia> add(3.0, 4.0)
-   7.0
+   julia> add(6.7, 3.9)
+   10.6
 
 
 Calling a Fortran subroutine is similar to calling a Fortran function. In fact, the subroutine in Fortran can be regarded as a special function, and its return value is void (corresponding to the `Nothing` type in Julia).
@@ -206,8 +207,8 @@ Here is another Fortran wrapper example.
           end
    addsub (generic function with 1 method)
 
-   julia> addsub(3.0, 4.0)
-   (7.0, -1.0)
+   julia> addsub(5.9, 1.5)
+   (7.4 4.4)
 
 
 The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters. 
@@ -228,8 +229,8 @@ Here is another example to concatenate two strings via calling a Fortran subrout
           end
    concatenate (generic function with 1 method)
 
-   julia> concatenate("Hello ", "World!!!")
-   "Hello World!!!"
+   julia> concatenate("Hello ", "Julia!!!")
+   "Hello Julia!!!"
 
 
 Finally, we have the sample to passing to and fetching an output array from the Fourtran subroutine.
@@ -243,13 +244,12 @@ Finally, we have the sample to passing to and fetching an output array from the 
           end
    add_array (generic function with 1 method)
 
-   julia> add_array([1.1, 1,3, 1.6, 1.9], [-1.9, -0.3, 1.1, 2.4])
-   5-element Vector{Float64}:
-    -0.7999999999999998
-     0.7
-     4.1
-     4.0
-     1.9
+   julia> add_array([0.2, 1.3, 1.6, 4.6], [-1.8, -0.3, 1.1, 2.4])
+   4-element Vector{Float64}:
+    -1.6
+     1.0
+     2.7
+     7.0
 
 
 The :code:`fortran_julia.f90` file and an Jupyter notebook file containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`__.
