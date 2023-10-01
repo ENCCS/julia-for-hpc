@@ -262,7 +262,7 @@ Interfacing Julia with other languages
 Besides C and Fortran that can be called directly using `ccall` function, it is possible for Julia to interact with other programming languages using third-party packages.
 The following table shows an overview of those packages.
 
-.. table:: Software mapping naming
+.. table:: Interfacing Julia with other languages
    :align: center
 
    +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
