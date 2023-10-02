@@ -19,13 +19,12 @@ Moreover, there is little reason to expect the performance of official Julia bin
 `Julia on HPC clusters <https://juliahpc.github.io/JuliaOnHPCClusters/>`_ gives an overview of the availability and documentation of Julia on a range of HPC systems around the world including EuroHPC systems.
 
 
-HPC cluster structure and system
----------------------
-- node
-- login nodes
-- compute nodes
-- high-speed network
-- parallel file system
+Components of a HPC cluster
+---------------------------
+HPC cluster consists of networked computers called **nodes**.
+The nodes are separated into user facing **login nodes** and nodes that are inteded for heavy computing called **compute nodes**
+The nodes are colocated and connected using a **high-speed network** minimize communication latency and maximize performance at scale.
+A **parallel file system** provides a system-wide mass storage capacity.
 
 HPC clusters use the **Linux operating system**.
 Many problems that users have of using a cluster stem from lack of Linux knowledge.
@@ -39,6 +38,9 @@ We demonstrate the popular **Slurm** workload manager and how to run Julia progr
 
 Using module enviroments
 ------------------------
+We can load a shared Julia installation as a module environment if one is available.
+The module environment modifies the path to the make the Julia command line client available and may set environment variables for Julia threads counts and modify the depot and load paths to make shared packages available.
+
 Available module enviroments are controlled by the module path (:code:`MODULEPATH`) environment variable.
 Sometimes, it is necessary to add custom directories to the module path as follows:
 
@@ -137,8 +139,8 @@ The :code:`srun` command launches the job with options that declare the resource
              bash
 
 
-Running batch jobs
-------------------
+Running a batch job
+-------------------
 We can run batch jobs via Slurm.
 We use batch jobs to run workloads from start to finish without interacting with them.
 We can run a batch job as follows:
@@ -179,3 +181,13 @@ The :code:`sbatch` command launches the batch job, with options that declare the
              --mem-per-cpu=1750 \
              --time="00:15:00" \
              script.sh
+
+
+Installing packages
+-------------------
+
+
+Exercises
+---------
+Run estimate pi using multithreading, multiprocesses and MPI.
+
