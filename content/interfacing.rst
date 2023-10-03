@@ -272,13 +272,59 @@ For specific interactions between Julia and Python, there are two formats, that 
 
 
 Calling Python from Julia
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The "standard" way to call Python code in Julia is to use the `PyCall <https://github.com/JuliaPy/PyCall.jl>`_ package, which has nice features including:
 
 - It can automatically download and install a local copy of Python, private to Julia, in order to avoid messing with version dependency from the "main" Python installation and provide a consistent environment within Linux, Windows, and MacOS.
 - It imports a Python module and provides Julia wrappers for all functions and constants including automatic conversion of types between Julia and Python.
-- Type conversions are automatically performed for numeric, boolean, string, and I/O streams plus all tuples, arrays, and dictionaries of these types.
+- Type conversions are automatically performed for numeric, boolean, string, and I/O streams plus all tuples, arrays, and dictionaries of these types. Other types are converted to the generic PyObject type.
+
+
+Before calling Python code from Julia, make sure you have PyCall installed in Julia
+
+.. code-block:: julia
+
+   julia> using Pkg
+   julia> Pkg.add("PyCall")
+
+Then you can use PyCall to import and call Python functions:
+
+.. code-block:: julia
+
+   julia> using PyCall
+   julia> math = pyimport("math")
+   julia> println(math.sin(math.pi / 4))
+
+
+Embedding Python code in a Julia program is similar to what we saw with C and Fortran, except that you don’t need (for the most part) to worry about transforming data.
+You define and call the Python functions with `py...` and, in the function call, you can use your Julia data directly.
+
+.. code-block:: julia
+
+   julia> py"""
+          def sumMyArgs(a,b):
+             return a+b
+          def getNElement(n):
+             c = [0,1,2,3,4,5]
+             return c[n]
+          """
+   julia> py"sumMyArgs"(3,4)
+   7
+   julia> py"sumMyArgs"([3,4],[5,6])
+   2-element Vector{Int64}:
+     8
+    10
+   julia> py"sumMyArgs"([3,4],7)
+   2-element Vector{Int64}:
+    10
+    11
+   julia> py"getNElement"(1)
+   1
+
+It is noted that
+- you don’t need to convert complex data like arrays, and the results are automatically converted to Julia types
+- in the last line of the example that PyCall doesn’t attempt index conversion (Python arrays are zero-based while Julia arrays are one-based). Calling the Python `getNElement()` function with `1` being the argument will retrieve what in Python is the first element of the array.
 
 
 
@@ -291,7 +337,7 @@ The "standard" way to call Python code in Julia is to use the `PyCall <https://g
 
 
 Calling Julia from Python
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 
