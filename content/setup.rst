@@ -122,14 +122,17 @@ you can for example place under a new directory `julia` in your home directory:
 .. code-block:: toml
 
    name = "Julia-for-HPC"
+
    [deps]
    BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+   Dagger = "d58978e5-989f-55fb-8d15-ea34adc7bf54"
    Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
    MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
    MPIPreferences = "3da0fdf6-3ccc-4f1b-acd9-58baa6c99267"
    Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
    Profile = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
+   PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
    SharedArrays = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
