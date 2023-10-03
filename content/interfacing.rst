@@ -168,7 +168,7 @@ Below we provide an example for interfacing Julia with Frotran.
    end module fortran_julia
 
 Then we compile the code :code:`fortran_julia.f90` using  into a shared object named as :code:`fortran_julia.so`.
-The flags 
+The flags
 
 .. code-block:: bash
 
@@ -211,7 +211,7 @@ Here is another Fortran wrapper example.
    (7.4 4.4)
 
 
-The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters. 
+The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters.
 In this example, x and y are the output results to the caller.
 Therefore two pointers should be defined using `Ref{Float64}()` and then passed to the Fortran subroutine.
 After calling the Fortran subroutine, we will use `x[]` and `y[]` to extract the results from the addresses the pre-defined pointers pointing to.
@@ -252,14 +252,57 @@ Finally, we have the sample to passing to and fetching an output array from the 
      7.0
 
 
-The :code:`fortran_julia.f90` file and an Jupyter notebook file containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`__.
+The :code:`fortran_julia.f90` file and a Jupyter notebook file (`fortran_julia.ipynb`) containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`__.
+
+
+
+Interfacing Julia with Python
+-----------------------------
+
+Besides interfacing Julia with *compiled* languages like C and Fortran, it is also possible for Julia to have intensive interactions with *interpreted* languages, such as Python, which provide a powerful procedure to leverage the strengths of both languages.
+
+
+Actually we have came to the interfacing of Julia with Python at the `Setup <https://enccs.github.io/julia-intro/setup/>`_ section in the ENCCS lesson of `Introduction to programming in Julia <https://enccs.github.io/julia-intro/>`_.
+We have demonstrated the creation of Jupyter notebooks in Julia using the `IJulia` package.
+The Jupyter notebooks support multiple languages, including Julia and Python.
+You can write Julia code in one cell and Python code in another, allowing seamless integration.
+
+For specific interactions between Julia and Python, there are two formats, that is, you can call Python from Julia, and you can also call Julia from Python.
+
+
+
+Calling Python from Julia
+^^^^^^^^^^^^^^^^^^^^^^
+
+The "standard" way to call Python code in Julia is to use the `PyCall <https://github.com/JuliaPy/PyCall.jl>`_ package, which has nice features including:
+
+- It can automatically download and install a local copy of Python, private to Julia, in order to avoid messing with version dependency from the "main" Python installation and provide a consistent environment within Linux, Windows, and MacOS.
+- It imports a Python module and provides Julia wrappers for all functions and constants including automatic conversion of types between Julia and Python.
+- Type conversions are automatically performed for numeric, boolean, string, and I/O streams plus all tuples, arrays, and dictionaries of these types.
+
+
+
+
+
+
+
+
+
+
+
+Calling Julia from Python
+^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
 
 
 
 Interfacing Julia with other languages
 --------------------------------------
 
-Besides C and Fortran that can be called directly using `ccall` function, it is possible for Julia to interact with other programming languages using third-party packages.
+In addition, it is also possible interfacing Julia with other programming languages using third-party packages.
 The following table shows an overview of those packages.
 
 .. table:: Interfacing Julia with other languages
@@ -268,8 +311,6 @@ The following table shows an overview of those packages.
    +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
    | Language  | Calling from Julia                                           | Calling Julia                                                 |
    +===========+==============================================================+===============================================================+
-   | Python    |  `PyCall.jl <https://github.com/JuliaPy/PyCall.jl>`_         |  `PyJulia <https://github.com/JuliaPy/pyjulia>`_              |
-   +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
    | R         | `RCall.jl <https://github.com/JuliaInterop/RCall.jl>`_       | `JuliaCall <https://github.com/Non-Contradiction/JuliaCall>`_ |
    +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
    | MATLAB    | `MATLAB.jl <https://github.com/JuliaInterop/MATLAB.jl>`_     | `Mex.jl <https://github.com/jebej/Mex.jl/>`_                  |
