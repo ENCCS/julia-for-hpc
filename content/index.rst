@@ -58,7 +58,7 @@ To learn about using Julia for problems in data science, please visit the lesson
    distributed
    dagger
    MPI
-   cluster
+   hpc-cluster
    GPU
    interfacing
    conclusions
