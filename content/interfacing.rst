@@ -1,10 +1,11 @@
-Interfacing to C and Fortran
+Interfacing to C, Fortran, and Python
 ============================
 
 .. questions::
 
-   - 1.
-   - 2.
+   - Why Julia interfacing with other languages?
+   - How interfacing Julia with *compiled* languages (C and Fortran)?
+   - How interfacing Julia with Python and *vice versa*?
 
 .. instructor-note::
 
@@ -68,7 +69,6 @@ It also makes sense to wrap a call like that in a native Julia function.
 
     julia> csqrt(x) = ccall((:sqrt, "libm"), Float64, (Float64,), x);
     julia> csqrt(81.0)
-
 
 
 The following example is adapted from `Calling C from Julia <https://craftofcoding.wordpress.com/2017/02/08/calling-c-from-julia-i-simple-arrays/>`_ by `The Craft of Coding`.
@@ -167,8 +167,7 @@ Below we provide an example for interfacing Julia with Frotran.
 
    end module fortran_julia
 
-Then we compile the code :code:`fortran_julia.f90` using  into a shared object named as :code:`fortran_julia.so`.
-The flags 
+Then we compile the code :code:`fortran_julia.f90` into a shared object named as :code:`fortran_julia.so`.
 
 .. code-block:: bash
 
@@ -181,7 +180,7 @@ Next we can call the shared object from Julia using the :code:`ccall` function:
    julia> ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
    4.6
 
-In addition, the `add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convension.
+In addition, the :code:`add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convension.
 
 .. code-block:: julia
 
@@ -194,7 +193,8 @@ In addition, the `add` function in the Fortran module can be further wrapped in 
    10.6
 
 
-Calling a Fortran subroutine is similar to calling a Fortran function. In fact, the subroutine in Fortran can be regarded as a special function, and its return value is void (corresponding to the `Nothing` type in Julia).
+Calling a Fortran subroutine is similar to calling a Fortran function.
+In fact, the subroutine in Fortran can be regarded as a special function, and its return value is void (corresponding to the `Nothing` type in Julia).
 Here is another Fortran wrapper example.
 
 .. code-block:: julia
@@ -211,7 +211,7 @@ Here is another Fortran wrapper example.
    (7.4 4.4)
 
 
-The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters. 
+The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters.
 In this example, x and y are the output results to the caller.
 Therefore two pointers should be defined using `Ref{Float64}()` and then passed to the Fortran subroutine.
 After calling the Fortran subroutine, we will use `x[]` and `y[]` to extract the results from the addresses the pre-defined pointers pointing to.
@@ -252,24 +252,207 @@ Finally, we have the sample to passing to and fetching an output array from the 
      7.0
 
 
-The :code:`fortran_julia.f90` file and an Jupyter notebook file containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`__.
+The :code:`fortran_julia.f90` file and a Jupyter notebook file (:code:`fortran_julia.ipynb`) containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`__.
+
+
+
+Interfacing Julia with Python
+-----------------------------
+
+Besides interfacing Julia with *compiled* languages like C and Fortran, it is also possible for Julia to have intensive interactions with *interpreted* languages, such as Python, which provide a powerful procedure to leverage the strengths of both languages.
+
+Actually we have came to the interfacing of Julia with Python at the `Setup <https://enccs.github.io/julia-intro/setup/>`_ section in the ENCCS lesson of `Introduction to programming in Julia <https://enccs.github.io/julia-intro/>`_.
+We have demonstrated the creation of Jupyter notebooks in Julia using the ``IJulia`` package.
+The Jupyter notebooks support multiple languages, including Julia and Python.
+You can write Julia code in one cell and Python code in another, allowing seamless integration.
+
+For specific interactions between Julia and Python, there are two formats, that is, you can call Python from Julia, and you can also call Julia from Python.
+
+
+
+Calling Python from Julia
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The "standard" way to call Python code in Julia is to use the `PyCall <https://github.com/JuliaPy/PyCall.jl>`_ package, which has nice features including:
+
+- It can automatically download and install a local copy of Python, private to Julia, in order to avoid messing with version dependency from the "main" Python installation and provide a consistent environment within Linux, Windows, and MacOS.
+- It imports a Python module and provides Julia wrappers for all functions and constants including automatic conversion of types between Julia and Python.
+- Type conversions are automatically performed for numeric, boolean, string, and I/O streams plus all tuples, arrays, and dictionaries of these types. Other types are converted to the generic PyObject type.
+
+
+Before calling Python code from Julia, make sure you have PyCall installed in Julia
+
+.. code-block:: julia
+
+   julia> using Pkg
+   julia> Pkg.add("PyCall")
+
+Then you can use PyCall to import and call Python functions:
+
+.. code-block:: julia
+
+   julia> using PyCall
+   julia> math = pyimport("math")
+   julia> println(math.sin(math.pi / 4))
+
+
+Embedding Python code in a Julia program is similar to what we saw with C and Fortran, except that you don’t need (for the most part) to worry about transforming data.
+You define and call the Python functions using py-strings (``py"..."``), and, in the function call, you can use your Julia data directly.
+Note that the py-strings are not part of the Julia itself: they are defined by the PyCall module.
+
+.. code-block:: julia
+
+   julia> py"""
+          def sumMyArgs(a,b):
+             return a+b
+          def getNElement(n):
+             c = [0,1,2,3,4,5]
+             return c[n]
+          """
+   julia> py"sumMyArgs"(3,4)
+   7
+   julia> py"sumMyArgs"([3,4],[5,6])
+   2-element Vector{Int64}:
+     8
+    10
+   julia> py"sumMyArgs"([3,4],7)
+   2-element Vector{Int64}:
+    10
+    11
+   julia> py"getNElement"(1)
+   1
+
+It is noted that
+
+- you don’t need to convert complex data like arrays, and the results are automatically converted to Julia types
+- in the last line of the example that PyCall doesn’t attempt index conversion (Python arrays are zero-based while Julia arrays are one-based).
+Calling the Python ``getNElement()`` function with `1` being the argument will retrieve what in Python is the first element of the array.
+
+It is very easy to mix Julia and Python code.
+So if you like a developed module in Python, you can directly use it in Julia.
+
+.. code-block:: julia
+
+   julia> np = pyimport("numpy")
+   PyObject <module 'numpy' from '/Users/XXX/.julia/conda/3/aarch64/lib/python3.10/site-packages/numpy/__init__.py'>
+
+   julia> a = np.random.rand(2, 3)
+   2×3 Matrix{Float64}:
+    0.0558569  0.631385  0.109421
+    0.220353   0.547723  0.962298
+
+   julia> exp_a = np.exp(a)
+   2×3 Matrix{Float64}:
+    1.05745  1.88021  1.11563
+    1.24652  1.72931  2.6177
+
+
+Calling Julia from Python
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The other way around, embedding Julia code in a Python script or terminal, is equally of importance, as in many cases it provides substantial performance gains for Python programmers, and it may be easier than embedding C or Fortran code.
+
+This is achieved using the `PyJulia <https://github.com/JuliaPy/pyjulia>`_ Python package, which is a Python interface to Julia (similar to `PyCall` being the Julia interface to Python).
+
+Before installing ``PyJulia``, be sure that the ``PyCall`` module is installed in Julia and that it is using the same Python version as the one from which you want to embed the Julia code.
+
+> Notice that the name of the package in pip is julia, not PyJulia
+
+.. code-block:: python
+
+   $ python3 -m pip install julia
+   $ python3
+   >>> import julia
+   >>> julia.install()
+   >>> jl = julia.Julia(compiled_modules=False)
+
+> If you have multiple Julia versions, you can specify the one to use in Python by passing julia="/path/to/julia/binary/executable" (e.g., julia = "/home/myUser/lib/julia-1.1.0/bin/julia") to the ``julia.install()`` function.
+
+Now you can now access to Julia in multiple ways. For example, you can define all your functions in a Julia script and “include” it.
+Herein we have a Julia script named as ``julia_for_python.jl``, which contains the following Julia code:
+
+.. code-block:: julia
+
+   function helloWorld()
+      println("Hello World!")
+   end
+
+   function sumMyArgs(a, b)
+      return a+b
+   end
+
+   function getNElement(n)
+      c = [0,1,2,3,4,5,6,7,8,9]
+      return c[n]
+   end
+
+You can access these defined functions in Python with:
+
+.. code-block:: python
+
+   >>> jl = julia.Julia(compiled_modules=False)
+
+   >>> jl.include("julia_for_python.jl")
+   <PyCall.jlwrap getNElement>
+
+   >>> jl.helloWorld()
+   Hello World!
+
+   >>> jl.sumMyArgs([1,2,3],[4,5,6])
+   array([5, 7, 9], dtype=int64)
+
+   >>> jl.getNElement(1)
+   0
+
+
+You can otherwise embed Julia code directly into Python using the Julia ``eval()`` function
+
+.. code-block:: python
+
+   jl.eval("""
+   function func_prod(is,js)
+      prod = 0
+      for i in 1:is
+         for j in 1:js
+            prod += 1
+         end
+      end
+      return prod
+   end
+   """)
+
+Then you can call this function in Python as
+
+.. code-block:: python
+
+   >>> jl.func_prod(2,3)
+   6
+
+It should be noted that if you want to run the function in broadcasted mode, i.e., apply the function for each element of a given array.
+In Julia, you could use the dot notation, e.g., func_prod.([2,3],[4,5]). But herein you will get an error as this is not a valid Python syntax.
+In cases like this, when you can’t simply calling a Julia function using Python syntax, you can still rely to the same Julia ``eval()`` function you used to define the Python function to call it:
+
+.. code-block:: python
+
+   >>> jl.eval("func_prod.([2,3],[4,5])")
+   array([ 8, 15], dtype=int64)
+
+Finally, you can also access any module available in Julia with `from julia import ModuleName`, and in particular you can set and access global Julia variables using the `Main` module.
 
 
 
 Interfacing Julia with other languages
 --------------------------------------
 
-Besides C and Fortran that can be called directly using `ccall` function, it is possible for Julia to interact with other programming languages using third-party packages.
+In addition, it is also possible interfacing Julia with other programming languages using third-party packages.
 The following table shows an overview of those packages.
 
-.. table:: Interfacing Julia with other languages
+.. table::
    :align: center
 
    +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
    | Language  | Calling from Julia                                           | Calling Julia                                                 |
    +===========+==============================================================+===============================================================+
-   | Python    |  `PyCall.jl <https://github.com/JuliaPy/PyCall.jl>`_         |  `PyJulia <https://github.com/JuliaPy/pyjulia>`_              |
-   +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
    | R         | `RCall.jl <https://github.com/JuliaInterop/RCall.jl>`_       | `JuliaCall <https://github.com/Non-Contradiction/JuliaCall>`_ |
    +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
    | MATLAB    | `MATLAB.jl <https://github.com/JuliaInterop/MATLAB.jl>`_     | `Mex.jl <https://github.com/jebej/Mex.jl/>`_                  |
@@ -283,9 +466,17 @@ Moreover, other Julia packages provide Julia interface for some well-known libra
 See also
 --------
 
+- `Interfacing with C and Fortran <https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/>`__.
+- `Interfacing with Python via PyCall <https://github.com/JuliaPy/PyCall.jl>`__.
+- `Interfacing to various other languages <https://github.com/JuliaInterop>`__.
 - `Julia for Optimization and Learning <https://juliateachingctu.github.io/Julia-for-Optimization-and-Learning/stable/>`__.
+- `Julia for Pythonistas <https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_for_Pythonistas.ipynb#scrollTo=YwM2lGhmjIAA>`__.
+
 
 
 .. keypoints::
 
-   - One
+   - Julia have significant interfacing with *compiled* and *interpreted* languages to leverage the strengths of both languages.
+   - Interfacing Julia with C and Fortran is accomplished by the ``ccall`` function.
+   - Interactions between Julia and Python are achived via the ``PyCall`` package for calling Python from Julia and through the ``PyJulia`` package for calling Julia from Python.
+
