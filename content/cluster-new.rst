@@ -1,10 +1,10 @@
-Using Julia on HPC cluster
-==========================
+Using Julia on an HPC cluster
+===========================
 
 .. questions::
 
-   - How do we run Julia a HPC cluster?
-   - How can we do parallel computing with Julia on HPC cluster?
+   - How do we run Julia in an HPC cluster?
+   - How can we do parallel computing with Julia on an HPC cluster?
 
 .. instructor-note::
 
@@ -16,32 +16,33 @@ Julia on HPC systems
 Despite rapid growth in the HPC domain in recent years, Julia is still not considered as mainstream as C/C++ and Fortran in the HPC world, and even Python is more commonly used (and generally available) than Julia.
 Fortunately, even if Julia is not already available as an environment module on your favorite cluster, it is easy to install Julia from scratch.
 Moreover, there is little reason to expect the performance of official Julia binaries to be any worse than if a system administrator built Julia from scratch with architecture-specific optimization.
-`Julia on HPC clusters <https://juliahpc.github.io/JuliaOnHPCClusters/>`_ gives an overview of the availability and documentation of Julia on a range of HPC systems around the world including EuroHPC systems.
+`Julia on HPC clusters <https://juliahpc.github.io/JuliaOnHPCClusters/>`_ gives an overview of the availability and documentation of Julia on a range of HPC systems around the world, including EuroHPC systems.
 
 
-Components of a HPC cluster
+Terminology of an HPC cluster
 ---------------------------
 HPC cluster consists of networked computers called **nodes**.
-The nodes are separated into user facing **login nodes** and nodes that are inteded for heavy computing called **compute nodes**
+The nodes are separated into user-facing **login nodes** and nodes that are intended for heavy computing called **compute nodes**
 The nodes are colocated and connected using a **high-speed network** minimize communication latency and maximize performance at scale.
 A **parallel file system** provides a system-wide mass storage capacity.
 
 HPC clusters use the **Linux operating system**.
-Many problems that users have of using a cluster stem from lack of Linux knowledge.
+Many problems that users have with using a cluster stem from a lack of Linux knowledge.
 
-Clusters also use **module environments** to manage software environments by setting enviroment variables and load other modules as dependencies.
+Clusters also use **module environments** to manage software environments by setting environment variables and loading other modules as dependencies.
 We demonstrate the popular **Lmod** software and how to use Julia module environments with Lmod.
 
-Finally, HPC clusters use a **workload manager** to manage resources and to run jobs on compute nodes.
+Finally, HPC clusters use a **workload manager** to manage resources and run jobs on compute nodes.
 We demonstrate the popular **Slurm** workload manager and how to run Julia programs that perform various forms of parallel computing with Slurm.
+We refer to a single workload run through a workload manager as a **job**.
 
 
-Using module enviroments
-------------------------
+Using module environments
+-------------------------
 We can load a shared Julia installation as a module environment if one is available.
-The module environment modifies the path to the make the Julia command line client available and may set environment variables for Julia threads counts and modify the depot and load paths to make shared packages available.
+The module environment modifies the path to make the Julia command line client available and may set environment variables for Julia thread count and modify the depot and load paths to make shared packages available.
 
-Available module enviroments are controlled by the module path (:code:`MODULEPATH`) environment variable.
+Available module environments are controlled by the module path (:code:`MODULEPATH`) environment variable.
 Sometimes, it is necessary to add custom directories to the module path as follows:
 
 .. code-block:: bash
@@ -54,8 +55,8 @@ We can check the availability of a Julia module environment as follows.
 
    module avail julia
 
-If Julia module is not available, we can install Julia manually to the cluster.
-On the otherhand, if a Julia module is available, we can take a look at what the Julia sets when it is loaded as follows:
+If the Julia module is not available, we can install Julia manually to the cluster.
+On the other hand, if a Julia module is available, we can take a look at what the Julia sets when it is loaded as follows:
 
 .. code-block:: bash
 
@@ -67,7 +68,7 @@ We can load the Julia module as follows:
 
    module load julia
 
-We can list loaded moduel and check that Julia is available as follows:
+We can list the loaded module and check that Julia is available as follows:
 
 .. code-block:: bash
 
@@ -82,21 +83,27 @@ In case everything works well, we should be ready to move forward.
 
       .. code-block::
 
+          # Add CSC's local module files to the module path
           module use /appl/local/csc/modulefiles
+
+          # Load the Julia module
           module load julia
 
    .. tab:: LUMI GPU
 
       .. code-block::
 
+          # Add CSC's local module files to the module path
           module use /appl/local/csc/modulefiles
+
+          # Load the Julia AMDGPU module
           module load julia-amdgpu
 
 
-Running an interactive job
---------------------------
+Running interactive jobs
+------------------------
 We can launch an interactive job on a compute node via Slurm.
-Interactive jobs are useful for developing, testing, debugging, and exploring slurm jobs.
+Interactive jobs are useful for developing, testing, debugging, and exploring Slurm jobs.
 We can run an interactive job as follows:
 
 .. code-block:: bash
@@ -139,8 +146,8 @@ The :code:`srun` command launches the job with options that declare the resource
              bash
 
 
-Running a batch job
--------------------
+Running batch jobs
+------------------
 We can run batch jobs via Slurm.
 We use batch jobs to run workloads from start to finish without interacting with them.
 We can run a batch job as follows:
@@ -149,7 +156,7 @@ We can run a batch job as follows:
 
    sbatch [options] script.sh
 
-The :code:`sbatch` command launches the batch job, with options that declare the resources we want to reserve and the :code:`script.sh` is the script we run.
+The :code:`sbatch` command launches the batch job, with options that declare the resources we want to reserve, and the batch script :code:`script.sh` contains the commands to run the job.
 
 .. tabs::
 
@@ -183,11 +190,58 @@ The :code:`sbatch` command launches the batch job, with options that declare the
              script.sh
 
 
-Installing packages
--------------------
+Running Julia application in a job
+----------------------------------
+Let's consider a standalone Julia application that contains the following files:
+
+- :code:`Project.toml` for describing project metadata and dependencies.
+- :code:`script.jl` for an entry point to run the desired Julia workload.
+  Optionally, it can implement a command line client if we want to parse arguments that are supplied to the script.
+- :code:`script.sh` for a batch script for setting up the Julia environment and running the Julia workload.
+
+Below, we show examples of the batch script :code:`script.sh`.
+We assume that our current working directory is the Julia application.
+
+.. tabs::
+
+   .. tab:: LUMI CPU
+
+      .. code-block:: bash
+
+         #!/bin/bash
+         # Add CSC's local modulefiles to the modulepath
+         module use /appl/local/csc/modulefiles
+
+         # Load the Julia module
+         module load julia
+
+         # Instantiate the project environment
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+         # Run the julia script
+         julia --project=. script.jl
+
+   .. tab:: LUMI GPU
+
+      .. code-block:: bash
+
+         #!/bin/bash
+         # Add CSC's local modulefiles to the modulepath
+         module use /appl/local/csc/modulefiles
+
+         # Load the Julia AMDGPU module
+         module load julia-amdgpu
+
+         # Instantiate the project environment
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+         # Run the julia script
+         julia --project=. script.jl
+
+Now, we can run the batch script as a batch job or supply the commands in the batch script individually to an interactive session.
 
 
 Exercises
 ---------
-Run estimate pi using multithreading, multiprocesses and MPI.
+Run estimate pi using multithreading, multiprocesses, and MPI.
 
