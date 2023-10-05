@@ -52,7 +52,7 @@ To learn about using Julia for problems in data science, please visit the lesson
    :maxdepth: 1
    :caption: The lesson
 
-   motivation
+   motivation-hpc
    performant-code
    multithreading
    distributed
