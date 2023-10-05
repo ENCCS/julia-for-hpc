@@ -18,7 +18,7 @@ Why Julia interfacing with other languages?
 
 One of the most significant advantages of Julia is its speed. As we have shown in the Episode
 `Motivation <https://enccs.github.io/julia-for-hpc/motivation/#speed>`_, Julia is fast out-of-box
-without the necessity to do any additional steps. As such, Julia solves the so-called **two-Language problem**.
+without the necessity to do any additional steps. As such, Julia solves the so-called **two-language problem**.
 
 Since Julia is fast enough, most of the libraries are written in pure Julia, and there is no need to use C or Fortran for performance.
 However, there are many high-quality, mature libraries for numerical computing already written in C and Fortran.
@@ -61,14 +61,15 @@ Here is one example to calculate the square root of a number (herein, it is 64.0
 
 .. code-block:: julia
 
-    julia> ccall((:sqrt, "libm"), Float64, (Float64,), 64.0)
+    ccall((:sqrt, "libm"), Float64, (Float64,), 64.0)
 
 It also makes sense to wrap a call like that in a native Julia function.
 
 .. code-block:: julia
 
-    julia> csqrt(x) = ccall((:sqrt, "libm"), Float64, (Float64,), x);
-    julia> csqrt(81.0)
+    csqrt(x) = ccall((:sqrt, "libm"), Float64, (Float64,), x);
+
+    csqrt(81.0)
 
 
 The following example is adapted from `Calling C from Julia <https://craftofcoding.wordpress.com/2017/02/08/calling-c-from-julia-i-simple-arrays/>`_ by `The Craft of Coding`.
@@ -122,11 +123,12 @@ During the compilation, the Fortran compilers usually generate mangled names by 
 Therefore, if you want to call a Fortran function using Julia, you must pass the mangled identifier corresponding to the rule followed by your Fortran compiler.
 In addition, all inputs must be passed by reference when calling a Fortran function.
 
-Below we provide an example for interfacing Julia with Frotran.
+Below we provide an example for interfacing Julia with Fortran.
 
 .. code-block:: fortran
 
    # fortran_julia.f90
+
    module fortran_julia
       implicit none
       public
@@ -177,20 +179,20 @@ Next we can call the shared object from Julia using the :code:`ccall` function:
 
 .. code-block:: julia
 
-   julia> ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
-   4.6
+   ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
+   # 4.6
 
-In addition, the :code:`add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convension.
+In addition, the :code:`add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convention.
 
 .. code-block:: julia
 
-   julia> function add(a::Float64, b::Float64)
-              ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), a, b)
-          end
-   add (generic function with 1 method)
+    function add(a::Float64, b::Float64)
+        ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), a, b)
+    end
+    # add (generic function with 1 method)
 
-   julia> add(6.7, 3.9)
-   10.6
+    add(6.7, 3.9)
+    # 10.6
 
 
 Calling a Fortran subroutine is similar to calling a Fortran function.
@@ -199,22 +201,22 @@ Here is another Fortran wrapper example.
 
 .. code-block:: julia
 
-   julia> function addsub(a::Float64, b::Float64)
-          x = Ref{Float64}()
-          y = Ref{Float64}()
-          ccall((:__fortran_julia_MOD_addsub, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Float64}), x, y, a, b)
-          x[], y[]
-          end
-   addsub (generic function with 1 method)
+    function addsub(a::Float64, b::Float64)
+        x = Ref{Float64}()
+        y = Ref{Float64}()
+        ccall((:__fortran_julia_MOD_addsub, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Float64}), x, y, a, b)
+        x[], y[]
+    end
+    # addsub (generic function with 1 method)
 
-   julia> addsub(5.9, 1.5)
-   (7.4 4.4)
+    addsub(5.9, 1.5)
+    # (7.4, 4.4)
 
 
 The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters.
 In this example, x and y are the output results to the caller.
-Therefore two pointers should be defined using `Ref{Float64}()` and then passed to the Fortran subroutine.
-After calling the Fortran subroutine, we will use `x[]` and `y[]` to extract the results from the addresses the pre-defined pointers pointing to.
+Therefore two pointers should be defined using ``Ref{Float64}()``` and then passed to the Fortran subroutine.
+After calling the Fortran subroutine, we will use ``x[]`` and ``y[]`` to extract the results from the addresses the pre-defined pointers pointing to.
 The rest of the this process is similar as calling the Fortran function.
 
 
@@ -222,34 +224,34 @@ Here is another example to concatenate two strings via calling a Fortran subrout
 
 .. code-block:: julia
 
-   julia> function concatenate(a::String, b::String)
-          x = Vector{UInt8}(undef, sizeof(a) + sizeof(b))
-          ccall((:__fortran_julia_MOD_concatenate, "fortran_julia.so"), Nothing, (Ref{UInt8}, Ref{UInt8}, Ptr{UInt8}, UInt, UInt, UInt), x, Vector{UInt8}(a), b, sizeof(x), sizeof(a), sizeof(b))
-          String(x)
-          end
-   concatenate (generic function with 1 method)
+    function concatenate(a::String, b::String)
+        x = Vector{UInt8}(undef, sizeof(a) + sizeof(b))
+        ccall((:__fortran_julia_MOD_concatenate, "fortran_julia.so"), Nothing, (Ref{UInt8}, Ref{UInt8}, Ptr{UInt8}, UInt, UInt, UInt), x, Vector{UInt8}(a), b, sizeof(x), sizeof(a), sizeof(b))
+        String(x)
+    end
+    # concatenate (generic function with 1 method)
 
-   julia> concatenate("Hello ", "Julia!!!")
-   "Hello Julia!!!"
+    concatenate("Hello ", "Julia!!!")
+    # "Hello Julia!!!"
 
 
-Finally, we have the sample to passing to and fetching an output array from the Fourtran subroutine.
+Finally, we have the sample to passing to and fetching an output array from the Fortran subroutine.
 
 .. code-block:: julia
 
-   julia> function add_array(a::Array{Float64,1}, b::Array{Float64,1})
-          x = Array{Float64,1}(undef, length(a))
-          ccall((:__fortran_julia_MOD_add_array, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{UInt32}), x, a, b, length(x))
-          x
-          end
-   add_array (generic function with 1 method)
+    function add_array(a::Array{Float64,1}, b::Array{Float64,1})
+        x = Array{Float64,1}(undef, length(a))
+        ccall((:__fortran_julia_MOD_add_array, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{UInt32}), x, a, b, length(x))
+        x
+    end
+    # add_array (generic function with 1 method)
 
-   julia> add_array([0.2, 1.3, 1.6, 4.6], [-1.8, -0.3, 1.1, 2.4])
-   4-element Vector{Float64}:
-    -1.6
-     1.0
-     2.7
-     7.0
+    add_array([0.2, 1.3, 1.6, 4.6], [-1.8, -0.3, 1.1, 2.4])
+    # 4-element Vector{Float64}:
+    # -1.6
+    #  1.0
+    #  2.7
+    #  7.0
 
 
 The :code:`fortran_julia.f90` file and a Jupyter notebook file (:code:`fortran_julia.ipynb`) containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`__.
@@ -284,16 +286,16 @@ Before calling Python code from Julia, make sure you have PyCall installed in Ju
 
 .. code-block:: julia
 
-   julia> using Pkg
-   julia> Pkg.add("PyCall")
+    using Pkg
+    Pkg.add("PyCall")
 
 Then you can use PyCall to import and call Python functions:
 
 .. code-block:: julia
 
-   julia> using PyCall
-   julia> math = pyimport("math")
-   julia> println(math.sin(math.pi / 4))
+    using PyCall
+    math = pyimport("math")
+    println(math.sin(math.pi / 4))
 
 
 Embedding Python code in a Julia program is similar to what we saw with C and Fortran, except that you don’t need (for the most part) to worry about transforming data.
@@ -302,25 +304,29 @@ Note that the py-strings are not part of the Julia itself: they are defined by t
 
 .. code-block:: julia
 
-   julia> py"""
-          def sumMyArgs(a,b):
-             return a+b
-          def getNElement(n):
-             c = [0,1,2,3,4,5]
-             return c[n]
-          """
-   julia> py"sumMyArgs"(3,4)
-   7
-   julia> py"sumMyArgs"([3,4],[5,6])
-   2-element Vector{Int64}:
-     8
-    10
-   julia> py"sumMyArgs"([3,4],7)
-   2-element Vector{Int64}:
-    10
-    11
-   julia> py"getNElement"(1)
-   1
+    py"""
+    def sumMyArgs(a,b):
+        return a+b
+    def getNElement(n):
+        c = [0,1,2,3,4,5]
+        return c[n]
+    """
+
+    py"sumMyArgs"(3,4)
+    # 7
+
+    py"sumMyArgs"([3,4],[5,6])
+    # 2-element Vector{Int64}:
+    #  8
+    # 10
+
+    py"sumMyArgs"([3,4],7)
+    # 2-element Vector{Int64}:
+    # 10
+    # 11
+
+    py"getNElement"(1)
+    # 1
 
 It is noted that
 
@@ -333,22 +339,22 @@ So if you like a developed module in Python, you can directly use it in Julia.
 
 .. code-block:: julia
 
-   julia> np = pyimport("numpy")
-   PyObject <module 'numpy' from '/Users/XXX/.julia/conda/3/aarch64/lib/python3.10/site-packages/numpy/__init__.py'>
+    np = pyimport("numpy")
+    # PyObject <module 'numpy' from '/Users/XXX/.julia/conda/3/aarch64/lib/python3.10/site-packages/numpy/__init__.py'>
 
-   julia> a = np.random.rand(2, 3)
-   2×3 Matrix{Float64}:
-    0.0558569  0.631385  0.109421
-    0.220353   0.547723  0.962298
+    a = np.random.rand(2, 3)
+    # 2×3 Matrix{Float64}:
+    # 0.0558569  0.631385  0.109421
+    # 0.220353   0.547723  0.962298
 
-   julia> exp_a = np.exp(a)
-   2×3 Matrix{Float64}:
-    1.05745  1.88021  1.11563
-    1.24652  1.72931  2.6177
+    exp_a = np.exp(a)
+    # 2×3 Matrix{Float64}:
+    # 1.05745  1.88021  1.11563
+    # 1.24652  1.72931  2.6177
 
 
-Calling Julia from Python
-^^^^^^^^^^^^^^^^^^^^^^^^^
+(Optional) Calling Julia from Python
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The other way around, embedding Julia code in a Python script or terminal, is equally of importance, as in many cases it provides substantial performance gains for Python programmers, and it may be easier than embedding C or Fortran code.
 
@@ -356,7 +362,9 @@ This is achieved using the `PyJulia <https://github.com/JuliaPy/pyjulia>`_ Pytho
 
 Before installing ``PyJulia``, be sure that the ``PyCall`` module is installed in Julia and that it is using the same Python version as the one from which you want to embed the Julia code.
 
-> Notice that the name of the package in pip is julia, not PyJulia
+.. Note::
+
+   It should be noted that the name of the package in pip is julia, not PyJulia.
 
 .. code-block:: python
 
@@ -366,7 +374,9 @@ Before installing ``PyJulia``, be sure that the ``PyCall`` module is installed i
    >>> julia.install()
    >>> jl = julia.Julia(compiled_modules=False)
 
-> If you have multiple Julia versions, you can specify the one to use in Python by passing julia="/path/to/julia/binary/executable" (e.g., julia = "/home/myUser/lib/julia-1.1.0/bin/julia") to the ``julia.install()`` function.
+.. Note::
+
+   If you have multiple Julia versions, you can specify the one to use in Python by passing julia="/path/to/julia/binary/executable" (e.g., julia = "/home/myUser/lib/julia-1.1.0/bin/julia") to the ``julia.install()`` function.
 
 Now you can now access to Julia in multiple ways. For example, you can define all your functions in a Julia script and “include” it.
 Herein we have a Julia script named as ``julia_for_python.jl``, which contains the following Julia code:
@@ -398,7 +408,7 @@ You can access these defined functions in Python with:
    >>> jl.helloWorld()
    Hello World!
 
-   >>> jl.sumMyArgs([1,2,3],[4,5,6])
+   >>> jl.sumMyArgs([1, 2, 3], [4, 5, 6])
    array([5, 7, 9], dtype=int64)
 
    >>> jl.getNElement(1)
@@ -410,7 +420,7 @@ You can otherwise embed Julia code directly into Python using the Julia ``eval()
 .. code-block:: python
 
    jl.eval("""
-   function func_prod(is,js)
+   function func_prod(is, js)
       prod = 0
       for i in 1:is
          for j in 1:js
@@ -425,7 +435,7 @@ Then you can call this function in Python as
 
 .. code-block:: python
 
-   >>> jl.func_prod(2,3)
+   >>> jl.func_prod(2, 3)
    6
 
 It should be noted that if you want to run the function in broadcasted mode, i.e., apply the function for each element of a given array.
@@ -460,7 +470,7 @@ The following table shows an overview of those packages.
    | Java      | `JavaCall.jl <https://github.com/JuliaInterop/JavaCall.jl>`_ | `JuliaCaller <https://github.com/jbytecode/juliacaller>`_     |
    +-----------+--------------------------------------------------------------+---------------------------------------------------------------+
 
-Moreover, other Julia packages provide Julia interface for some well-known libraries from other languages. As an example, we can mention `ScikitLear.jl <https://github.com/cstjean/ScikitLearn.jl>`_, which provides an interface for the `scikit-learn <https://scikit-learn.org/>`_ library from Python or the `RDatasets.jl <https://github.com/JuliaStats/RDatasets.jl>`_ that provides an easy way to load famous R datasets.
+Moreover, other Julia packages provide Julia interface for some well-known libraries from other languages. As an example, we can mention `ScikitLearn.jl <https://github.com/cstjean/ScikitLearn.jl>`_, which provides an interface for the `scikit-learn <https://scikit-learn.org/>`_ library from Python or the `RDatasets.jl <https://github.com/JuliaStats/RDatasets.jl>`_ that provides an easy way to load famous R datasets.
 
 
 See also
@@ -473,10 +483,8 @@ See also
 - `Julia for Pythonistas <https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_for_Pythonistas.ipynb#scrollTo=YwM2lGhmjIAA>`__.
 
 
-
 .. keypoints::
 
    - Julia have significant interfacing with *compiled* and *interpreted* languages to leverage the strengths of both languages.
    - Interfacing Julia with C and Fortran is accomplished by the ``ccall`` function.
    - Interactions between Julia and Python are achived via the ``PyCall`` package for calling Python from Julia and through the ``PyJulia`` package for calling Julia from Python.
-
