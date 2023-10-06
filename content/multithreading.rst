@@ -177,6 +177,8 @@ costly calculation.
 
       .. code-block:: julia
 
+         using Base.Threads
+
          function threaded_sqrt_array(A)
              B = similar(A)
              @threads :dynamic for i in eachindex(A)
@@ -189,6 +191,8 @@ costly calculation.
 
       .. code-block:: julia
 
+         using Base.Threads
+
          function sqrt_array!(A, B, chunk)
              for i in chunk
                  @inbounds B[i] = sqrt(A[i])
@@ -197,7 +201,7 @@ costly calculation.
 
          function threaded_sqrt_array(A)
              B = similar(A)
-             chunks = Iterators.partition(eachindex(A), length(A) ÷ Threads.nthreads())
+             chunks = Iterators.partition(eachindex(A), length(A) ÷ nthreads())
              @sync for chunk in chunks
                  @spawn sqrt_array!(A, B, chunk)
              end
@@ -238,7 +242,7 @@ how we can ensure a correct results by using `atomic operations`.
 The "workaround" version shows how we can refactor the code to get both 
 correct result and speedup.
 
-FIXME: do not use threadid for indexing!!!
+FIXME: do not use threadid for indexing!!! (use @spawn and fetch)
 
 .. tabs:: 
 
