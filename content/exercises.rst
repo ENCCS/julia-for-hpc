@@ -69,7 +69,7 @@ The source files listed below represent a simplification of this `HeatEquation p
 
 .. challenge:: Optimise and benchmark
 
-   - Benchmark the :meth:`evolve!` function.
+   - Benchmark the :meth:`evolve!` function in the Julia REPL. 
    - Add the ``@inbounds`` macro to the innermost loop.
    - Benchmark again and estimate the performance gain.
 
@@ -77,7 +77,9 @@ The source files listed below represent a simplification of this `HeatEquation p
 .. challenge:: Multithread 
 
    - Multithread the :meth:`evolve!` function
-   - Benchmark again with different number of threads. How does it scale?
+   - Benchmark again with different number of threads. It will be most convenient to 
+     run these benchmarks from the command line where you can set the number of threads: `julia -t <nthreads>`.
+   - How does it scale?
 
    .. solution::
 
@@ -93,33 +95,18 @@ The source files listed below represent a simplification of this `HeatEquation p
              end
          end
       
-      Script to run benchmarking:
-
-      .. code-block:: julia
- 
-         using HeatEquation
-         using BenchmarkTools
-         
-         ncols, nrows, nsteps = 10_000, 10_000, 20
-         curr, prev = initialize(ncols, nrows)
-         
-         bench_results = @benchmark simulate!(curr, prev, nsteps)
-         # minimum runtime in seconds
-         println(minimum(bench_results.times)/1e9)
-
       Running benchmarking from terminal:
 
       .. code-block:: bash
 
-         $ julia --project -t 1 run_benchmarking.jl
-         # 5.314849396
-         $ julia --project -t 2 run_benchmarking.jl
-         # 3.236433742
-         $ julia --project -t 4 run_benchmarking.jl
-         # 3.311189835
+         $ julia --project -t 1 main.jl
+         #   1.088 s (4032 allocations: 64.35 MiB)
+         $ julia --project -t 2 main.jl
+         #   612.132 ms (7009 allocations: 64.62 MiB)
+         $ julia --project -t 4 main.jl
+         #   474.350 ms (13294 allocations: 65.19 MiB)
        
-      The scaling isn't very good because the loops in ``evolve!`` are very cheap, 
-      but it seems to scale better with larger arrays.
+      The scaling isn't very good because the loops in ``evolve!`` are rather cheap.
 
 
 .. exercise:: Using SharedArrays with stencil problem
@@ -127,12 +114,12 @@ The source files listed below represent a simplification of this `HeatEquation p
    Look again at the double for loop in the ``evolve!`` function 
    and think about how you could use SharedArrays.
 
-   The best approach might be to start by refactoring the package a bit and change 
+   The best approach might be to start by refactoring the code a bit and change 
    the ``evolve!`` function to accept arrays instead of ``Field`` structs, like this:
 
    .. code-block:: julia
 
-      function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
+      function evolve2!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
           nx, ny = size(currdata) .- 2
           for j = 2:ny+1
               for i = 2:nx+1
@@ -143,8 +130,8 @@ The source files listed below represent a simplification of this `HeatEquation p
           end
       end 
 
-   - Create a new script where you import ``Distributed``, ``SharedArrays`` and 
-     ``BenchmarkTools`` and define the ``evolve!`` function above.
+   - In your `main` script, import also ``Distributed`` and ``SharedArrays``. 
+   - In ``core.jl``, define the ``evolve2!`` function above and call it from :meth:`simulate`.
    - Benchmark the original version:
 
    .. code-block:: julia
