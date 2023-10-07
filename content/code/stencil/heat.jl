@@ -51,8 +51,8 @@ function initialize(nrows = 1000, ncols = 1000, arraytype = Matrix)
     if arraytype != Matrix
         tmp = Field(nrows, ncols, data)
         generate_field!(tmp)
-        gpudata = arraytype(tmp.data)
-        previous = Field(nrows, ncols, gpudata)
+        newdata = arraytype(tmp.data)
+        previous = Field(nrows, ncols, newdata)
     else
         previous = Field(nrows, ncols, data)
         generate_field!(previous)
