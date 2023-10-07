@@ -62,9 +62,10 @@ The source files listed below represent a simplification of this `HeatEquation p
 
 .. challenge:: Run the code
 
-   - Copy the source files from the code box above or from the `content/code/stencil/ <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code/stencil>`__ directory of this repository.
-   - Activate the environment found in the Project.toml file
+   - Copy the source files from the code box above.
+   - Activate the environment found in the Project.toml file.
    - Run the main.jl code and (optionally) visualise the result by uncommenting the relevant line.
+   - Study the code for a while to understand how it works.
 
 
 .. challenge:: Optimise and benchmark
@@ -73,6 +74,14 @@ The source files listed below represent a simplification of this `HeatEquation p
    - Add the ``@inbounds`` macro to the innermost loop.
    - Benchmark again and estimate the performance gain.
 
+   .. solution:: 
+
+      - Add the ``@btime`` macro and execute in VSCode:
+
+        .. code-block:: julia
+
+           @btime simulate!(curr, prev, nsteps)
+           
 
 .. challenge:: Multithread 
 
@@ -109,13 +118,9 @@ The source files listed below represent a simplification of this `HeatEquation p
       The scaling isn't very good because the loops in ``evolve!`` are rather cheap.
 
 
-.. exercise:: Using SharedArrays with stencil problem
+.. exercise:: Adapt the stencil problem for GPU porting
 
-   Look again at the double for loop in the ``evolve!`` function 
-   and think about how you could use SharedArrays.
-
-   The best approach might be to start by refactoring the code a bit and change 
-   the ``evolve!`` function to accept arrays instead of ``Field`` structs, like this:
+   In order to prepare for porting the stencil problem to run on a GPU, it's wise to modify the code slightly. One approach is to change the ``evolve!`` function to accept arrays instead of ``Field`` types. For now, we define a new version of this function called :meth:`evolve2`:
 
    .. code-block:: julia
 
@@ -130,30 +135,100 @@ The source files listed below represent a simplification of this `HeatEquation p
           end
       end 
 
-   - In your `main` script, import also ``Distributed`` and ``SharedArrays``. 
-   - In ``core.jl``, define the ``evolve2!`` function above and call it from :meth:`simulate`.
-   - Benchmark the original version:
+   - In the :meth:`simulate!` function, update how you call the :meth:`evolve2!` function.
+   - Take a moment to study the :meth:`initialize` function. Why is the `if arraytype != Matrix` statement there?
 
-   .. code-block:: julia
+   .. solution::
 
-      dx = dy = 0.01
-      a = 0.5
-      dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
-      M1 = rand(1000, 1000);
-      M2 = rand(1000, 1000);
-      @btime evolve!(M1, M2, dx, dy, a, dt)
+      In the :meth:`simulate!` function you need to change from:
 
-   - Now create a new method for this function which accepts SharedArrays. 
-   - Add worker processes with ``addprocs`` and benchmark your new method 
-     when passing in SharedArrays. Is there any performance gain? 
+      .. code-block:: julia
 
-   - The overhead in managing the workers will probably far outweigh the 
-     parallelization benefit because the computation in the inner loop is 
-     very simple and fast.
-   - Try adding ``sleep(0.001)`` to the **outermost** loop to simulate the effect 
-     of a more demanding calculation, and rerun the benchmarking. Can you see a 
-     speedup now?
-   - Remember that you can remove worker processes with ``rmprocs(workers())``.
+         evolve!(curr, prev, a, dt)
+
+      to:
+
+      .. code-block:: julia
+
+         evolve2!(curr.data, prev.data, curr.dx, curr.dy, a, dt)
+
+      The purpose of the if-else block in :meth:`initialize` is to handle situations where you want the data arrays in the Field composite types to be something else than regular Matrix types. This will be needed when we port to GPU, and also when using SharedArrays.
+
+.. exercise:: Using SharedArrays with stencil problem
+
+   Look again at the double for-loop in the modified ``evolve!`` function 
+   and think about how you could use SharedArrays. Start from the :meth:`evolve2!` function defined above, and try to implement a version that accepts `SharedArray` arrays.
+
+   .. solution:: First hint
+
+      - In your `main` script, import also ``Distributed`` and ``SharedArrays``. 
+      - In ``core.jl``, create another method for the ``evolve2!`` function with the following signature: ``evolve2!(currdata::SharedArray, prevdata::SharedArray, dx, dy, a, dt)``
+
+   .. solution:: Second hint
+
+      The only change you have to make to the SharedArray method of :meth:`evolve2!` is to add ``@sync @distributed`` in front of the first loop!
+
+   .. solution:: Solution and benchmarking
+
+      This is how the SharedArray method should look:
+
+      .. code-block:: julia
+
+         function evolve2!(currdata::SharedArray, prevdata::SharedArray, dx, dy, a, dt)
+             nx, ny = size(currdata) .- 2
+             @sync @distributed for j = 2:ny+1
+                 for i = 2:nx+1
+                     @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
+                     @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
+                     @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
+                 end
+             end
+         end         
+
+      and this is how you would set up the simulation in the `main`` file:
+
+      .. code-block:: julia
+
+         using BenchmarkTools
+         using Distributed
+         using SharedArrays
+         include("heat.jl")
+         include("core.jl")
+         # ... definition of visualize()
+         ncols, nrows = 2048, 2048
+         nsteps = 10
+         curr, prev = initialize(ncols, nrows, SharedArray)
+         @btime simulate!(curr, prev, nsteps)
+
+      To run the script with multiple processes:
+
+      .. code-block:: console
+
+         $ julia -p 4 --project main.jl
+
+      NOTE: Your benchmark results will turn out to be underwhelming - the SharedArray version will most likely run slower! See explanation below.
+
+   .. solution:: Notes on performance
+
+     - The overhead in managing the workers will probably far outweigh the 
+       parallelization benefit because the computation in the inner loop is 
+       very simple and extremely fast. 
+     - To see the benefit you can obtain for more computationally demanding calculations, you can try to introduce a more expensive mathematical operation  to the **outermost** loop to simulate the effect 
+     - To see the benefit you can obtain for more computationally demanding calculations, you can try to introduce a more expensive mathematical operation to the inner loop, e.g. by taking the arctangent of some values:
+       
+       .. code-block:: julia
+
+          @inbounds xderiv = (atan(prevdata[i-1, j]) - 2.0 * atan(prevdata[i, j]) + atan(prevdata[i+1, j])) / dx^2
+         @inbounds yderiv = (atan(prevdata[i, j-1]) - 2.0 * atan(prevdata[i, j]) + atan(prevdata[i, j+1])) / dy^2
+
+      This should clearly demonstrate the performance benefit of parallelisation via SharedArrays:
+
+      .. code-block:: console
+
+         $ julia -p 1 --project main.jl
+         #    1.840 s (442 allocations: 64.03 MiB)
+         $ julia -p 4 --project main.jl
+         #    513.529 ms (8315 allocations: 64.39 MiB)
 
 
    .. solution:: 
@@ -183,8 +258,7 @@ The source files listed below represent a simplification of this `HeatEquation p
                      @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
                      @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
                      @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
-                 end 
-                 sleep(0.001)
+                 end                  
              end
          end
 
@@ -208,6 +282,7 @@ The source files listed below represent a simplification of this `HeatEquation p
 
          @btime evolve!(S1, S2, dx, dy, a, dt)
          #   578.060 ms (722 allocations: 32.72 KiB)
+
 
 
 .. challenge:: Exercise: Julia port to GPUs
