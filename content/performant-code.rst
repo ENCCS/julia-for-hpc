@@ -147,6 +147,9 @@ Let's go ahead and profile the `lap2d!` function:
       using ProfileView
       @profview lap2d!(u, unew)
 
+      # if you get a warning like **both ProfileView and VSCodeServer export "@profview"**, you can use the command below
+      # VSCodeServer.@profview lap2d!(u, unew)
+
    We can also look at the same information in a flamegraph by clicking the little fire
    button next to the search area.
    We should now be able to conclude that ``setindex!`` and ``getindex`` functions
