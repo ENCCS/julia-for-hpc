@@ -229,7 +229,8 @@ performance:
          A_d = CuArray(A);
 
          @btime $A * $A;
-         @btime $A_d * $A_d;
+         # need to synchronize to let the CPU wait for the GPU kernel to finish
+         @btime CUDA.@sync $A_d * $A_d;
 
    .. group-tab:: AMD
 
@@ -242,7 +243,10 @@ performance:
          A_d = ROCArray(A);
       
          @btime $A * $A;
-         @btime $A_d * $A_d;
+         @btime begin
+             $A_d * $A_d;
+             AMDGPU.synchronize()
+         end
 
    .. group-tab:: Intel
 
@@ -255,6 +259,7 @@ performance:
          A_d = oneArray(A);
       
          @btime $A * $A;
+         # FIXME: how to synchronize with oneAPI
          @btime $A_d * $A_d;
 
    .. group-tab:: Apple
@@ -268,6 +273,7 @@ performance:
          A_d = MtlArray(A);
       
          @btime $A * $A;
+         # FIXME: how to synchronize with Metal?         
          @btime $A_d * $A_d;
 
 
@@ -295,7 +301,9 @@ There should be a considerable speedup!
          @btime $A * $A
          # 517.722 μs (2 allocations: 2.00 MiB)
          # GPU
-         @btime $A_d * $A_d
+         @btime begin         
+             $A_d * $A_d
+         end
          # 115.805 μs (21 allocations: 1.06 KiB)
 
          # ~47 times faster than 1 CPU core, ~5 times faster than 64 cores
@@ -324,7 +332,9 @@ There should be a considerable speedup!
          # 64 CPU cores
          @btime $A * $A
          # 30.081 ms (2 allocations: 32.00 MiB)
-         @btime $A_d * $A_d
+         @btime begin
+             $A_d * $A_d
+         end
          # 866.348 μs (21 allocations: 1.06 KiB)
 
          # ~400 times faster than 1 core, 35 times faster than 64 cores
