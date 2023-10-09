@@ -456,11 +456,7 @@ conditions?
 .. solution:: Hint
 
    You need to make sure that the different threads are not incrementing the same memory address.
-   One can for example define a ``partial_hits`` array and increment its indices in the for loop:
-
-   .. code-block:: julia
-
-      partial_hits = zeros(Int, nthreads())
+   You should split the input size evenly for available threads, then use ``@spawn`` to compute hits in each thread and finally ``fetch`` the return values, and preceed as in the serial example.
 
 .. solution:: 
 
