@@ -34,24 +34,22 @@ Furthermore, Julia can directly interface with shared C and Fortran libraries wi
 There are also packages for interfacing with other languages, such as Python, R, and C++.
 We can use Julia to call external programs directly, which means we can use it as an efficient, robust, parallelizable glue language instead of shell scripting.
 
-Julia supports four main types of parallel programming:
+Julia supports four main types of parallel programming.
 
-- **Asynchronous tasks or coroutines**:
-  Tasks allow suspending and resuming  computations for I/O, event handling and similar patterns.
-  Not really HPC and outside the scope of the this lesson.
+**Asynchronous tasks (aka coroutines)** provides the ability to suspend and resume  computations for I/O, event handling and similar patterns.
+Asynchronous tasks are not specific to HPC and therefore we do not cover them in the lessons.
 
-- **Multi-threading**:
-  Provides the ability to schedule Tasks simultaneously on more than one thread or CPU core, sharing memory.
-  The easiest way to parallelize on shared-memory systems.
-  Contained in the ``Threads`` standard library.
+**Multithreading** provides the ability to schedule tasks simultaneously on more than one CPU core with shared memory.
+Julia implements threading in the ``Base.Threads`` library.
 
-- **Distributed computing**:
-  Runs multiple Julia processes with separate memory spaces on the same or multiple computers.
-  Useful high-level constructs are implemented in the standard library ``Distributed`` module.
-  For those that like MPI there is `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_.
+**Distributed computing** refers to running multiple Julia processes with separate memory spaces on the same or multiple computers.
+Julia implements constructs for distributed computing in the standard library ``Distributed``.
+Extensions to Distributed and other forms of distributed computing such as MPI are available from extenal packages.
 
-- **GPU computing**:
-  Ports computation to a graphical processing unit (GPU) via either high-level or low-level programming. 
+**GPU computing** ports computation to a graphical processing unit (GPU) via either high-level or low-level programming.
+Julia has external packages for GPU computing.
+
+The lessons in this course will cover aspects of multithreading, distributed computing and GPU computing with Julia on HPC clusters.
 
 ----
 

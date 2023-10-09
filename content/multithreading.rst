@@ -3,8 +3,7 @@ Multithreading
 
 .. questions::
 
-   - What parallelization options exist in Julia?
-   - What is multithreading?
+   - How multithreading works in Julia?
 
 .. instructor-note::
 
@@ -53,7 +52,7 @@ We should see a difference between using single and all threads.
 
 Julia threading
 ---------------
-We start by walking through how to use multithreading in Julia.
+We start by walking through how to use `multithreading <https://docs.julialang.org/en/v1/manual/multi-threading/>`_ in Julia.
 We can set the :code:`JULIA_NUM_THREADS` environment variable such that Julia will start the set thread count.
 
 .. code-block:: bash
@@ -85,7 +84,8 @@ Using an option will override the value in the environment variable.
    with the ``Threads.nthreads()`` function.
 
 In Julia, we can import the Threads module for easier usage.
-We use the following functions ``nthreads``, ``threadid``, ``@threads``, ``@sync``, ``@spawn``, and ``fetch``.
+
+.. We use the following functions ``nthreads``, ``threadid``, ``@threads``, ``@sync``, ``@spawn``, and ``fetch``.
 
 .. code-block:: julia
 
@@ -95,7 +95,7 @@ The ``nthreads`` function show us how many threads we have available:
 
 .. code-block:: julia
 
-   n = nthreads()
+   nthreads()
 
 There are three main ways of approaching multithreading:
 
@@ -112,8 +112,10 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
 
       .. code-block:: julia
 
+         using Base.Threads
+
          # Using @threads macro with dynamic scheduling
-         a = zeros(Int, 2n)
+         a = zeros(Int, 2*nthreads())
          @threads for i in eachindex(a)
              a[i] = threadid()
          end
@@ -123,6 +125,8 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
 
       .. code-block:: julia
 
+         using Base.Threads
+
          function task(b, chunk)
               for i in chunk
                   b[i] = threadid()
@@ -130,7 +134,7 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
          end
 
          # Using @sync and @spawn macros (also dynamic scheduling)
-         b = zeros(Int, 2n)
+         b = zeros(Int, 2 * nthreads())
          chunks = Iterators.partition(eachindex(b), length(b) ÷ nthreads())
          @sync for chunk in chunks
              @spawn task(b, chunk)
@@ -141,8 +145,10 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
 
       .. code-block:: julia
 
+         using Base.Threads
+
          # Using @spawn and fetch
-         t = [@spawn threadid() for _ in 1:2n]
+         t = [@spawn threadid() for _ in 1:2*nthreads()]
          c = fetch.(t)
 
 Let's see if we can achieve any speed gain when performing a 
@@ -212,8 +218,8 @@ With 4 threads, the speedup could be about a factor of 3.
 
 .. callout:: Threading overhead
 
-   Using ``Threads.@threads`` has an overhead of a few microseconds (equivalent to thousands of computations), 
-   so threading is most efficient for time consuming jobs.
+   Julia threading has an overhead of a few microseconds (equivalent to thousands of computations).
+   Multithreading becomes efficient for tasks that are larger than the overhead.
 
 
 Pitfalls
@@ -322,7 +328,7 @@ We will observe that:
 - The serial version is slow but correct.
 - The race condition version is both slow and wrong.
 - The atomic version is correct but extremely slow.
-- The migration version is incorrect because tasks can migrate between Julia threads during execution, thus `threadid()` is not constant.
+- The migration version is incorrect because tasks can migrate between Julia threads during execution, thus ``threadid()`` is not constant.
 - The workaround is fast and correct, but required refactoring.
 
 Bonus questions: 
@@ -502,19 +508,4 @@ conditions?
 
       $ julia estimate_pi.jl
       # pi = 3.14147392
-      # time = 228.434583     
-
-
-See also
---------
-
-- The `Julia Parallel <https://github.com/JuliaParallel>`_ organization collects 
-  packages developed for parallel computing in Julia.
-- `Multi-threading docs <https://docs.julialang.org/en/v1/manual/multi-threading/>`__
-
-.. keypoints::
-
-   - One should choose a distributed mechanism that fits with the 
-     time and memory parameters of your problem   
-   - ``Threads`` is as easy as decorating for loops with ``@threads``, but data 
-     dependencies (race conditions) need to be avoided.
+      # time = 228.434583
