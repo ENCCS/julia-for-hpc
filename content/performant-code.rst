@@ -53,7 +53,7 @@ and arbitrarily set the boundaries to 10.0 to have something interesting to simu
 To simulate something that resembles e.g. the evolution of temperature in a 2D heat conductor
 (although we've completely ignored physical constants and time-stepping involved in solving the
 heat equation), we could run a loop of say 1000 "time" steps and visualize the results with the
-``heatmap`` method of the Plots package:
+``heatmap`` method of the ``Plots`` package:
 
 .. code-block:: julia
 
@@ -116,9 +116,8 @@ Profiling
 ---------
 
 The `Profile module <https://docs.julialang.org/en/v1/manual/profile/>`_, part of ``Base``,
-provides tools to help improve
-the performance of Julia code. It relies on `sampling` code at runtime
-and thus gathering statistical information on where time is spent.
+provides tools to help improve the performance of Julia code.
+It relies on `sampling` code at runtime and thus gathering statistical information on where time is spent.
 Profiling is particularly useful for identifying bottlenecks in code -
 we should remember that "premature optimization is the root of all evil" (Donald Knuth).
 
@@ -147,13 +146,15 @@ Let's go ahead and profile the `lap2d!` function:
       using ProfileView
       @profview lap2d!(u, unew)
 
-      # if you get a warning like "both ProfileView and VSCodeServer export '@profview'", you can use the following expression
+      # if you get a warning like "both ProfileView and VSCodeServer export '@profview'", 
+      # you can use the following expression:
       # VSCodeServer.@profview lap2d!(u, unew)
 
    We can also look at the same information in a flamegraph by clicking the little fire
    button next to the search area.
    We should now be able to conclude that ``setindex!`` and ``getindex`` functions
    inside ``lap2d!`` take most of the time.
+
    It should be noted that there are only addition and multiplication operations in
    the ``lap2d!`` function, and these operations just run limited CPU cycles.
    A time-demanding example is provided in `this page <https://www.julia-vscode.org/docs/dev/userguide/profiler/>`_.
