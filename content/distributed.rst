@@ -292,13 +292,12 @@ Exercises
              end
          end
 
-         function lap2d!(u, unew)
-             M, N = size(u)
-             for j in 2:N-1
-                 for i in 2:M-1
-                     unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
-                 end 
-             end
+         function setup(N=4096, M=4096)
+             u = zeros(M, N)
+             # set boundary conditions
+             u[1,:] = u[end,:] = u[:,1] = u[:,end] .= 10.0
+             unew = copy(u);
+             return u, unew
          end
 
 
@@ -363,11 +362,43 @@ Exercises
 
          # benchmark
          @btime lap2d!(u, unew) 
-         #   WRITEME
+         #     10.853 ms (0 allocations: 0 bytes)
 
          @btime lap2d!(u_s, unew_s)
-         #   WRITEME
+         #   38.033 ms (1426 allocations: 68.59 KiB)
 
+      The SharedArray version runs slower! What if we add a ``sleep(0.001)`` in there?
+
+      .. code-block:: julia
+
+         function lap2d!(u, unew)
+             M, N = size(u)
+             for j in 2:N-1
+                 for i in 2:M-1
+                     @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+                 end 
+                 sleep(0.001)
+             end
+         end         
+
+         function lap2d!(u::SharedArray, unew::SharedArray)
+             M, N = size(u)
+             @sync @distributed for j in 2:N-1
+                 for i in 2:M-1
+                     @inbounds unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+                 end  
+                 sleep(0.001)
+             end
+         end
+
+         # benchmark
+         @btime lap2d!(u, unew)
+         #  8.432 s (20640 allocations: 648.77 KiB)
+         
+         @btime lap2d!(u_s, unew_s)
+         #  1.063 s (1428 allocations: 69.17 KiB)
+
+      On 8 CPU cores the speedup is now very close to 8!
 
 .. exercise:: Distribute the computation of π
 
