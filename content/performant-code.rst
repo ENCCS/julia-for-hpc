@@ -147,13 +147,17 @@ Let's go ahead and profile the `lap2d!` function:
       using ProfileView
       @profview lap2d!(u, unew)
 
-      # if you get a warning like **both ProfileView and VSCodeServer export "@profview"**, you can use the command below
+      # if you get a warning like "both ProfileView and VSCodeServer export '@profview'", you can use the following expression
       # VSCodeServer.@profview lap2d!(u, unew)
 
    We can also look at the same information in a flamegraph by clicking the little fire
    button next to the search area.
    We should now be able to conclude that ``setindex!`` and ``getindex`` functions
    inside ``lap2d!`` take most of the time.
+   It should be noted that there are only addition and multiplication operations in
+   the ``lap2d!`` function, and these operations just run limited CPU cycles.
+   A time-demanding example is provided in `this page <https://www.julia-vscode.org/docs/dev/userguide/profiler/>`_.
+
 
 Several packages are available for more advanced visualization of profiling results:
 
