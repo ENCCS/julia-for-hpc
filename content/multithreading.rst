@@ -112,6 +112,8 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
 
       .. code-block:: julia
 
+         using Base.Threads
+
          # Using @threads macro with dynamic scheduling
          a = zeros(Int, 2*nthreads())
          @threads for i in eachindex(a)
@@ -122,6 +124,8 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
    .. tab:: @sync and @spawn
 
       .. code-block:: julia
+
+         using Base.Threads
 
          function task(b, chunk)
               for i in chunk
@@ -140,6 +144,8 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
    .. tab:: @spawn and fetch
 
       .. code-block:: julia
+
+         using Base.Threads
 
          # Using @spawn and fetch
          t = [@spawn threadid() for _ in 1:2*nthreads()]

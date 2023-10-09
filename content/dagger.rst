@@ -85,7 +85,9 @@ Next, we want to define and execute a task graph using Dagger.
 .. code-block:: julia
 
    # Add task function to all workers
-   @everywhere task() = (Distributed.myid(), Threads.threadid())
+   @everywhere function task()
+       return (Distributed.myid(), Threads.threadid())
+   end
 
    # Let's define a simple task graph consisting of 10 independent tasks
    tasks = [Dagger.@spawn task() for _ in 1:10]
