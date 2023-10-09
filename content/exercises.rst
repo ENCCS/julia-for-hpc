@@ -439,3 +439,14 @@ The source files listed below represent a simplification of this `HeatEquation p
          @btime evolve!(M1, M2, dx, dy, a, dt)
          @btime CUDA.@sync @cuda threads=(nthreads, nthreads) blocks=(numblocks, numblocks) evolve_gpu!(M1_d, M2_d, dx^2, dy^2, a, dt)
 
+
+.. exercise:: Create a package 
+
+   Take the code for the stencil example and convert it into a Julia package!
+   Instructions for creating Julia packages are found in the `Introduction to Julia <https://enccs.github.io/julia-intro/development/>`__ lesson.
+
+   Also try to write one or more tests. It can include unit tests, integration tests or an end-to-end test.
+
+   .. solution:: 
+
+      See `HeatEquation.jl <https://github.com/ENCCS/HeatEquation.jl>`__.
