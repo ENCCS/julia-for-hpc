@@ -8,17 +8,28 @@ Distributed computing
 
 .. instructor-note::
 
-   - 20 min teaching
-   - 20 min exercises
+   - 35 min teaching
+   - 25 min exercises
 
 
 Distributed computing
 ---------------------
 
-Julia's main implementation of message passing for distributed-memory systems is contained in 
-the ``Distributed`` module. Its approach is different from other frameworks like MPI in 
-that communication is generally "one-sided", meaning that the programmer needs to explicitly 
-manage only one process in a two-process operation. 
+In distributed computing, different processes often need to communicate with each other, and this is typically done through a method called message passing¹. Julia's main implementation of message passing for distributed-memory systems is contained in the ``Distributed`` module².
+
+Julia's approach to message passing is different from other frameworks like MPI (Message Passing Interface)³. In many systems, communication is "two-sided", meaning that both the sender and receiver processes need to participate in the communication⁴. The sender process needs to initiate the send, and the receiver needs to expect and handle the receipt of the message⁵.
+
+However, Julia uses a "one-sided" communication approach. This means that the programmer needs to explicitly manage only one process in a two-process operation. In other words, these operations typically do not look like "message send" and "message receive" but rather resemble higher-level operations like calls to user functions¹.
+
+This approach can simplify the programming model, especially for complex applications where coordinating sends and receives can be challenging. It allows programs to run on multiple processes in separate memory domains at once. This can be particularly useful in environments where you have multiple CPUs or are working across a cluster of machines.
+
+References:
+
+1. Multi-processing and Distributed Computing · The Julia Language. https://docs.julialang.org/en/v1/manual/distributed-computing/
+2. Distributed Computing · The Julia Language. https://docs.julialang.org/en/v1/stdlib/Distributed/
+3. What is message passing interface in distributed system?. https://profoundqa.com/what-is-message-passing-interface-in-distributed-system/
+4. Message Passing Model of Process Communication - GeeksforGeeks. https://www.geeksforgeeks.org/message-passing-model-of-process-communication/
+5. Programming Environments for Massively Parallel Distributed Systems. https://books.google.com/books/about/Programming_Environments_for_Massively_P.html?id=NlR_m9OWgoYC
  
 Julia can be started with a given number of `p local` workers using the ``-p``:
 
@@ -153,19 +164,24 @@ techniques:
              p = sum(fetch.(futures))
          end
 
+We are using both `@distributed` and `pmap` to calculate the sum of square roots of an array. The `sqrt_sum_range` function calculates the sum of square roots for a given range of an array. We are using this function with both `@distributed` and `pmap`.
+
+The main difference is how work is distributed among workers. With `@distributed`, work is divided equally among all workers, regardless of their computing power. With `pmap`, work is assigned based on the computing power of each worker.
+
+In conclusion, if you have some small, simple assignments, these problems with `@distributed` will most likely not cause problems. However, for larger or more complex tasks, `pmap` has advantages¹.
 The ``@spawnat`` version looks cumbersome for this case particular case as the algorithm 
 required the explicit partitioning of the array which is common in MPI, for instance. 
 The ``@distributed (+)`` parallel for loop and the ``pmap`` mapping are much simpler,
 but which one is preferable for a given use case?
 
-- ``@distributed`` is appropriate for reductions. It does not load-balance and 
-  simply divides the work evenly between processes. It is best in cases where 
-  each loop iteration is cheap.
-- ``pmap`` can handle reductions as well as other algorithms. It performs load-balancing
-  and since dynamic scheduling introduces some overhead it's best to use ``pmap`` 
-  for computationally heavy tasks.
-- In the case of ``@spawnat``, because the `futures` are not immediately using CPU
-  resources, it opens the possibility of using asynchronous and uneven workloads.
+- ``@distributed`` is appropriate for reductions. The ``@distributed`` macro is used to distribute work evenly across all workers.
+   It divides the specified range according to the number of all workers¹. This means that it will immediately distribute the work      to be evenly distributed to all workers. It does not load-balance and simply divides the work evenly between processes.
+   It is best in cases where each loop iteration is cheap.
+
+-  On the other hand, ``pmap`` starts each worker on a job and assigns work tasks based on the computing power of the worker. Once a    worker finishes a job, it will provide the next available job². This is similar to queue-based multiprocessing common in             Python. `pmap` can handle reductions as well as other algorithms. It performs load-balancing and since dynamic scheduling           introduces some overhead it's best to use `pmap` for computationally heavy tasks.
+
+-  In the case of ``@spawnat``, because the `futures` are not immediately using CPU
+   resources, it opens the possibility of using asynchronous and uneven workloads.
 
 .. callout:: Multiprocessing overhead
 
@@ -183,10 +199,16 @@ For example, computing the singular value decomposition of many matrices:
 .. code-block:: julia
 
    @everywhere using LinearAlgebra
+   using BenchmarkTools
    x=[rand(100,100) for i in 1:10]
    @btime map(LinearAlgebra.svd, x);
    @btime pmap(LinearAlgebra.svd, x);
 
+References:
+
+1. Julia concurrent programming – the difference between @distributed and pmap. https://www.programmersought.com/article/38894559405/
+2. Julia - Difference between parallel map and parallel for-loop. https://stackoverflow.com/questions/55697905/difference-between-parallel-map-and-parallel-for-loop
+3. Julia - What exactly is the difference between @parallel and pmap. https://stackoverflow.com/questions/37846838/what-exactly-is-the-difference-between-parallel-and-pmap
 
 SharedArrays
 ^^^^^^^^^^^^
