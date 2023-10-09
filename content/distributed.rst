@@ -52,10 +52,9 @@ password-less ``ssh``. Support for running on clusters with various schedulers
 package.
 
 Each process has a unique identifier accessible via the ``myid()`` function (`master` 
-has ``myid() = 1``). The ``@spawn`` and ``@spawnat`` macros can be used to transfer 
+has ``myid() = 1``). The ``@spawnat`` macro can be used to transfer 
 work to a process, and then return the resulting ``Future`` to the `master` process 
-using the ``fetch`` function (``@spawn`` selects the process automatically while 
-``@spawnat`` lets you choose: 
+using the ``fetch`` function: 
 
 .. code-block:: julia
 
@@ -65,8 +64,7 @@ using the ``fetch`` function (``@spawn`` selects the process automatically while
    fetch(r)
 
 One use case could be to manually distribute expensive function calls 
-between processes,
-but there are higher-level and simpler constructs than ``@spawn`` / ``@spawnat``:
+between processes, but there are higher-level and simpler constructs than ``@spawnat``:
 
 - the ``@distributed`` macro for ``for`` loops. Can be used with a 
   reduction operator to gather work performed by the independent tasks.
