@@ -174,6 +174,19 @@ The :code:`sbatch` command launches the batch job, with options that declare the
              --time="00:15:00" \
              script.sh
 
+      Often options are specified as comments in the batch ``script.sh`` as follows.
+
+      .. code-block:: bash
+
+         #!/bin/bash
+         #SBATCH --account="<project>"
+         #SBATCH --partition=small
+         #SBATCH --nodes=1
+         #SBATCH --ntasks-per-node=1
+         #SBATCH --cpus-per-task=2
+         #SBATCH --mem-per-cpu=1000
+         #SBATCH --time="00:15:00"
+
    .. tab:: LUMI GPU (small-g)
 
       .. code-block:: bash
@@ -188,6 +201,20 @@ The :code:`sbatch` command launches the batch job, with options that declare the
              --mem-per-cpu=1750 \
              --time="00:15:00" \
              script.sh
+
+      Often options are specified as comments in the batch ``script.sh`` as follows.
+
+      .. code-block:: bash
+
+         #!/bin/bash
+         #SBATCH --account="<project>"
+         #SBATCH --partition=small-g
+         #SBATCH --nodes=1
+         #SBATCH --ntasks-per-node=1
+         #SBATCH --cpus-per-task=16
+         #SBATCH --gpus-per-node=1
+         #SBATCH --mem-per-cpu=1750
+         #SBATCH --time="00:15:00"
 
 
 Running Julia application in a job
@@ -243,5 +270,202 @@ Now, we can run the batch script as a batch job or supply the commands in the ba
 
 Exercises
 ---------
-Run estimate pi using multithreading, multiprocesses, and MPI.
+In these exercises you should create the three files ``Project.toml``, ``script.jl``, and ``script.sh`` and run them via Slurm in the LUMI cluster.
+If the course has a resource reservation, we can use the :code:`--reservation="<name>"` option to use it.
+
+
+Run multithreaded job
+^^^^^^^^^^^^^^^^^^^^^
+Run the following files in a single node job with two CPU cores and one julia thread per core.
+
+``Project.toml``
+
+.. code-block:: toml
+
+   # empty Project.toml
+
+``script.jl``
+
+.. code-block:: julia
+
+   using Base.Threads
+   a = zeros(Int, 2*nthreads())
+   @threads for i in eachindex(a)
+       a[i] = threadid()
+   end
+   println(a)
+
+.. solution::
+
+   ``script.sh``
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      #SBATCH --account="<project>"
+      #SBATCH --partition=small
+      #SBATCH --nodes=1
+      #SBATCH --ntasks-per-node=1
+      #SBATCH --cpus-per-task=2
+      #SBATCH --mem-per-cpu=1000
+      #SBATCH --time="00:15:00"
+
+      module use /appl/local/csc/modulefiles
+      module load julia
+      julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      julia --project=. script.jl
+
+   .. code-block:: bash
+
+      sbatch script.sh
+
+
+Run distributed job
+^^^^^^^^^^^^^^^^^^^
+Run the following files a single node job with three CPU cores and one julia process per core.
+
+``Project.toml``
+
+.. code-block:: toml
+
+   [deps]
+   Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+
+``script.jl``
+
+.. code-block:: julia
+
+   using Distributed
+   addprocs(Sys.CPU_THREADS-1)
+
+   @everywhere task() = myid()
+   futures = [@spawnat id task() for id in workers()]
+   outputs = fetch.(futures)
+   println(outputs)
+
+.. solution::
+
+   ``script.sh``
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      #SBATCH --account="<project>"
+      #SBATCH --partition=small
+      #SBATCH --nodes=1
+      #SBATCH --ntasks-per-node=1
+      #SBATCH --cpus-per-task=3
+      #SBATCH --mem-per-cpu=1000
+      #SBATCH --time="00:15:00"
+
+      module use /appl/local/csc/modulefiles
+      module load julia
+      julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      julia --project=. script.jl
+
+   .. code-block:: bash
+
+      sbatch script.sh
+
+
+Run MPI job
+^^^^^^^^^^^
+Run the following files MPI code using two nodes with two slurm tasks per node and one CPU per task.
+
+``Project.toml``
+
+.. code-block:: toml
+
+   [deps]
+   MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
+
+   [compat]
+   MPI = "=0.20.8"
+
+``script.jl``
+
+.. code-block:: julia
+
+   using MPI
+
+   MPI.Init()
+   comm = MPI.COMM_WORLD
+   rank = MPI.Comm_rank(comm)
+   size = MPI.Comm_size(comm)
+   println("Hello from rank $(rank) out of $(size) from host $(gethostname()) and process $(getpid()).")
+   MPI.Barrier(comm)
+
+.. solution::
+
+   ``script.sh``
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      #SBATCH --account="<project>"
+      #SBATCH --partition=small
+      #SBATCH --nodes=2
+      #SBATCH --ntasks-per-node=2
+      #SBATCH --cpus-per-task=1
+      #SBATCH --mem-per-cpu=1000
+      #SBATCH --time="00:15:00"
+
+      module use /appl/local/csc/modulefiles
+      module load julia
+      julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      julia --project=. script.jl
+
+   .. code-block:: bash
+
+      sbatch script.sh
+
+
+Run GPU job
+^^^^^^^^^^^
+Run the following files GPU code using one node with one slurm tasks per node, one GPU per node and sixteen CPUs per task.
+
+``Project.toml``
+
+.. code-block:: toml
+
+   [deps]
+   AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+
+   [compat]
+   AMDGPU = "=0.4.13"
+
+``script.jl``
+
+.. code-block:: julia
+
+   using AMDGPU
+
+   A = rand(2^9, 2^9)
+   A_d = ROCArray(A)
+   B_d = $A_d * $A_d
+
+.. solution::
+
+   ``script.sh``
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      #SBATCH --account=<project>
+      #SBATCH --partition=small-g
+      #SBATCH --time=00:15:00
+      #SBATCH --nodes=1
+      #SBATCH --ntasks-per-node=1
+      #SBATCH --cpus-per-task=16
+      #SBATCH --gpus-per-node=1
+      #SBATCH --mem-per-cpu=1750
+
+      module use /appl/local/csc/modulefiles
+      module load julia-amdgpu
+      julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      julia --project=. script.jl
+
+   .. code-block:: bash
+
+      sbatch script.sh
 
