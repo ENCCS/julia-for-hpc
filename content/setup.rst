@@ -250,7 +250,7 @@ Using EuroHPC systems
                #!/bin/bash -l
                #SBATCH -A project_465000693
                #SBATCH -t 00:15:00
-               #SBATCH -p short
+               #SBATCH -p small
                #SBATCH --nodes 1
                #SBATCH --ntasks-per-node=8
 
@@ -271,7 +271,7 @@ Using EuroHPC systems
                #!/bin/bash -l
                #SBATCH -A project_465000693
                #SBATCH -t 00:15:00
-               #SBATCH -p short-g
+               #SBATCH -p small-g
                #SBATCH --nodes 1
                #SBATCH --ntasks-per-node=8
                #SBATCH --cpus-per-task=16 
