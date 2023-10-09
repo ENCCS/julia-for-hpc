@@ -410,6 +410,8 @@ Exercises
 
       .. code-block:: julia
 
+         using Statistics 
+         
          p1 = estimate_pi(num_points)
          p2 = mean(pmap(estimate_pi, chunks))
          p3 = @distributed (+) for c in chunks
