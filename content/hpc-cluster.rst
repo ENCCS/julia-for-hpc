@@ -20,7 +20,7 @@ Moreover, there is little reason to expect the performance of official Julia bin
 
 
 Terminology of an HPC cluster
----------------------------
+-----------------------------
 HPC cluster consists of networked computers called **nodes**.
 The nodes are separated into user-facing **login nodes** and nodes that are intended for heavy computing called **compute nodes**
 The nodes are colocated and connected using a **high-speed network** minimize communication latency and maximize performance at scale.
