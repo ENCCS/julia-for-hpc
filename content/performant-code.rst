@@ -24,8 +24,12 @@ finite-difference formula, which reads:
 
    u_{out}(i,j) = 0.25 [u(i−1,j) + u(i+1,j) + u(i,j−1) + u(i,j+1)]
 
-In Julia, this can be implemented as:
+.. figure:: img/2D-Laplace-operator.png
+  :align: center
 
+  An example of the discretization of the 2D Laplace operator.
+
+In Julia, this can be implemented as:
 
 .. literalinclude:: code/lap2d.jl
    :language: julia
@@ -49,7 +53,7 @@ and arbitrarily set the boundaries to 10.0 to have something interesting to simu
 To simulate something that resembles e.g. the evolution of temperature in a 2D heat conductor
 (although we've completely ignored physical constants and time-stepping involved in solving the
 heat equation), we could run a loop of say 1000 "time" steps and visualize the results with the
-:meth:`heatmap` method of the Plots package:
+``heatmap`` method of the Plots package:
 
 .. code-block:: julia
 

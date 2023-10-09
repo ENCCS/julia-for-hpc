@@ -279,6 +279,29 @@ Exercises
    Look again at the double for loop in the ``lap2d!`` function 
    and think about how you could use SharedArrays.
 
+   .. solution:: Laplace and setup functions
+
+      .. code-block:: julia
+
+         function lap2d!(u, unew)
+             M, N = size(u)
+             for j in 2:N-1
+                 for i in 2:M-1
+                     unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+                 end 
+             end
+         end
+
+         function lap2d!(u, unew)
+             M, N = size(u)
+             for j in 2:N-1
+                 for i in 2:M-1
+                     unew[i,j] = 0.25 * (u[i+1,j] + u[i-1,j] + u[i,j+1] + u[i,j-1])
+                 end 
+             end
+         end
+
+
    - Create a new script where you import ``Distributed``, ``SharedArrays`` and 
      ``BenchmarkTools`` and define the ``lap2d!`` function.
    - Benchmark the original version:
@@ -409,6 +432,8 @@ Exercises
       Call :meth:`estimate_pi` in serial, with :meth:`pmap` and ``@distributed (+)``:
 
       .. code-block:: julia
+
+         using Statistics 
 
          p1 = estimate_pi(num_points)
          p2 = mean(pmap(estimate_pi, chunks))

@@ -27,7 +27,7 @@ end
 
 
 ncols, nrows = 2048, 2048
-nsteps = 500
+nsteps = 10
 
 # initialize current and previous states to the same state
 curr, prev = initialize(ncols, nrows)
