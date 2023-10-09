@@ -215,6 +215,77 @@ Using EuroHPC systems
          n=$SLURM_NTASKS
          srun -n $n julia mpi_program.jl
 
+   .. tab:: LUMI
+
+      To load Julia, type:
+
+      .. code-block:: console
+
+         $ module use /appl/local/csc/modulefiles
+         
+         $ module load julia           # for non-GPU version
+         $ module load julia-amdgpu    # for GPU version
+
+      To start a new bash session on a reserved interactive **CPU node**:
+
+      .. code-block:: console
+
+         $ srun --account=project_465000693 --partition=small --nodes=1 --ntasks-per-node=8 --cpus-per-task=8 --mem-per-cpu=1000 --time=00:15:00 --pty bash
+
+      To run instead on a **GPU node**:
+
+      .. code-block:: console
+
+         $ srun --account=project_465000693 --partition=small-g --nodes=1 --ntasks-per-node=1 --cpus-per-task=16 --gpus-per-node=1 --mem-per-cpu=1750 --time=00:15:00 --pty  bash
+
+
+      To run a batch job to run an MPI job, create a job script similar to the following:
+
+      .. tabs:: 
+
+         .. tab:: CPU
+
+            .. code-block:: bash
+            
+               #!/bin/bash -l
+               #SBATCH -A project_465000693
+               #SBATCH -t 00:15:00
+               #SBATCH -p short
+               #SBATCH --nodes 1
+               #SBATCH --ntasks-per-node=8
+
+               module use /appl/local/csc/modulefiles
+               module load julia
+
+               # Instantiate the project environment
+               julia --project -e 'using Pkg; Pkg.instantiate()'
+
+               # Run the julia script
+               julia --project script.jl
+
+
+         .. tab:: GPU
+
+            .. code-block:: bash
+            
+               #!/bin/bash -l
+               #SBATCH -A project_465000693
+               #SBATCH -t 00:15:00
+               #SBATCH -p short-g
+               #SBATCH --nodes 1
+               #SBATCH --ntasks-per-node=8
+               #SBATCH --cpus-per-task=16 
+               #SBATCH --gpus-per-node=1               
+
+               module use /appl/local/csc/modulefiles
+               module load julia-amdgpu
+
+               # Instantiate the project environment
+               julia --project -e 'using Pkg; Pkg.instantiate()'
+
+               # Run the julia script
+               julia --project script.jl
+
 
 
 (Optional) Installing JupyterLab and a Julia kernel
