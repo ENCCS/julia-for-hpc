@@ -159,14 +159,11 @@ The source files listed below represent a simplification of this `HeatEquation p
    Look again at the double for-loop in the modified ``evolve!`` function 
    and think about how you could use SharedArrays. Start from the :meth:`evolve2!` function defined above, and try to implement a version that accepts `SharedArray` arrays.
 
-   .. solution:: First hint
+   .. solution:: Hints
 
       - In your `main` script, import also ``Distributed`` and ``SharedArrays``. 
       - In ``core.jl``, create another method for the ``evolve2!`` function with the following signature: ``evolve2!(currdata::SharedArray, prevdata::SharedArray, dx, dy, a, dt)``
-
-   .. solution:: Second hint
-
-      The only change you have to make to the SharedArray method of :meth:`evolve2!` is to add ``@sync @distributed`` in front of the first loop!
+      - The only change you have to make to the SharedArray method of :meth:`evolve2!` is to add ``@sync @distributed`` in front of the first loop!
 
    .. solution:: Solution and benchmarking
 
@@ -185,7 +182,7 @@ The source files listed below represent a simplification of this `HeatEquation p
              end
          end         
 
-      and this is how you would set up the simulation in the `main`` file:
+      and this is how you would set up the simulation in the `main` file:
 
       .. code-block:: julia
 
@@ -211,15 +208,14 @@ The source files listed below represent a simplification of this `HeatEquation p
    .. solution:: Notes on performance
 
      - The overhead in managing the workers will probably far outweigh the 
-       parallelization benefit because the computation in the inner loop is 
+       parallelisation benefit because the computation in the inner loop is 
        very simple and extremely fast. 
-     - To see the benefit you can obtain for more computationally demanding calculations, you can try to introduce a more expensive mathematical operation  to the **outermost** loop to simulate the effect 
      - To see the benefit you can obtain for more computationally demanding calculations, you can try to introduce a more expensive mathematical operation to the inner loop, e.g. by taking the arctangent of some values:
        
        .. code-block:: julia
 
           @inbounds xderiv = (atan(prevdata[i-1, j]) - 2.0 * atan(prevdata[i, j]) + atan(prevdata[i+1, j])) / dx^2
-         @inbounds yderiv = (atan(prevdata[i, j-1]) - 2.0 * atan(prevdata[i, j]) + atan(prevdata[i, j+1])) / dy^2
+          @inbounds yderiv = (atan(prevdata[i, j-1]) - 2.0 * atan(prevdata[i, j]) + atan(prevdata[i, j+1])) / dy^2
 
       This should clearly demonstrate the performance benefit of parallelisation via SharedArrays:
 
@@ -229,60 +225,6 @@ The source files listed below represent a simplification of this `HeatEquation p
          #    1.840 s (442 allocations: 64.03 MiB)
          $ julia -p 4 --project main.jl
          #    513.529 ms (8315 allocations: 64.39 MiB)
-
-
-   .. solution:: 
-
-      .. code-block:: Julia
-
-         using BenchmarkTools
-         using Distributed
-         using SharedArrays
-
-         function evolve!(currdata::AbstractArray, prevdata::AbstractArray, dx, dy, a, dt)
-             nx, ny = size(currdata) .- 2
-             for j = 2:ny+1
-                 for i = 2:nx+1
-                     @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                     @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                     @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
-                 end 
-                 sleep(0.001)
-             end
-         end
-
-         function evolve!(currdata::SharedArray, prevdata::SharedArray, dx, dy, a, dt)
-             nx, ny = size(currdata) .- 2
-             @sync @distributed for j = 2:ny+1
-                 for i = 2:nx+1
-                     @inbounds xderiv = (prevdata[i-1, j] - 2.0 * prevdata[i, j] + prevdata[i+1, j]) / dx^2
-                     @inbounds yderiv = (prevdata[i, j-1] - 2.0 * prevdata[i, j] + prevdata[i, j+1]) / dy^2
-                     @inbounds currdata[i, j] = prevdata[i, j] + a * dt * (xderiv + yderiv)
-                 end                  
-             end
-         end
-
-         dx = dy = 0.01
-         a = 0.5
-         dt = dx^2 * dy^2 / (2.0 * a * (dx^2 + dy^2))
-         M1 = rand(1000, 1000);
-         M2 = rand(1000, 1000);
-         S1 = SharedArray(M1);
-         S2 = SharedArray(M2);
-
-         # test for correctness:
-         evolve!(M1, M2, dx, dy, a, dt) 
-         evolve!(S1, S2, dx, dy, a, dt) 
-         # element-wise comparison, should give "true"
-         all(M1 .≈ S1)
-
-         # benchmark
-         @btime evolve!(M1, M2, dx, dy, a, dt) 
-         #   2.379 s (5031 allocations: 152.52 KiB)
-
-         @btime evolve!(S1, S2, dx, dy, a, dt)
-         #   578.060 ms (722 allocations: 32.72 KiB)
-
 
 
 .. challenge:: Exercise: Julia port to GPUs
