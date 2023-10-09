@@ -104,6 +104,7 @@ There are three main ways of approaching multithreading:
 3) Using ``@spawn`` and ``fetch`` to spawn tasks and fetch their return values once they are complete.
 
 Choosing the most suitable method depends on the problem.
+Julia uses dynamic scheduler for multithreading which allows us to do nested multithreading, that is, to nest ``@spawn`` statements.
 
 .. tabs::
 
