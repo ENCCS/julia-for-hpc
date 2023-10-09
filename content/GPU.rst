@@ -295,14 +295,14 @@ There should be a considerable speedup!
          A = rand(2^9, 2^9); A_d = ROCArray(A);
 
          # 1 CPU core:
-         @btime $A * $A
+         @btime $A * $A;
          # 5.472 ms (2 allocations: 2.00 MiB)
          # 64 CPU cores:
-         @btime $A * $A
+         @btime $A * $A;
          # 517.722 μs (2 allocations: 2.00 MiB)
          # GPU
          @btime begin         
-             $A_d * $A_d
+             $A_d * $A_d;
          end
          # 115.805 μs (21 allocations: 1.06 KiB)
 
@@ -311,13 +311,13 @@ There should be a considerable speedup!
          A = rand(2^10, 2^10); A_d = ROCArray(A);
 
          # 1 CPU core
-         @btime $A * $A
+         @btime $A * $A;
          # 43.364 ms (2 allocations: 8.00 MiB)
          # 64 CPU cores
          @btime $A*$A;
          # 2.929 ms (2 allocations: 8.00 MiB)
          @btime begin
-            $A_d * $A_d
+            $A_d * $A_d;
             AMDGPU.synchronize()
          end
          # 173.316 μs (21 allocations: 1.06 KiB)
@@ -327,13 +327,13 @@ There should be a considerable speedup!
          A = rand(2^11, 2^11); A_d = ROCArray(A);
 
          # 1 CPU core
-         @btime $A * $A
+         @btime $A * $A;
          # 344.364 ms (2 allocations: 32.00 MiB)
          # 64 CPU cores
-         @btime $A * $A
+         @btime $A * $A;
          # 30.081 ms (2 allocations: 32.00 MiB)
          @btime begin
-             $A_d * $A_d
+             $A_d * $A_d;
          end
          # 866.348 μs (21 allocations: 1.06 KiB)
 
@@ -349,7 +349,7 @@ There should be a considerable speedup!
          # 159.563 ms (2 allocations: 128.00 MiB)
          # GPU
          @btime begin
-            $A_d * $A_d
+            $A_d * $A_d;
             AMDGPU.synchronize()
          end
          # 5.910 ms (21 allocations: 1.06 KiB)
@@ -400,30 +400,48 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
 
          .. code-block:: julia
          
-            A = rand(2^9, 2^9)
-            A_d = CuArray(A)
+            A = rand(2^9, 2^9);
+            A_d = CuArray(A);
 
-      .. tab:: :meth:`rand` method from CUDA.jl
+      .. tab:: :meth:`rand` method from CUDA.jl/AMDGPU.jl
 
          .. code-block:: julia
 
-            A_d = CUDA.rand(2^9, 2^9)
+            A_d = CUDA.rand(2^9, 2^9);     # NVIDIA
+            A_d = AMDGPU.rand(2^9, 2^9);   # AMD
 
    .. solution:: 
 
-      .. code-block:: julia
+      .. tabs::
 
-         A = rand(2^9, 2^9)
-         A_d = CuArray(A)
-         typeof(A_d)
-         # CuArray{Float64, 2, CUDA.Mem.DeviceBuffer}
+         .. group-tab:: NVIDIA
 
-         B_d = CUDA.rand(2^9, 2^9)
-         typeof(B_d)
-         # CuArray{Float32, 2, CUDA.Mem.DeviceBuffer}
+            .. code-block:: julia
+            
+               A = rand(2^9, 2^9);
+               A_d = CuArray(A);
+               typeof(A_d)
+               # CuArray{Float64, 2, CUDA.Mem.DeviceBuffer}
 
-      The :meth:`rand` method defined in CUDA.jl creates 32-bit floating point numbers while 
-      converting from a 64-bit float Base.Array to a CuArray retains it as Float64!
+               B_d = CUDA.rand(2^9, 2^9);
+               typeof(B_d)
+               # CuArray{Float32, 2, CUDA.Mem.DeviceBuffer}
+
+         .. group-tab:: AMD
+
+            .. code-block:: julia
+            
+               A = rand(2^9, 2^9);
+               A_d = ROCArray(A);
+               typeof(A_d)
+               # ROCMatrix{Float64}
+      
+               B_d = AMDGPU.rand(2^9, 2^9);
+               typeof(B_d)
+               # ROCMatrix{Float32}
+
+      The :meth:`rand` method defined in CUDA.jl/AMDGPU.jl creates 32-bit floating point numbers while 
+      converting from a 64-bit float Base.Array to a CuArray/ROCArray retains it as Float64!
 
       GPUs normally perform significantly better for 32-bit floats.
 
@@ -442,7 +460,7 @@ an example of this, but more general constructs can be created with
 
       .. code-block:: julia
 
-         broadcast(A) do x
+         broadcast(A_d) do x
              x += 1
          end
 
@@ -450,7 +468,7 @@ an example of this, but more general constructs can be created with
 
       .. code-block:: julia
 
-         map(A) do x
+         map(A_d) do x
              x + 1
          end
 
@@ -458,13 +476,13 @@ an example of this, but more general constructs can be created with
 
       .. code-block:: julia
 
-         reduce(+, A)
+         reduce(+, A_d)
 
    .. tab:: accumulate
 
       .. code-block:: julia
 
-         accumulate(+, A)
+         accumulate(+, A_d)
 
 
 
@@ -562,8 +580,8 @@ and ``workitemIdx().x`` for AMD):
          A, B = CUDA.ones(2^9)*2, CUDA.ones(2^9)*3;
          C = similar(A);
 
-         nthreads = length(A)
-         @cuda threads=nthreads vadd!(C, A, B)
+         N = length(A)
+         @cuda threads=N vadd!(C, A, B)
 
          @assert all(Array(C) .== 5.0)
 
@@ -571,7 +589,6 @@ and ``workitemIdx().x`` for AMD):
 
       .. code-block:: julia
 
-         # WARNING: this is still untested on AMD GPUs
          function vadd!(C, A, B)
              index = workitemIdx().x   # linear indexing, so only use `x`
              @inbounds C[index] = A[index] + B[index]
@@ -581,8 +598,8 @@ and ``workitemIdx().x`` for AMD):
          A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
          C = similar(A);
 
-         groupsize = length(A)
-         @roc groupsize=groupsize vadd!(C, A, B)   
+         N = length(A)
+         @roc groupsize=N vadd!(C, A, B)   
          
          @assert all(Array(C) .== 5.0)
 
@@ -600,8 +617,8 @@ and ``workitemIdx().x`` for AMD):
          A, B = oneArray(ones(2^9)*2), oneArray(ones(2^9)*3);
          C = similar(A);
 
-         items = length(A)
-         @oneapi items=items vadd!(C, A, B) 
+         N = length(A)
+         @oneapi items=N vadd!(C, A, B) 
 
          @assert all(Array(C) .== 5.0)  
 
@@ -618,8 +635,8 @@ and ``workitemIdx().x`` for AMD):
          A, B = MtlArray(ones(Float32, 2^9)*2), MtlArray(Float32, ones(2^9)*3);
          C = similar(A);
 
-         nthreads = length(A)
-         @metal threads=nthreads vadd!(C, A, B)
+         N = length(A)
+         @metal threads=N vadd!(C, A, B)
 
          @assert all(Array(C) .== 5.0)
 
@@ -637,9 +654,7 @@ GPU we are using:
 
    .. group-tab:: AMD
 
-      .. code-block:: julia
-   
-         Int(AMDGPU.max_group_size(first(AMDGPU.isas(get_default_agent()))))
+      Not known
 
    .. group-tab:: Intel
 
@@ -686,10 +701,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
 
       .. code-block:: julia
       
-         # WARNING: this is still untested on AMD GPUs
          function vadd!(C, A, B)
              i = workitemIdx().x + (workgroupIdx().x - 1) * workgroupDim().x 
-             if i <= length(a)
+             if i <= length(A)
                  @inbounds C[i] = A[i] + B[i]
              end
              return
@@ -697,10 +711,10 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
       
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
-         numblocks = cld(length(A_d), nthreads)
+         numblocks = cld(length(A), nthreads)
       
          # run using 256 threads
-         @roc groupsize=nthreads blocks=numblocks vadd!(C, A, B)
+         @roc groupsize=nthreads gridsize=numblocks vadd!(C, A, B)
 
          @assert all(Array(C) .== 5.0)
 
@@ -711,17 +725,17 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
          # WARNING: this is still untested on Intel GPUs
          function vadd!(C, A, B)
              i = get_global_id()
-             if i <= length(a)
-                 c[i] = a[i] + b[i]
+             if i <= length(A)
+                 C[i] = A[i] + B[i]
              end
              return
          end
    
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
-         numgroups = cld(length(a),256)
+         numgroups = cld(length(A),256)
    
-         @oneapi items=nthreads groups=numgroups vadd!(c, a, b)
+         @oneapi items=nthreads groups=numgroups vadd!(C, A, B)
 
          @assert all(Array(C) .== 5.0)
 
