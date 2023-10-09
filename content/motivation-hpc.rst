@@ -34,6 +34,25 @@ Furthermore, Julia can directly interface with shared C and Fortran libraries wi
 There are also packages for interfacing with other languages, such as Python, R, and C++.
 We can use Julia to call external programs directly, which means we can use it as an efficient, robust, parallelizable glue language instead of shell scripting.
 
+Julia supports four main types of parallel programming:
+
+- **Asynchronous tasks or coroutines**:
+  Tasks allow suspending and resuming  computations for I/O, event handling and similar patterns.
+  Not really HPC and outside the scope of the this lesson.
+
+- **Multi-threading**:
+  Provides the ability to schedule Tasks simultaneously on more than one thread or CPU core, sharing memory.
+  The easiest way to parallelize on shared-memory systems.
+  Contained in the ``Threads`` standard library.
+
+- **Distributed computing**:
+  Runs multiple Julia processes with separate memory spaces on the same or multiple computers.
+  Useful high-level constructs are implemented in the standard library ``Distributed`` module.
+  For those that like MPI there is `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_.
+
+- **GPU computing**:
+  Ports computation to a graphical processing unit (GPU) via either high-level or low-level programming. 
+
 ----
 
 .. [#c1] `Bridging HPC Communities through the Julia Programming Language <https://arxiv.org/abs/2211.02740>`_

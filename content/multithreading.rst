@@ -12,27 +12,6 @@ Multithreading
    - 30 min exercises
 
 
-Parallel computing
-------------------
-Julia supports four main types of parallel programming:
-
-- **Asynchronous tasks or coroutines**: Tasks allow suspending and resuming 
-  computations for I/O, event handling and similar patterns. Not really HPC and 
-  outside the scope of the this lesson. 
-
-- **Multi-threading**: Provides the ability to schedule Tasks simultaneously 
-  on more than one thread or CPU core, sharing memory. The easiest way to parallelize 
-  on shared-memory systems. Contained in the ``Threads`` standard library.
-
-- **Distributed computing**: Runs multiple Julia processes with separate memory 
-  spaces on the same or multiple computers. Useful high-level constructs are implemented 
-  in the standard library ``Distributed`` module. For those that like MPI there is 
-  `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_.
-
-- **GPU computing**: Ports computation to a graphical processing unit (GPU) via either high-level 
-  or low-level programming. 
-
-
 Linear algebra threading
 ------------------------
 OpenBLAS is the default linear algebra backend in Julia.
@@ -89,6 +68,8 @@ Using an option will override the value in the environment variable.
    # Short form
    julia -t 4
 
+.. code-block:: bash
+
    # Long form
    julia --threads=4
 
@@ -104,10 +85,10 @@ Using an option will override the value in the environment variable.
    with the ``Threads.nthreads()`` function.
 
 In Julia, we can import the Threads module for easier usage.
+We use the following functions ``nthreads``, ``threadid``, ``@threads``, ``@sync``, ``@spawn``, and ``fetch``.
 
 .. code-block:: julia
 
-   # nthreads, threadid, @threads, @sync, @spawn, fetch
    using Base.Threads
 
 The ``nthreads`` function show us how many threads we have available:
@@ -132,7 +113,7 @@ Choosing the most suitable method depends on the problem.
 
          # Using @threads macro with dynamic scheduling
          a = zeros(Int, 2n)
-         @threads :dynamic for i in eachindex(a)
+         @threads for i in eachindex(a)
              a[i] = threadid()
          end
          println(a)
@@ -141,10 +122,17 @@ Choosing the most suitable method depends on the problem.
 
       .. code-block:: julia
 
+         function task(b, chunk)
+              for i in chunk
+                  b[i] = threadid()
+              end
+         end
+
          # Using @sync and @spawn macros (also dynamic scheduling)
          b = zeros(Int, 2n)
-         @sync for i in eachindex(b)
-             @spawn b[i] = threadid()
+         chunks = Iterators.partition(eachindex(b), length(b) ÷ nthreads())
+         @sync for chunk in chunks
+             @spawn task(b, chunk)
          end
          println(b)
 
@@ -181,7 +169,7 @@ costly calculation.
 
          function threaded_sqrt_array(A)
              B = similar(A)
-             @threads :dynamic for i in eachindex(A)
+             @threads for i in eachindex(A)
                  @inbounds B[i] = sqrt(A[i])
              end
              B
@@ -242,8 +230,6 @@ how we can ensure a correct results by using `atomic operations`.
 The "workaround" version shows how we can refactor the code to get both 
 correct result and speedup.
 
-FIXME: do not use threadid for indexing!!! (use @spawn and fetch)
-
 .. tabs:: 
 
    .. tab:: Serial
@@ -263,6 +249,8 @@ FIXME: do not use threadid for indexing!!! (use @spawn and fetch)
 
       .. code-block:: julia
 
+         using Base.Threads
+
          function threaded_sqrt_sum(A)
              s = zero(eltype(A))
              @threads for i in eachindex(A)
@@ -275,6 +263,8 @@ FIXME: do not use threadid for indexing!!! (use @spawn and fetch)
 
       .. code-block:: julia
 
+         using Base.Threads
+
          function threaded_sqrt_sum_atomic(A)
              s = Atomic{eltype(A)}(zero(eltype(A)))
              @threads for i in eachindex(A)
@@ -283,27 +273,55 @@ FIXME: do not use threadid for indexing!!! (use @spawn and fetch)
              return s[]
          end
 
-   .. tab:: Workaround
+   .. tab:: Thread migration
 
       .. code-block:: julia
 
-         function threaded_sqrt_sum_workaround(A)
+         using Base.Threads
+
+         function threaded_sqrt_sum_migration(A)
              partial = zeros(eltype(A), nthreads())
              @threads for i in eachindex(A)
+                 # We should not use threadid() for indexing
+                 # Threads can migrate during execution.
                  @inbounds partial[threadid()] += sqrt(A[i])
              end
              s = zero(eltype(A))
              for i in eachindex(partial)
                  s += partial[i]
-             end     
+             end
              return s
-         end         
+         end
+
+   .. tab:: Workaround
+
+      .. code-block:: julia
+
+         using Base.Threads
+
+         function sqrt_sum(A, chunk)
+             s = zero(eltype(A))
+             for i in chunk
+                 @inbounds s += sqrt(A[i])
+             end
+             return s
+         end
+
+         function threaded_sqrt_sum_workaround(A)
+             chunks = Iterators.partition(eachindex(A), length(A) ÷ nthreads())
+             tasks = map(chunks) do chunk
+                 @spawn sqrt_sum(A, chunk)
+             end
+             s = mapreduce(fetch, +, tasks; init=zero(eltype(A)))
+             return s
+         end
 
 We will observe that:
 
 - The serial version is slow but correct.
 - The race condition version is both slow and wrong.
 - The atomic version is correct but extremely slow.
+- The migration version is incorrect because tasks can migrate between Julia threads during execution, thus `threadid()` is not constant.
 - The workaround is fast and correct, but required refactoring.
 
 Bonus questions: 
