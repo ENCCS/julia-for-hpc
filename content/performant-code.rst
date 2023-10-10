@@ -63,6 +63,8 @@ heat equation), we could run a loop of say 1000 "time" steps and visualize the r
        lap2d!(u, unew)
        # copy new computed field to old array
        u = copy(unew)
+       # you can using the following expression if you get a warning "Assignment to `u` in soft scope is ambiguous because ..."
+       # global u = copy(unew)
    end
 
    using Plots
@@ -146,8 +148,8 @@ Let's go ahead and profile the `lap2d!` function:
       using ProfileView
       @profview lap2d!(u, unew)
 
-      # if you get a warning like "both ProfileView and VSCodeServer export '@profview'", 
-      # you can use the following expression:
+      # if you get a warning like "both ProfileView and VSCodeServer export '@profview'",
+      # you can use the following expression in VS Code:
       # VSCodeServer.@profview lap2d!(u, unew)
 
    We can also look at the same information in a flamegraph by clicking the little fire
