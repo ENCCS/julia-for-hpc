@@ -507,7 +507,7 @@ Let's take a simple example, adding two vectors:
    C = similar(B);
    vadd!(C, A, B)
 
-We can already run this on the GPU with the ``@cuda`` macro, which 
+We can already run this on the GPU with the ``@cuda`` (NVIDIA) or ``@roc`` (AMD) macro, which 
 will compile :meth:`vadd!` into a GPU kernel and launch it:
 
 .. tabs:: 
@@ -688,6 +688,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
 
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numblocks = cld(length(A), nthreads)
@@ -709,6 +712,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
       
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+         
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numblocks = cld(length(A), nthreads)
@@ -731,6 +737,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
    
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+         
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numgroups = cld(length(A),256)
@@ -751,6 +760,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
       
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+         
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numblocks = cld(length(A), nthreads)
