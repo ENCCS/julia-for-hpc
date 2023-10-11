@@ -244,6 +244,21 @@ SharedArrays which has the required ``@distributed`` and ``@sync`` macros
              end
          end
 
+The choice between using `Serial` or `SharedArray` depends on the specific requirements of your computation and the resources available on your machine.
+
+- **Serial**: This version is simpler and doesn't require inter-process communication. However, it may not fully utilize all the available CPU cores¹.
+
+- **SharedArray**: This version uses the `@distributed` and `@sync` macros to distribute operations across multiple processes on the same machine. It can be faster than the serial version, especially for large computations, but it also requires more communication and data transfer between processes².
+
+Remember, in a `SharedArray`, each “participating” process has access to the entire array³. This is a good choice when you want to have a large amount of data jointly accessible to two or more processes on the same machine⁴. However, it's important to note that using `SharedArray` requires careful consideration of memory usage and process communication⁵.
+
+References:
+
+1. SharedArrays · ParallelUtilities.jl - JuliaHub. https://docs.juliahub.com/ParallelUtilities/SO4iL/0.8.5/examples/sharedarrays/
+2. Difference between SharedArrays and DistributedArrays. https://discourse.julialang.org/t/difference-between-sharedarrays-and-distributedarrays/60258
+3. Parallel Computing · The Julia Language - MIT. https://web.mit.edu/julia_v0.6.2/julia/share/doc/julia/html/en/manual/parallel-computing.html
+4. Parallel Computing with Julia - University of Illinois Chicago. http://homepages.math.uic.edu/~jan/mcs507/paralleljulia.pdf
+5. Parallel Computing · The Julia Language. https://docs.julialang.org/en/v1/manual/parallel-computing/
 
 Remember that Julia always selects the most specialized method for 
 dispatch based on the argument type. We can now time these two methods 
@@ -284,6 +299,7 @@ which implements a *Global Array* interface. A `DArray` is distributed across a
 set of workers. Each worker can read and write from its local portion of the 
 array and each worker has read-only access to the portions of the array held 
 by other workers.
+This can be particularly useful for large computations that are organized around large arrays of data.
 
 Currently, distributed arrays do not have much functionality 
 and they requires significant book-keeping of array indices. 
