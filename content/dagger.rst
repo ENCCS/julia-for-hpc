@@ -108,18 +108,23 @@ Here is an example of a dynamic task graph:
 
 .. code-block:: julia
 
-   @everywhere function task_nested(a, b)
-       return [Dagger.@spawn b+i for i in 1:a]
+   using Random
+
+   @everywhere function task_nested(a::Integer, b::Integer)
+       return [Dagger.@spawn b+i for i in one(a):a]
    end
 
+   # Use determistic random number generators
+   rngs = [MersenneTwister(seed) for seed in 1:3]
+
    # Define and execute a task graph
-   a = Dagger.@spawn rand(4:8)
-   b = Dagger.@spawn rand(10:20)
+   a = Dagger.@spawn rand(rngs[1], 4:8)
+   b = Dagger.@spawn rand(rngs[2], 10:20)
    # The value of `a` determines how many nested tasks are spawned
-   c = Dagger.@spawn task_nested(a, b)
-   d = Dagger.@spawn rand(10:20)
+   c = Dagger.@spawn task_nested(fetch(a), fetch(b))
+   d = Dagger.@spawn rand(rngs[3], 10:20)
    # We use fetch inside @spawn so it does not block
-   f = Dagger.@spawn +(fetch(c)..., d)
+   f = Dagger.@spawn mapreduce(fetch, +, fetch(c)) + fetch(d)
 
    # Fetch the final result
    fetch(f)
@@ -127,3 +132,27 @@ Here is an example of a dynamic task graph:
 
 Exercises
 ---------
+.. exercise:: Parallelize serial code using Dagger
+
+   Parallelize the following serial code using Dagger.
+   The, execute the script with Julia process using two threads, and add one Distributed worker with two threads.
+   Compare the results and execution time between the serial and parallel versions.
+
+   .. literalinclude:: code/dagger_serial.jl
+      :language: julia
+
+   .. solution:: Hints
+
+      .. literalinclude:: code/dagger_hints.jl
+         :language: julia
+
+   .. solution:: Solution
+
+      .. code-block:: bash
+
+         julia --threads=2 dagger.jl
+
+      ``dagger.jl``
+
+      .. literalinclude:: code/dagger_parallel.jl
+         :language: julia
