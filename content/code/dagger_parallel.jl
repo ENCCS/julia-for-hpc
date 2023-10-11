@@ -1,9 +1,7 @@
-using Random
-
 using Distributed
 addprocs(1; exeflags="--threads=2")
 
-@everywhere using Dagger
+@everywhere using Dagger, Random
 
 @everywhere function f(rng, x::Integer)
     sleep(1)

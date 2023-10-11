@@ -141,17 +141,18 @@ Exercises
    .. literalinclude:: code/dagger_serial.jl
       :language: julia
 
-.. solution:: Hints
+   .. solution:: Hints
 
-   TODO:
+      .. literalinclude:: code/dagger_hints.jl
+         :language: julia
 
-.. solution:: Solution
+   .. solution:: Solution
 
-   .. code-block:: bash
+      .. code-block:: bash
 
-      julia --threads=2 dagger.jl
+         julia --threads=2 dagger.jl
 
-   ``dagger.jl``
+      ``dagger.jl``
 
-   .. literalinclude:: code/dagger_parallel.jl
-      :language: julia
+      .. literalinclude:: code/dagger_parallel.jl
+         :language: julia
