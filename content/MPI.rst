@@ -31,7 +31,7 @@ The idea behind MPI is that:
   that all tasks do the same thing.
 
 ``MPI.jl`` provides Julia bindings for the Message Passing Interface (MPI) standard.
-This is how a hello world MPI program looks like in Python:
+This is how a hello world MPI program looks like in Julia:
 
 .. code-block:: julia
 
@@ -187,7 +187,7 @@ Exercises
 
 .. exercise:: From blocking to non-blocking
 
-   Consider the following two examples where data is sent around "in a circle" 
+   Consider the following example where data is sent around "in a circle" 
    (0->1, 1->2, ..., N->0). Will it work as intended? 
 
       .. code-block:: julia
@@ -214,13 +214,17 @@ Exercises
          print("$rank: Sending   $rank -> $dst = $send_mesg\n")
          MPI.Send(send_mesg, comm, dest=dst, tag=rank+32)
 
-         print("$rank: Received $src -> $rank = $recv_mesg\n")
          MPI.Recv!(recv_mesg, comm, source=src,  tag=src+32)
+         print("$rank: Received $src -> $rank = $recv_mesg\n")
 
          MPI.Barrier(comm)
 
    Try running this program. Were the arrays received successfully? 
    Introduce non-blocking communication to solve the problem.
+
+   .. solution:: Explanation for why this code _might_ work
+
+      This code _might_ work correctly, but it's not _guaranteed_ to work! This depends on the backend MPI library (OpenMPI or MPICH). :meth:`MPI.Send` can run in one of several modes, and usually *standard* mode is the default which means that the library decides based on performance reasons whether to *buffer* the send message or not - if it does, the send can complete before a matching receive has been invoked. It might stop working if you're sending larger amounts of data, so you need to use non-blocking communication instead.    
 
    .. solution:: 
 
@@ -347,7 +351,7 @@ Exercises
 Limitations
 -----------
 
-MPI.jl has (as of October 2022) not reached v1.0 so future changes could be backwards incompatible. 
+MPI.jl has (as of October 2023) not reached v1.0 so future changes could be backwards incompatible. 
 
 The MPI.jl documentation has a section on `known issues <https://juliaparallel.org/MPI.jl/latest/knownissues/>`__. 
 
