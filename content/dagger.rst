@@ -108,18 +108,23 @@ Here is an example of a dynamic task graph:
 
 .. code-block:: julia
 
-   @everywhere function task_nested(a, b)
-       return [Dagger.@spawn b+i for i in 1:a]
+   using Random
+
+   @everywhere function task_nested(a::Integer, b::Integer)
+       return [Dagger.@spawn b+i for i in one(a):a]
    end
 
+   # Use determistic random number generators
+   rngs = [MersenneTwister(seed) for seed in 1:3]
+
    # Define and execute a task graph
-   a = Dagger.@spawn rand(4:8)
-   b = Dagger.@spawn rand(10:20)
+   a = Dagger.@spawn rand(rngs[1], 4:8)
+   b = Dagger.@spawn rand(rngs[2], 10:20)
    # The value of `a` determines how many nested tasks are spawned
-   c = Dagger.@spawn task_nested(a, b)
-   d = Dagger.@spawn rand(10:20)
+   c = Dagger.@spawn task_nested(fetch(a), fetch(b))
+   d = Dagger.@spawn rand(rngs[3], 10:20)
    # We use fetch inside @spawn so it does not block
-   f = Dagger.@spawn +(fetch(c)..., d)
+   f = Dagger.@spawn mapreduce(fetch, +, fetch(c)) + fetch(d)
 
    # Fetch the final result
    fetch(f)
@@ -127,3 +132,91 @@ Here is an example of a dynamic task graph:
 
 Exercises
 ---------
+.. exercise:: Parallelize serial code using Dagger
+
+   Parallelize the following serial code using Dagger.
+   The, execute the script with Julia process using two threads, and add one Distributed worker with two threads.
+
+   .. code-block:: julia
+
+      using Random
+
+      function f(rng, x::Integer)
+          sleep(1)
+          rand(rng, one(x):x)
+      end
+
+      function g(rng, x::Integer)
+          sleep(1)
+          rand(rng, x:x+2)
+      end
+
+      function h(x::Integer, y::Integer)
+          map(one(x):x) do i
+              sleep(1)
+              y+i
+          end
+      end
+
+      function task_graph()
+         # Use determistic random number generators
+         a = f(MersenneTwister(1), 3)
+         b = g(MersenneTwister(2), 5)
+         c = h(a, b)
+         d = reduce(+, c)
+         return d
+      end
+
+      println(task_graph())
+
+.. solution:: Hints
+
+   TODO:
+
+.. solution:: Solution
+
+   .. code-block:: bash
+
+      julia --threads=2 dagger.jl
+
+   ``dagger.jl``
+
+   .. code-block:: julia
+
+      using Random
+
+      using Distributed
+      addprocs(1; exeflags="--threads=2")
+
+      @everywhere using Dagger
+
+      @everywhere function f(rng, x::Integer)
+          sleep(1)
+          rand(rng, one(x):x)
+      end
+
+      @everywhere function g(rng, x::Integer)
+          sleep(1)
+          rand(rng, x:x+2)
+      end
+
+      @everywhere function h(x::Integer, y::Integer)
+          map(one(x):x) do i
+              Dagger.@spawn begin
+                  sleep(1)
+                  y+i
+              end
+          end
+      end
+
+      @everywhere function task_graph()
+          # Use determistic random number generators
+          a = Dagger.@spawn f(MersenneTwister(1), 3)
+          b = Dagger.@spawn g(MersenneTwister(2), 5)
+          c = Dagger.@spawn h(fetch(a), fetch(b))
+          d = Dagger.@spawn mapreduce(fetch, +, fetch(c))
+          return fetch(d)
+      end
+
+      println(task_graph())
+      @time task_graph()
