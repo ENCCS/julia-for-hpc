@@ -136,38 +136,10 @@ Exercises
 
    Parallelize the following serial code using Dagger.
    The, execute the script with Julia process using two threads, and add one Distributed worker with two threads.
+   Compare the results and execution time between the serial and parallel versions.
 
-   .. code-block:: julia
-
-      using Random
-
-      function f(rng, x::Integer)
-          sleep(1)
-          rand(rng, one(x):x)
-      end
-
-      function g(rng, x::Integer)
-          sleep(1)
-          rand(rng, x:x+2)
-      end
-
-      function h(x::Integer, y::Integer)
-          map(one(x):x) do i
-              sleep(1)
-              y+i
-          end
-      end
-
-      function task_graph()
-         # Use determistic random number generators
-         a = f(MersenneTwister(1), 3)
-         b = g(MersenneTwister(2), 5)
-         c = h(a, b)
-         d = reduce(+, c)
-         return d
-      end
-
-      println(task_graph())
+   .. literalinclude:: code/dagger_serial.jl
+      :language: julia
 
 .. solution:: Hints
 
@@ -181,42 +153,5 @@ Exercises
 
    ``dagger.jl``
 
-   .. code-block:: julia
-
-      using Random
-
-      using Distributed
-      addprocs(1; exeflags="--threads=2")
-
-      @everywhere using Dagger
-
-      @everywhere function f(rng, x::Integer)
-          sleep(1)
-          rand(rng, one(x):x)
-      end
-
-      @everywhere function g(rng, x::Integer)
-          sleep(1)
-          rand(rng, x:x+2)
-      end
-
-      @everywhere function h(x::Integer, y::Integer)
-          map(one(x):x) do i
-              Dagger.@spawn begin
-                  sleep(1)
-                  y+i
-              end
-          end
-      end
-
-      @everywhere function task_graph()
-          # Use determistic random number generators
-          a = Dagger.@spawn f(MersenneTwister(1), 3)
-          b = Dagger.@spawn g(MersenneTwister(2), 5)
-          c = Dagger.@spawn h(fetch(a), fetch(b))
-          d = Dagger.@spawn mapreduce(fetch, +, fetch(c))
-          return fetch(d)
-      end
-
-      println(task_graph())
-      @time task_graph()
+   .. literalinclude:: code/dagger_parallel.jl
+      :language: julia
