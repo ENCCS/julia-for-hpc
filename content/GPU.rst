@@ -788,7 +788,15 @@ supported, and then launch the compiled kernel:
 
    .. group-tab:: AMD 
 
-      WRITEME
+      .. code-block:: julia
+
+         kernel = @roc launch=false vadd!(C, A, B)
+         occupancy = AMDGPU.launch_configuration(kernel)
+         @show occupancy.gridsize
+         @show occupancy.groupsize
+
+         @roc groupsize=occupancy.groupsize vadd!(C, A, B)
+
 
    .. group-tab:: Intel
 
