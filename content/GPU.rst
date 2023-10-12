@@ -13,8 +13,7 @@ GPU programming
    - 40 min exercises
 
 
-Julia has first-class support for GPU programming through the following 
-packages that target GPUs from all three major vendors:
+Julia has first-class support for GPU programming through the following packages that target GPUs from all major vendors:
 
 - `CUDA.jl <https://cuda.juliagpu.org/stable/>`_ for NVIDIA GPUs
 - `AMDGPU.jl <https://amdgpu.juliagpu.org/stable/>`_ for AMD GPUs
@@ -25,13 +24,9 @@ packages that target GPUs from all three major vendors:
 ready for general use, while ``oneAPI.jl`` and ``Metal.jl`` are functional but might 
 contain bugs, miss some features and provide suboptimal performance.
 
-NVIDIA still dominates the HPC accelerator market and we will focus here 
-on using ``CUDA.jl`` - the API of ``AMDGPU.jl`` is however completely analogous
-and translation between the two is straightforward.
+NVIDIA still dominates the HPC accelerator market, but AMD has recently made big strides in this sector and both Frontier and LUMI (ranked 1st and 3rd on the Top500 list in June 2023) are built on AMD GPUs. This section will show code examples targeting all four frameworks, but for certain functionalities only the ``CUDA.jl`` version will be shown. 
 
-``CUDA.jl`` offers both user-friendly high-level abstractions that require 
-very little programming effort and a lower level approach for writing kernels 
-for fine-grained control.
+``CUDA.jl``, ``AMDGPU.jl``, ``oneAPI.jl`` and ``Metal.jl`` offer both user-friendly high-level abstractions that require very little programming effort and a lower level approach for writing kernels for fine-grained control.
 
 Setup
 -----
