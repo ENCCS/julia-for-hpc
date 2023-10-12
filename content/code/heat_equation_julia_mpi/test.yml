@@ -1,0 +1,13 @@
+grids:
+  nx: 128
+  ny: 128
+
+processes:
+  nprocx: 2
+  nprocy: 4
+
+steps:
+  max_step: 100000
+
+output:
+  filename: "output.dat"
