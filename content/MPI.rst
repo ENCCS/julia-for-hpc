@@ -121,6 +121,8 @@ In any case, it is good to have a mental model of different communication patter
      (:meth:`MPI.Recv`, :meth:`MPI.Reduce`).
 
 
+.. _Examples:
+
 Examples
 ~~~~~~~~
 
@@ -185,6 +187,14 @@ it's more conveniently solved by using non-blocking send and receive.
 Exercises
 ---------         
 
+.. exercise:: Run the examples of point-to-point and collective communication
+
+   Take the examples of point-to-point and collective communication methods from the 
+   :ref:`Examples` section above, and run them locally or on a cluster. 
+
+   Try to understand exactly the program flow and what each rank is doing.
+
+
 .. exercise:: From blocking to non-blocking
 
    Consider the following example where data is sent around "in a circle" 
@@ -222,9 +232,11 @@ Exercises
    Try running this program. Were the arrays received successfully? 
    Introduce non-blocking communication to solve the problem.
 
-   .. solution:: Explanation for why this code _might_ work
+   .. solution:: Explanation for why this code *might* work
 
-      This code _might_ work correctly, but it's not _guaranteed_ to work! This depends on the backend MPI library (OpenMPI or MPICH). :meth:`MPI.Send` can run in one of several modes, and usually *standard* mode is the default which means that the library decides based on performance reasons whether to *buffer* the send message or not - if it does, the send can complete before a matching receive has been invoked. It might stop working if you're sending larger amounts of data, so you need to use non-blocking communication instead.    
+      This code *might* work correctly, but it's not _guaranteed_ to work! This depends on the backend MPI library (OpenMPI or MPICH). :meth:`MPI.Send` can run in one of several modes, and usually *standard* mode is the default which means that the library decides based on performance reasons whether to *buffer* the send message or not - if it does, the send can complete before a matching receive has been invoked. It might stop working if you're sending larger amounts of data, so you need to use non-blocking communication instead.    
+
+      More details in `this StackOverflow post <https://stackoverflow.com/questions/10017301/mpi-blocking-vs-non-blocking>`__.
 
    .. solution:: 
 

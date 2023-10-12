@@ -507,7 +507,7 @@ Let's take a simple example, adding two vectors:
    C = similar(B);
    vadd!(C, A, B)
 
-We can already run this on the GPU with the ``@cuda`` macro, which 
+We can already run this on the GPU with the ``@cuda`` (NVIDIA) or ``@roc`` (AMD) macro, which 
 will compile :meth:`vadd!` into a GPU kernel and launch it:
 
 .. tabs:: 
@@ -688,6 +688,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
 
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numblocks = cld(length(A), nthreads)
@@ -709,14 +712,24 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
       
-         nthreads = 256
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+         
+         groupsize = 256
          # smallest integer larger than or equal to length(A)/threads
-         numblocks = cld(length(A), nthreads)
-      
+         gridsize = cld(length(A), nthreads) * groupsize
+         # NOTE: after v0.5.5, gridsize should instead be:  
+         #gridsize = cld(length(A), nthreads) 
+
          # run using 256 threads
-         @roc groupsize=nthreads gridsize=numblocks vadd!(C, A, B)
+         @roc groupsize=groupsize gridsize=gridsize vadd!(C, A, B)
 
          @assert all(Array(C) .== 5.0)
+
+      .. warning::
+
+         Since AMDGPU v0.5.0 ``gridsize`` represents the number of "workgroups" (or ``blocks`` in CUDA) and no longer "workitems * workgroups" (or ``threads`` * ``blocks`` in CUDA).
+
 
    .. group-tab:: Intel
 
@@ -731,6 +744,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
    
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+         
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numgroups = cld(length(A),256)
@@ -751,6 +767,9 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
       
+         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         C = similar(A);
+         
          nthreads = 256
          # smallest integer larger than or equal to length(A)/threads
          numblocks = cld(length(A), nthreads)
@@ -759,6 +778,7 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
          @metal threads=nthreads grid=numblocks vadd!(C, A, B)    
 
          @assert all(Array(C) .== 5.0)              
+
 
 We have been using 256 GPU threads, but this might not be optimal. The more 
 threads we use the better is the performance, but the maximum number depends 
@@ -788,7 +808,15 @@ supported, and then launch the compiled kernel:
 
    .. group-tab:: AMD 
 
-      WRITEME
+      .. code-block:: julia
+
+         kernel = @roc launch=false vadd!(C, A, B)
+         occupancy = AMDGPU.launch_configuration(kernel)
+         @show occupancy.gridsize
+         @show occupancy.groupsize
+
+         @roc groupsize=occupancy.groupsize vadd!(C, A, B)
+
 
    .. group-tab:: Intel
 
