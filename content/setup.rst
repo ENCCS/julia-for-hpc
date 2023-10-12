@@ -312,7 +312,7 @@ Using EuroHPC systems
                julia --project -e 'using Pkg; Pkg.instantiate()'
 
                # Run the julia script
-               julia --project script.jl
+               srun julia --project script.jl
 
 
 
