@@ -396,7 +396,7 @@ in ``CUDA.jl`` and can be used directly with ``CuArrays``:
          .. code-block:: julia
          
             A = rand(2^9, 2^9);
-            A_d = CuArray(A);
+            A_d = CuArray(A); # ROCArray(A) for AMDGPU
 
       .. tab:: :meth:`rand` method from CUDA.jl/AMDGPU.jl
 
@@ -485,7 +485,7 @@ Writing your own kernels
 ------------------------
 
 Not all algorithms can be made to work with the higher-level abstractions 
-in ``CUDA.jl``. In such cases it's necessary to explicitly write our own GPU kernel.
+in ``CUDA.jl`` / ``AMDGPU.jl`` / ``oneAPI.jl`` / ``Metal.jl``. In such cases it's necessary to explicitly write our own GPU kernel.
 
 Let's take a simple example, adding two vectors:
 
@@ -859,7 +859,7 @@ Profiling
 ---------
 
 We can not use the regular Julia profilers to profile GPU code. However, 
-we can use NVIDIA's Nsight systems profiler simply by starting Julia like this:
+for NVIDIA GPUs we can use the Nsight systems profiler simply by starting Julia like this:
 
 .. code-block:: console
 
@@ -887,6 +887,8 @@ in a GUI, but summary statistics can also be printed in the terminal:
 
 More information on profiling with NVIDIA tools can be found in the 
 `documentation <https://cuda.juliagpu.org/stable/development/profiling/>`__.
+
+For profiling Julia code running on AMD GPUs one can use rocprof - see the `documentation <https://amdgpu.juliagpu.org/stable/profiling/>`__.
 
 Conditional use
 ---------------
@@ -978,25 +980,48 @@ Exercises
 
    .. solution:: 
 
-      .. code-block:: julia
+      .. tabs:: 
 
-         using CUDA, BenchmarkTools, LinearAlgebra
+         .. group-tab:: NVIDIA 
 
-         A = CUDA.rand(2^5, 2^5)
-         B = similar(A)
-         @btime $A*$A;
-         #  8.803 μs (16 allocations: 384 bytes)  
-         @btime mul!($B, $A, $A);
-         #  7.282 μs (12 allocations: 224 bytes)
+            .. code-block:: julia
+            
+               using CUDA, BenchmarkTools, LinearAlgebra
 
-         A = CUDA.rand(2^12, 2^12)
-         B = similar(A)
-         @btime $A*$A;
-         #  12.760 μs (28 allocations: 576 bytes)
-         @btime mul!($B, $A, $A)
-         #  11.020 μs (24 allocations: 416 bytes)
+               A = CUDA.rand(2^5, 2^5)
+               B = similar(A)
+               @btime $A*$A;
+               #  8.803 μs (16 allocations: 384 bytes)  
+               @btime mul!($B, $A, $A);
+               #  7.282 μs (12 allocations: 224 bytes)
 
-      :meth:`LinearAlgebra.mul!` is around 15-20% faster!
+               A = CUDA.rand(2^12, 2^12)
+               B = similar(A)
+               @btime $A*$A;
+               #  12.760 μs (28 allocations: 576 bytes)
+               @btime mul!($B, $A, $A)
+               #  11.020 μs (24 allocations: 416 bytes)
+
+            :meth:`LinearAlgebra.mul!` is around 15-20% faster!
+
+         .. group-tab:: AMD 
+
+            .. code-block:: julia
+            
+               using AMDGPU, BenchmarkTools, LinearAlgebra
+
+               A = AMDGPU.rand(2^5, 2^5)
+               B = similar(A)
+               @btime $A*$A;
+
+               @btime mul!($B, $A, $A);
+
+               A = AMDGPU.rand(2^10, 2^10)
+               B = similar(A)
+               @btime $A*$A;
+
+               @btime mul!($B, $A, $A)
+
 
 .. challenge:: Compare broadcasting to kernel
 
