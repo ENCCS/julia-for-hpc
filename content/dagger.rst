@@ -118,12 +118,11 @@ Here is an example of a dynamic task graph:
    rngs = [MersenneTwister(seed) for seed in 1:3]
 
    # Define and execute a task graph
+   # We use fetch inside @spawn so it does not block
    a = Dagger.@spawn rand(rngs[1], 4:8)
    b = Dagger.@spawn rand(rngs[2], 10:20)
-   # The value of `a` determines how many nested tasks are spawned
    c = Dagger.@spawn task_nested(fetch(a), fetch(b))
    d = Dagger.@spawn rand(rngs[3], 10:20)
-   # We use fetch inside @spawn so it does not block
    f = Dagger.@spawn mapreduce(fetch, +, fetch(c)) + fetch(d)
 
    # Fetch the final result
