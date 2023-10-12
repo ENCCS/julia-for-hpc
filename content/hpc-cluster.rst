@@ -442,7 +442,7 @@ Run the following files GPU code using one node with one slurm tasks per node, o
 
    A = rand(2^9, 2^9)
    A_d = ROCArray(A)
-   B_d = $A_d * $A_d
+   B_d = A_d * A_d
 
 .. solution::
 
