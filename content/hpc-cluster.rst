@@ -413,7 +413,7 @@ Run the following files MPI code using two nodes with two slurm tasks per node a
       module use /appl/local/csc/modulefiles
       module load julia
       julia --project=. -e 'using Pkg; Pkg.instantiate()'
-      julia --project=. script.jl
+      srun julia --project=. script.jl
 
    .. code-block:: bash
 
