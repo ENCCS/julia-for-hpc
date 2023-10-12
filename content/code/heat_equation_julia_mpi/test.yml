@@ -1,13 +1,15 @@
-grids:
+num_grids:
   nx: 128
   ny: 128
 
-processes:
+num_processes:
   nprocx: 2
   nprocy: 4
 
-steps:
-  max_step: 100000
+step_timestep_tol:
+  max_steps: 10000
+  dt: 0.02
+  tol: 1.0
 
 output:
   filename: "output.dat"
