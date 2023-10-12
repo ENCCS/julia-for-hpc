@@ -1,4 +1,4 @@
-name = "Diffusion"
+name = "heat_diff_eq"
 
 [deps]
 MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
@@ -8,4 +8,3 @@ Profile = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-

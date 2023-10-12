@@ -6,10 +6,11 @@ function twoDArray(t::DataType, len_x::Int, len_y::Int)
     return zeros(t, len_x, len_y)
 end
 
+
 function init_values(x0::Array{Float64,2}, size_total_x::Int, size_total_y::Int,
                     temp_high_init::Float64, temp_low_init::Float64)
 
-   # setup temp_high_init on borders
+   # setup high temperature on border cells
    for i = 1:size_total_x - 1
      x0[i,1] = temp_high_init
      x0[i,size_total_y] = temp_high_init
@@ -30,7 +31,7 @@ function init_values(x0::Array{Float64,2}, size_total_x::Int, size_total_y::Int,
      x0[size_total_x-1,j] = temp_high_init
    end
 
-   # setup temp_low_init inside
+   # setup low temperature for inside cells
    for i = 3:size_total_x-2
      for j = 3:size_total_y-2
        x0[i,j] = temp_low_init
@@ -53,6 +54,7 @@ function neighbors(my_id::Int, nproc::Int, nx_domains::Int, ny_domains::Int)
         id_pos[n_row, n_col] = id
     end
 
+    # PBC and ID of neighbor cells
     neighbor_N = my_row + 1 <= nx_domains ? my_row + 1 : -1
     neighbor_S = my_row - 1 > 0 ? my_row - 1 : -1
     neighbor_E = my_col + 1 <= ny_domains ? my_col + 1 : -1
@@ -70,23 +72,23 @@ end
 function process_coordinates!(xs::Array{Int}, ys::Array{Int}, xe::Array{Int},
     ye::Array{Int}, xcell::Int, ycell::Int, nx_domains::Int, ny_domains::Int, nproc::Int)
 
-    # computation of starting ys,ye on standard axis for the first column of global domain,
+    # computation of starting ys,ye on (Ox) standard axis for the first column of global domain
     ys[1:nx_domains] .= 3
     ye[1:nx_domains] = ys[1:nx_domains] .+ ycell .- 1
 
-    # computation of ys,ye on standard axis for all other cells of global domain
+    # computation of ys,ye on (Ox) standard axis for all other cells of global domain
     for i = 1:ny_domains-1
         ys[i*nx_domains+1:(i+1)*nx_domains] = ys[(i-1)*nx_domains+1:i*nx_domains] .+ ycell .+ 2
         ye[i*nx_domains+1:(i+1)*nx_domains] = ys[i*nx_domains+1:(i+1)*nx_domains] .+ ycell .- 1
     end
 
-    # computation of starting xs,xe on standard axis for the first row of global domain,
+    # computation of starting xs,xe on (Oy) standard axis for the first row of global domain
     for i = 1:ny_domains
         xs[(i-1)*nx_domains+1] = 3
         xe[(i-1)*nx_domains+1] = xs[(i-1)*nx_domains+1] + xcell - 1
     end
 
-    # computation of xs,xe on standard axix for all other cells of global domain
+    # computation of xs,xe on (Oy) standard axis for all other cells of global domain
     for i = 1:ny_domains
         for j = 2:nx_domains
             xs[(i-1)*nx_domains+j] = xs[(i-1)*nx_domains+(j-1)] + xcell + 2
