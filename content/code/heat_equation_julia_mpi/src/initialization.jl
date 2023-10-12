@@ -13,7 +13,7 @@ function init_values(x0::Array{Float64,2}, size_total_x::Int, size_total_y::Int,
    # setup high temperature on border cells
    for i = 1:size_total_x - 1
      x0[i,1] = temp_high_init
-     x0[i,size_total_y] = temp_high_init
+     x0[i, size_total_y] = temp_high_init
    end
 
    for j = 1:size_total_y
@@ -23,7 +23,7 @@ function init_values(x0::Array{Float64,2}, size_total_x::Int, size_total_y::Int,
 
    for i = 2:size_total_x-1
      x0[i,2] = temp_high_init
-     x0[i,size_total_y-1] = temp_high_init
+     x0[i, size_total_y-1] = temp_high_init
    end
 
    for j = 2:size_total_y-1
@@ -34,7 +34,7 @@ function init_values(x0::Array{Float64,2}, size_total_x::Int, size_total_y::Int,
    # setup low temperature for inside cells
    for i = 3:size_total_x-2
      for j = 3:size_total_y-2
-       x0[i,j] = temp_low_init
+       x0[i, j] = temp_low_init
      end
    end
 
@@ -98,5 +98,3 @@ function process_coordinates!(xs::Array{Int}, ys::Array{Int}, xe::Array{Int},
 
     return xs, xe, ys, ye
 end
-
-

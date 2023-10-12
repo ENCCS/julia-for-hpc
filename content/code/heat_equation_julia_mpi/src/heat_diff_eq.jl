@@ -19,7 +19,7 @@ k0 = Float64(1)
 # define rank of root process
 root = 0
 
-# MPI Initialization
+# MPI initialization
 MPI.Init()
 comm = MPI.COMM_WORLD
 my_id = MPI.Comm_rank(comm)
@@ -149,5 +149,3 @@ end
 #main()
 
 end
-
-
