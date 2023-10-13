@@ -12,12 +12,17 @@ function partial_hits(rng, num_points)
     return hits
 end
 
+function partition(v::Integer, n::Integer)
+    d, r = divrem(v, n)
+    c = vcat(fill(d, n-r), fill(d+1, r))
+    return c
+end
+
 function threaded_estimate_pi(num_points)
     n = nthreads()
-    rngs = [MersenneTwister() for _ in 1:n]
-    d, r = divrem(num_points, n)
-    chunks = zip(rngs, vcat(fill(d, n-r), fill(d+1, r)))
-    tasks = map(chunks) do (rng, chunk)
+    rngs = [MersenneTwister(seed) for seed in 1:n]
+    chunks = partition(num_points, n)
+    tasks = map(zip(rngs, chunks)) do (rng, chunk)
         @spawn partial_hits(rng, chunk)
     end
     hits = mapreduce(fetch, +, tasks; init=zero(Int))
