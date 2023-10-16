@@ -73,14 +73,14 @@ It also makes sense to wrap a call like that in a native Julia function.
 
 
 The following example is adapted from `Calling C from Julia <https://craftofcoding.wordpress.com/2017/02/08/calling-c-from-julia-i-simple-arrays/>`_ by `The Craft of Coding`.
-Let's conside the following C function which computes the mean from an array of integer values.
+Let's conside the following C function which computes the mean from an array of 64-bit integer values.
 We will name the file as :code:`mean.c`.
 
 .. code-block:: c
 
-   double vectorMean(int *arr, int n)
+   double mean(long *arr, long n)
    {
-       int i, sum=0;
+       long i, sum=0;
        double mean;
        for (i=0; i<n; i=i+1)
            sum = sum + arr[i];
@@ -105,15 +105,27 @@ follows:
    arr = [1,2,3,4,5]
 
    # Length of the array
-   n = length(arr_c)
+   n = length(arr)
 
-   # Convert the inputs to native C integer types
-   arr_c = collect(Cint, arr)
-   n_c = convert(Cint, n)
+   # We need to convert the inputs because Julia integer type can be 32 or 64-bit
+   # depending on the system.
+   arr_c = convert(Vector{Clong}, arr)
+   n_c = convert(Clong, length(arr))
 
    # Call the shared library
-   ccall((:vectorMean, "./mean.so"), Cdouble, (Ptr{Cint}, Cint), arr_c, n_c)
+   ccall((:mean, "./mean.so"), Cdouble, (Ptr{Clong}, Clong), arr_c, n_c)
 
+We can also create a wrapper function for convenient access to the function as follows:
+
+.. code-block:: julia
+
+   function mean(arr::Vector{Int64}, n::Int64)
+       ccall((:mean, "./mean.so"), Cdouble, (Ptr{Clong}, Clong), arr, n)
+   end
+
+   function mean(arr::Vector{Integer})
+       mean(convert(Vector{Clong}, arr), convert(Clong, length(arr)))
+   end
 
 
 Interfacing Julia with Fortran
