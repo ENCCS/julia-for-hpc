@@ -1,0 +1,38 @@
+.rst-content .objectives {
+    background: #fee0d2;
+}
+.rst-content .objectives > .admonition-title {
+    background: #fc9272;
+}
+
+
+.rst-content .prereq {
+    background: #fee0d2;
+}
+.rst-content .prereq > .admonition-title {
+    background: #fc9272;
+}
+
+
+.rst-content .instructor-note {
+    background: #f0f0f0;
+}
+.rst-content .instructor-note > .admonition-title {
+    background: #bdbdbd;
+}
+
+
+.rst-content .keypoints {
+    background: #e5f5e0;
+}
+.rst-content .keypoints > .admonition-title {
+    background: #a1d99b;
+}
+
+
+.rst-content .discussion {
+    background: #fee6ce;
+}
+.rst-content .discussion > .admonition-title {
+    background: #fdae6b;
+}

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using Julia on an HPC cluster &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx_lesson.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/overrides.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script src="../_static/tabs.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+        <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Message passing" href="../MPI/" />
+    <link rel="prev" title="Dagger" href="../dagger/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Dagger</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using Julia on an HPC cluster</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#julia-on-hpc-systems">Julia on HPC systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#terminology-of-an-hpc-cluster">Terminology of an HPC cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-module-environments">Using module environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-interactive-jobs">Running interactive jobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-batch-jobs">Running batch jobs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-julia-application-in-a-job">Running Julia application in a job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exercises">Exercises</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run-multithreaded-job">Run multithreaded job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-distributed-job">Run distributed job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-mpi-job">Run MPI job</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-gpu-job">Run GPU job</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Using Julia on an HPC cluster</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/hpc-cluster.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="using-julia-on-an-hpc-cluster">
+<h1>Using Julia on an HPC cluster<a class="headerlink" href="#using-julia-on-an-hpc-cluster" title="Permalink to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>How do we run Julia in an HPC cluster?</p></li>
+<li><p>How can we do parallel computing with Julia on an HPC cluster?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>30 min teaching</p></li>
+<li><p>30 min exercises</p></li>
+</ul>
+</div>
+<section id="julia-on-hpc-systems">
+<h2>Julia on HPC systems<a class="headerlink" href="#julia-on-hpc-systems" title="Permalink to this heading"></a></h2>
+<p>Despite rapid growth in the HPC domain in recent years, Julia is still not considered as mainstream as C/C++ and Fortran in the HPC world, and even Python is more commonly used (and generally available) than Julia.
+Fortunately, even if Julia is not already available as an environment module on your favorite cluster, it is easy to install Julia from scratch.
+Moreover, there is little reason to expect the performance of official Julia binaries to be any worse than if a system administrator built Julia from scratch with architecture-specific optimization.
+<a class="reference external" href="https://juliahpc.github.io/JuliaOnHPCClusters/">Julia on HPC clusters</a> gives an overview of the availability and documentation of Julia on a range of HPC systems around the world, including EuroHPC systems.</p>
+</section>
+<section id="terminology-of-an-hpc-cluster">
+<h2>Terminology of an HPC cluster<a class="headerlink" href="#terminology-of-an-hpc-cluster" title="Permalink to this heading"></a></h2>
+<p>HPC cluster consists of networked computers called <strong>nodes</strong>.
+The nodes are separated into user-facing <strong>login nodes</strong> and nodes that are intended for heavy computing called <strong>compute nodes</strong>
+The nodes are colocated and connected using a <strong>high-speed network</strong> minimize communication latency and maximize performance at scale.
+A <strong>parallel file system</strong> provides a system-wide mass storage capacity.</p>
+<p>HPC clusters use the <strong>Linux operating system</strong>.
+Many problems that users have with using a cluster stem from a lack of Linux knowledge.</p>
+<p>Clusters also use <strong>module environments</strong> to manage software environments by setting environment variables and loading other modules as dependencies.
+We demonstrate the popular <strong>Lmod</strong> software and how to use Julia module environments with Lmod.</p>
+<p>Finally, HPC clusters use a <strong>workload manager</strong> to manage resources and run jobs on compute nodes.
+We demonstrate the popular <strong>Slurm</strong> workload manager and how to run Julia programs that perform various forms of parallel computing with Slurm.
+We refer to a single workload run through a workload manager as a <strong>job</strong>.</p>
+</section>
+<section id="using-module-environments">
+<h2>Using module environments<a class="headerlink" href="#using-module-environments" title="Permalink to this heading"></a></h2>
+<p>We can load a shared Julia installation as a module environment if one is available.
+The module environment modifies the path to make the Julia command line client available and may set environment variables for Julia thread count and modify the depot and load paths to make shared packages available.</p>
+<p>Available module environments are controlled by the module path (<code class="code docutils literal notranslate"><span class="pre">MODULEPATH</span></code>) environment variable.
+Sometimes, it is necessary to add custom directories to the module path as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>module<span class="w"> </span>use<span class="w"> </span>&lt;path&gt;
+</pre></div>
+</div>
+<p>We can check the availability of a Julia module environment as follows.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>module<span class="w"> </span>avail<span class="w"> </span>julia
+</pre></div>
+</div>
+<p>If the Julia module is not available, we can install Julia manually to the cluster.
+On the other hand, if a Julia module is available, we can take a look at what the Julia sets when it is loaded as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>module<span class="w"> </span>show<span class="w"> </span>julia
+</pre></div>
+</div>
+<p>We can load the Julia module as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>module<span class="w"> </span>load<span class="w"> </span>julia
+</pre></div>
+</div>
+<p>We can list the loaded module and check that Julia is available as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>module<span class="w"> </span>list
+julia<span class="w"> </span>--version
+</pre></div>
+</div>
+<p>In case everything works well, we should be ready to move forward.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">LUMI CPU</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">LUMI GPU</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add CSC&#39;s local module files to the module path</span>
+<span class="n">module</span> <span class="n">use</span> <span class="o">/</span><span class="n">appl</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">csc</span><span class="o">/</span><span class="n">modulefiles</span>
+
+<span class="c1"># Load the Julia module</span>
+<span class="n">module</span> <span class="n">load</span> <span class="n">julia</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add CSC&#39;s local module files to the module path</span>
+<span class="n">module</span> <span class="n">use</span> <span class="o">/</span><span class="n">appl</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">csc</span><span class="o">/</span><span class="n">modulefiles</span>
+
+<span class="c1"># Load the Julia AMDGPU module</span>
+<span class="n">module</span> <span class="n">load</span> <span class="n">julia</span><span class="o">-</span><span class="n">amdgpu</span>
+</pre></div>
+</div>
+</div></div>
+</section>
+<section id="running-interactive-jobs">
+<h2>Running interactive jobs<a class="headerlink" href="#running-interactive-jobs" title="Permalink to this heading"></a></h2>
+<p>We can launch an interactive job on a compute node via Slurm.
+Interactive jobs are useful for developing, testing, debugging, and exploring Slurm jobs.
+We can run an interactive job as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>srun<span class="w"> </span><span class="o">[</span>options<span class="o">]</span><span class="w"> </span>--pty<span class="w"> </span>bash
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">srun</span></code> command launches the job with options that declare the resources we want to reserve, <code class="code docutils literal notranslate"><span class="pre">--pty</span></code> flag attached a pseudoterminal to the job and the argument to run <code class="code docutils literal notranslate"><span class="pre">bash</span></code>.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-1-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-1-1-0" name="1-0" role="tab" tabindex="0">LUMI CPU (small)</button><button aria-controls="panel-1-1-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-1" name="1-1" role="tab" tabindex="-1">LUMI GPU (small-g)</button></div><div aria-labelledby="tab-1-1-0" class="sphinx-tabs-panel" id="panel-1-1-0" name="1-0" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>srun<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--account<span class="o">=</span><span class="s2">&quot;&lt;project&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--partition<span class="o">=</span>small<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--ntasks-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cpus-per-task<span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mem-per-cpu<span class="o">=</span><span class="m">1000</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--time<span class="o">=</span><span class="s2">&quot;00:15:00&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pty<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bash
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-1" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-1" name="1-1" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>srun<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--account<span class="o">=</span><span class="s2">&quot;&lt;project&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--partition<span class="o">=</span>small-g<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--ntasks-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cpus-per-task<span class="o">=</span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--gpus-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mem-per-cpu<span class="o">=</span><span class="m">1750</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--time<span class="o">=</span><span class="s2">&quot;00:15:00&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--pty<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bash
+</pre></div>
+</div>
+</div></div>
+</section>
+<section id="running-batch-jobs">
+<h2>Running batch jobs<a class="headerlink" href="#running-batch-jobs" title="Permalink to this heading"></a></h2>
+<p>We can run batch jobs via Slurm.
+We use batch jobs to run workloads from start to finish without interacting with them.
+We can run a batch job as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span><span class="o">[</span>options<span class="o">]</span><span class="w"> </span>script.sh
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">sbatch</span></code> command launches the batch job, with options that declare the resources we want to reserve, and the batch script <code class="code docutils literal notranslate"><span class="pre">script.sh</span></code> contains the commands to run the job.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-2-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-2-2-0" name="2-0" role="tab" tabindex="0">LUMI CPU (small)</button><button aria-controls="panel-2-2-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-2-2-1" name="2-1" role="tab" tabindex="-1">LUMI GPU (small-g)</button></div><div aria-labelledby="tab-2-2-0" class="sphinx-tabs-panel" id="panel-2-2-0" name="2-0" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--account<span class="o">=</span><span class="s2">&quot;&lt;project&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--partition<span class="o">=</span>small<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--ntasks-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cpus-per-task<span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mem-per-cpu<span class="o">=</span><span class="m">1000</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--time<span class="o">=</span><span class="s2">&quot;00:15:00&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>script.sh
+</pre></div>
+</div>
+<p>Often options are specified as comments in the batch <code class="docutils literal notranslate"><span class="pre">script.sh</span></code> as follows.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --account=&quot;&lt;project&gt;&quot;</span>
+<span class="c1">#SBATCH --partition=small</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --ntasks-per-node=1</span>
+<span class="c1">#SBATCH --cpus-per-task=2</span>
+<span class="c1">#SBATCH --mem-per-cpu=1000</span>
+<span class="c1">#SBATCH --time=&quot;00:15:00&quot;</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-2-2-1" class="sphinx-tabs-panel" hidden="true" id="panel-2-2-1" name="2-1" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>srun<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--account<span class="o">=</span><span class="s2">&quot;&lt;project&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--partition<span class="o">=</span>small-g<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--ntasks-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cpus-per-task<span class="o">=</span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--gpus-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--mem-per-cpu<span class="o">=</span><span class="m">1750</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--time<span class="o">=</span><span class="s2">&quot;00:15:00&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>script.sh
+</pre></div>
+</div>
+<p>Often options are specified as comments in the batch <code class="docutils literal notranslate"><span class="pre">script.sh</span></code> as follows.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --account=&quot;&lt;project&gt;&quot;</span>
+<span class="c1">#SBATCH --partition=small-g</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --ntasks-per-node=1</span>
+<span class="c1">#SBATCH --cpus-per-task=16</span>
+<span class="c1">#SBATCH --gpus-per-node=1</span>
+<span class="c1">#SBATCH --mem-per-cpu=1750</span>
+<span class="c1">#SBATCH --time=&quot;00:15:00&quot;</span>
+</pre></div>
+</div>
+</div></div>
+</section>
+<section id="running-julia-application-in-a-job">
+<h2>Running Julia application in a job<a class="headerlink" href="#running-julia-application-in-a-job" title="Permalink to this heading"></a></h2>
+<p>Let’s consider a standalone Julia application that contains the following files:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">Project.toml</span></code> for describing project metadata and dependencies.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">script.jl</span></code> for an entry point to run the desired Julia workload.
+Optionally, it can implement a command line client if we want to parse arguments that are supplied to the script.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">script.sh</span></code> for a batch script for setting up the Julia environment and running the Julia workload.</p></li>
+</ul>
+<p>Below, we show examples of the batch script <code class="code docutils literal notranslate"><span class="pre">script.sh</span></code>.
+We assume that our current working directory is the Julia application.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-3-3-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-3-3-0" name="3-0" role="tab" tabindex="0">LUMI CPU</button><button aria-controls="panel-3-3-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-3-3-1" name="3-1" role="tab" tabindex="-1">LUMI GPU</button></div><div aria-labelledby="tab-3-3-0" class="sphinx-tabs-panel" id="panel-3-3-0" name="3-0" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1"># Add CSC&#39;s local modulefiles to the modulepath</span>
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+
+<span class="c1"># Load the Julia module</span>
+module<span class="w"> </span>load<span class="w"> </span>julia
+
+<span class="c1"># Instantiate the project environment</span>
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;using Pkg; Pkg.instantiate()&#39;</span>
+
+<span class="c1"># Run the julia script</span>
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>script.jl
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-3-3-1" class="sphinx-tabs-panel" hidden="true" id="panel-3-3-1" name="3-1" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1"># Add CSC&#39;s local modulefiles to the modulepath</span>
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+
+<span class="c1"># Load the Julia AMDGPU module</span>
+module<span class="w"> </span>load<span class="w"> </span>julia-amdgpu
+
+<span class="c1"># Instantiate the project environment</span>
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;using Pkg; Pkg.instantiate()&#39;</span>
+
+<span class="c1"># Run the julia script</span>
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>script.jl
+</pre></div>
+</div>
+</div></div>
+<p>Now, we can run the batch script as a batch job or supply the commands in the batch script individually to an interactive session.</p>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Permalink to this heading"></a></h2>
+<p>In these exercises you should create the three files <code class="docutils literal notranslate"><span class="pre">Project.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">script.jl</span></code>, and <code class="docutils literal notranslate"><span class="pre">script.sh</span></code> and run them via Slurm in the LUMI cluster.
+If the course has a resource reservation, we can use the <code class="code docutils literal notranslate"><span class="pre">--reservation=&quot;&lt;name&gt;&quot;</span></code> option to use it.</p>
+<section id="run-multithreaded-job">
+<h3>Run multithreaded job<a class="headerlink" href="#run-multithreaded-job" title="Permalink to this heading"></a></h3>
+<p>Run the following files in a single node job with two CPU cores and one julia thread per core.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Project.toml</span></code></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># empty Project.toml</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">script.jl</span></code></p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zeros</span><span class="p">(</span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">*</span><span class="n">nthreads</span><span class="p">())</span>
+<span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="w">    </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadid</span><span class="p">()</span>
+<span class="k">end</span>
+<span class="n">println</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-solution solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Solution</p>
+<p><code class="docutils literal notranslate"><span class="pre">script.sh</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --account=&quot;&lt;project&gt;&quot;</span>
+<span class="c1">#SBATCH --partition=small</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --ntasks-per-node=1</span>
+<span class="c1">#SBATCH --cpus-per-task=2</span>
+<span class="c1">#SBATCH --mem-per-cpu=1000</span>
+<span class="c1">#SBATCH --time=&quot;00:15:00&quot;</span>
+
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+module<span class="w"> </span>load<span class="w"> </span>julia
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;using Pkg; Pkg.instantiate()&#39;</span>
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>script.jl
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>script.sh
+</pre></div>
+</div>
+</div>
+</section>
+<section id="run-distributed-job">
+<h3>Run distributed job<a class="headerlink" href="#run-distributed-job" title="Permalink to this heading"></a></h3>
+<p>Run the following files a single node job with three CPU cores and one julia process per core.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Project.toml</span></code></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[deps]</span>
+<span class="n">Distributed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;8ba89e20-285c-5b6f-9357-94700520ee1b&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">script.jl</span></code></p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+<span class="n">addprocs</span><span class="p">(</span><span class="n">Sys</span><span class="o">.</span><span class="n">CPU_THREADS</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="n">task</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">myid</span><span class="p">()</span>
+<span class="n">futures</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="nd">@spawnat</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="n">task</span><span class="p">()</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">workers</span><span class="p">()]</span>
+<span class="n">outputs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fetch</span><span class="o">.</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-solution solution important dropdown admonition" id="solution-1">
+<p class="admonition-title">Solution</p>
+<p><code class="docutils literal notranslate"><span class="pre">script.sh</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --account=&quot;&lt;project&gt;&quot;</span>
+<span class="c1">#SBATCH --partition=small</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --ntasks-per-node=1</span>
+<span class="c1">#SBATCH --cpus-per-task=3</span>
+<span class="c1">#SBATCH --mem-per-cpu=1000</span>
+<span class="c1">#SBATCH --time=&quot;00:15:00&quot;</span>
+
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+module<span class="w"> </span>load<span class="w"> </span>julia
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;using Pkg; Pkg.instantiate()&#39;</span>
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>script.jl
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>script.sh
+</pre></div>
+</div>
+</div>
+</section>
+<section id="run-mpi-job">
+<h3>Run MPI job<a class="headerlink" href="#run-mpi-job" title="Permalink to this heading"></a></h3>
+<p>Run the following files MPI code using two nodes with two slurm tasks per node and one CPU per task.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Project.toml</span></code></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[deps]</span>
+<span class="n">MPI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;da04e1cc-30fd-572f-bb4f-1f8673147195&quot;</span>
+
+<span class="k">[compat]</span>
+<span class="n">MPI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;=0.20.8&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">script.jl</span></code></p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Hello from rank </span><span class="si">$</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="s"> out of </span><span class="si">$</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="s"> from host </span><span class="si">$</span><span class="p">(</span><span class="n">gethostname</span><span class="p">())</span><span class="s"> and process </span><span class="si">$</span><span class="p">(</span><span class="n">getpid</span><span class="p">())</span><span class="s">.&quot;</span><span class="p">)</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Barrier</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-solution solution important dropdown admonition" id="solution-2">
+<p class="admonition-title">Solution</p>
+<p><code class="docutils literal notranslate"><span class="pre">script.sh</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --account=&quot;&lt;project&gt;&quot;</span>
+<span class="c1">#SBATCH --partition=small</span>
+<span class="c1">#SBATCH --nodes=2</span>
+<span class="c1">#SBATCH --ntasks-per-node=2</span>
+<span class="c1">#SBATCH --cpus-per-task=1</span>
+<span class="c1">#SBATCH --mem-per-cpu=1000</span>
+<span class="c1">#SBATCH --time=&quot;00:15:00&quot;</span>
+
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+module<span class="w"> </span>load<span class="w"> </span>julia
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;using Pkg; Pkg.instantiate()&#39;</span>
+srun<span class="w"> </span>julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>script.jl
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>script.sh
+</pre></div>
+</div>
+</div>
+</section>
+<section id="run-gpu-job">
+<h3>Run GPU job<a class="headerlink" href="#run-gpu-job" title="Permalink to this heading"></a></h3>
+<p>Run the following files GPU code using one node with one slurm tasks per node, one GPU per node and sixteen CPUs per task.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Project.toml</span></code></p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[deps]</span>
+<span class="n">AMDGPU</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;21141c5a-9bdb-4563-92ae-f87d6854732e&quot;</span>
+
+<span class="k">[compat]</span>
+<span class="n">AMDGPU</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;=0.4.13&quot;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">script.jl</span></code></p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">AMDGPU</span>
+
+<span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="o">^</span><span class="mi">9</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">^</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">A_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ROCArray</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="n">B_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A_d</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">A_d</span>
+</pre></div>
+</div>
+<div class="admonition-solution solution important dropdown admonition" id="solution-3">
+<p class="admonition-title">Solution</p>
+<p><code class="docutils literal notranslate"><span class="pre">script.sh</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --account=&lt;project&gt;</span>
+<span class="c1">#SBATCH --partition=small-g</span>
+<span class="c1">#SBATCH --time=00:15:00</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --ntasks-per-node=1</span>
+<span class="c1">#SBATCH --cpus-per-task=16</span>
+<span class="c1">#SBATCH --gpus-per-node=1</span>
+<span class="c1">#SBATCH --mem-per-cpu=1750</span>
+
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+module<span class="w"> </span>load<span class="w"> </span>julia-amdgpu
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;using Pkg; Pkg.instantiate()&#39;</span>
+julia<span class="w"> </span>--project<span class="o">=</span>.<span class="w"> </span>script.jl
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>script.sh
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../dagger/" class="btn btn-neutral float-left" title="Dagger" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../MPI/" class="btn btn-neutral float-right" title="Message passing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
