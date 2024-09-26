@@ -151,8 +151,7 @@ Julia uses dynamic scheduler for multithreading which allows us to do nested mul
          t = [@spawn threadid() for _ in 1:2*nthreads()]
          c = fetch.(t)
 
-Let's see if we can achieve any speed gain when performing a 
-costly calculation.
+Let's see if we can achieve any speed gain when performing a costly calculation.
 
 .. tabs::
 
