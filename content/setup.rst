@@ -230,19 +230,19 @@ Using EuroHPC systems
 
       .. code-block:: console
 
-         $ srun --account=project_465000693 --partition=small --nodes=1 --ntasks-per-node=1 --cpus-per-task=8 --mem-per-cpu=1000 --time=00:15:00 --pty bash
+         $ srun --account=project_465001310 --partition=small --nodes=1 --ntasks-per-node=1 --cpus-per-task=8 --mem-per-cpu=1000 --time=00:15:00 --pty bash
 
       To run **MPI** jobs on a **CPU node**:
 
       .. code-block:: console
 
-         $ srun --account=project_465000693 --partition=small --nodes=1 --ntasks-per-node=8 --cpus-per-task=1 --mem-per-cpu=1000 --time=00:15:00 --pty bash
+         $ srun --account=project_465001310 --partition=small --nodes=1 --ntasks-per-node=8 --cpus-per-task=1 --mem-per-cpu=1000 --time=00:15:00 --pty bash
 
       To run instead on a **GPU node**:
 
       .. code-block:: console
 
-         $ srun --account=project_465000693 --partition=small-g --nodes=1 --ntasks-per-node=1 --cpus-per-task=16 --gpus-per-node=1 --mem-per-cpu=1750 --time=00:15:00 --pty  bash
+         $ srun --account=project_465001310 --partition=small-g --nodes=1 --ntasks-per-node=1 --cpus-per-task=16 --gpus-per-node=1 --mem-per-cpu=1750 --time=00:15:00 --pty  bash
 
 
       To run a batch job to run an MPI job, create a job script similar to the following:
@@ -254,7 +254,7 @@ Using EuroHPC systems
             .. code-block:: bash
             
                #!/bin/bash -l
-               #SBATCH -A project_465000693
+               #SBATCH -A project_465001310
                #SBATCH -t 00:15:00
                #SBATCH -p small
                #SBATCH --nodes 1
@@ -276,7 +276,7 @@ Using EuroHPC systems
             .. code-block:: bash
             
                #!/bin/bash -l
-               #SBATCH -A project_465000693
+               #SBATCH -A project_465001310
                #SBATCH -t 00:15:00
                #SBATCH -p small
                #SBATCH --nodes 1
@@ -297,7 +297,7 @@ Using EuroHPC systems
             .. code-block:: bash
             
                #!/bin/bash -l
-               #SBATCH -A project_465000693
+               #SBATCH -A project_465001310
                #SBATCH -t 00:15:00
                #SBATCH -p small-g
                #SBATCH --nodes 1
