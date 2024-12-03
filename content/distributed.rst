@@ -550,15 +550,17 @@ Exercises
          #  59.480 ms (270 allocations: 43.61 KiB)
 
 
+
 See also
 --------
 
-- The `Julia Parallel <https://github.com/JuliaParallel>`_ organization collects 
-  packages developed for parallel computing in Julia.
-- `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`__
-- `Distributed computing in Julia docs <https://docs.julialang.org/en/v1/manual/distributed-computing/>`__
+- The `Julia Parallel <https://github.com/JuliaParallel>`_ organization collects packages developed for parallel computing in Julia.
+- `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_.
+- `Distributed computing in Julia docs <https://docs.julialang.org/en/v1/manual/distributed-computing/>`_.
 - `Distributed API <https://docs.julialang.org/en/v1/stdlib/Distributed/>`__
-- Valentin Churavy, `Levels of Parallelism <https://slides.com/valentinchuravy/julia-parallelism>`__
+- Valentin Churavy, `Levels of Parallelism <https://slides.com/valentinchuravy/julia-parallelism>`_.
+
+
 
 .. keypoints::
 
@@ -569,3 +571,4 @@ See also
    - ``pmap`` is good for expensive inner loops that return a value.
    - ``SharedArrays`` can be an easier drop-in replacement for threading-like 
      behaviors on a single machine.
+

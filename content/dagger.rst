@@ -38,6 +38,7 @@ Furthermore, they may support features such as out-of-core execution to process 
 We focus on defining task graphs and parallel execution.
 
 
+
 Dagger
 ------
 `Dagger.jl` can dynamically execute tasks on a task graph to execute independent tasks in parallel with available threads and distributed workers.
@@ -127,6 +128,7 @@ Here is an example of a dynamic task graph:
 
    # Fetch the final result
    fetch(f)
+
 
 
 Exercises

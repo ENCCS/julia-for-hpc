@@ -1,6 +1,8 @@
 Julia for high-performance scientific computing
 ===============================================
 
+
+
 Julia is a scientific programming language that is free and open
 source - see https://julialang.org/ for downloads, documentation,
 learning resources etc. Bridging high-level interpreted and low-level
@@ -81,6 +83,8 @@ To learn about using Julia for problems in data science, please visit the lesson
 
 .. _learner-personas:
 
+
+
 Who is the course for?
 ----------------------
 
@@ -93,6 +97,7 @@ who:
  - need to analyze big data or perform computationally demanding modeling, analysis or simulations
  - want to develop high-performance parallelized and/or GPU code but prefer to stay within a
    productive high-level language.
+
 
 
 About the course
@@ -112,10 +117,14 @@ The lesson material is licensed under `CC-BY-4.0
 Instructors who wish to teach this lesson can refer to the :doc:`guide` for
 practical advice.
 
+
+
 Graphical and text conventions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Different graphical elements are used to organize the material.
+
+
 
 Type-along sections
 ~~~~~~~~~~~~~~~~~~~
@@ -130,6 +139,8 @@ type-along and appear in a separate text box, marked with a keyboard emoji:
   .. code-block:: julia
 
     x = 1
+
+
 
 Exercises
 ~~~~~~~~~
@@ -150,6 +161,8 @@ there's also a solution:
 
     Correct answer is both 1 and 2! ``println()`` uses ``print()`` and adds a new line.
 
+
+
 Important information
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -158,6 +171,8 @@ Sometimes important information is displayed inside boxes with an exclamation ma
 .. callout:: Important info
 
   Please don't hesitate to ask questions during the workshop!
+
+
 
 Discussion
 ~~~~~~~~~~
@@ -168,6 +183,8 @@ Discussion exercises are conducted either via voice or through a shared workshop
 
    Discuss any questions about the lesson format either via the shared workshop document or  
    in breakout room sessions.
+
+
 
 See also
 --------
@@ -184,6 +201,8 @@ A recent talk given by Kristoffer Carlsson, developer at Julia Computing in Swed
 
 `This repository <https://github.com/carstenbauer/JuliaHLRS22>`__ is from the Julia for High Performance Computing Course @ HLRS
 developed by Carsten Bauer.
+
+
 
 Credits
 -------
@@ -203,6 +222,7 @@ lessons, particularly:
 - `Carsten Bauer's 3-day Julia workshop <https://github.com/carstenbauer/JuliaCologne21>`__
 - `The Carpentry lesson Introduction to Julia <https://carpentries-incubator.github.io/julia-novice/>`__
 - `Storopoli, Huijzer and Alonso (2021). Julia Data Science. ISBN: 9798489859165. <https://juliadatascience.io>`__
+
 
 
 Instructional Material
@@ -237,7 +257,9 @@ The licensor cannot revoke these freedoms as long as you follow these license te
   - No warranties are given. The license may not give you all of the permissions
     necessary for your intended use. For example, other rights such as
     publicity, privacy, or moral rights may limit how you use the material.
-  
+
+
+
 Software
 ^^^^^^^^
 

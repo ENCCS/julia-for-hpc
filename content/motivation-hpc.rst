@@ -10,6 +10,8 @@ Motivation
 
    - 15 min teaching
 
+
+
 HPC
 ---
 
@@ -18,6 +20,8 @@ Such problems often arise in scientific simulation and modeling, data analysis, 
 Most HPC systems are computer clusters, a computer network with many colocated computers connected via a high-speed network.
 Contemporary HPC clusters derive the computational capacity from parallel processing on Central Processing Units (CPUs) for general tasks and accelerators, such as Graphics Processing Units (GPUs), for specialized tasks.
 We consider a programming language a high-performance language if it can efficiently use the features of HPC clusters.
+
+
 
 Why Julia
 ---------
@@ -34,16 +38,18 @@ Therefore, they act as an interface to programs written in the traditional compi
    :align: center
    :scale: 70 %
 
-   Adapted from Julia Data Science [#c7]_, published under CC BY-NC-SA 4.0.
+   Adapted from `Julia Data Science <https://juliadatascience.io>`_, published under CC BY-NC-SA 4.0.
 
-Julia is an open-source software with a permissive MIT license that offers a modern alternative to scientific and high-performance computing. [#c1]_ [#c6]_
+Julia is an open-source software with a permissive MIT license that offers a modern alternative to scientific and high-performance computing.
 Julia is `fast, composable and practical <https://enccs.github.io/julia-intro/motivation/>`_ with natural syntax for scientific computing and a memory-managed runtime.
-NERSC has demonstrated that Julia can run at large scale at petaflop speeds, a feat previously possible only by C, C++, and Fortran. [#c5]_
-Running Julia at scale is possible because Julia can generate efficient machine code for multiple architectures via the LLVM compiler and has parallel computing capabilities, including SIMD, multithreading, multiprocessing, and packages for using MPI and various GPUs. [#c2]_ [#c3]_
-The performance of Julia is comparable to other parallel programming frameworks [#c4]_.
+NERSC has demonstrated that Julia can run at large scale at petaflop speeds, a feat previously possible only by C, C++, and Fortran.
+Running Julia at scale is possible because Julia can generate efficient machine code for multiple architectures via the LLVM compiler and has parallel computing capabilities, including SIMD, multithreading, multiprocessing, and packages for using MPI and various GPUs.
+The performance of Julia is comparable to other parallel programming frameworks.
 Furthermore, Julia can directly interface with shared C and Fortran libraries with the same overhead as calling them natively.
 There are also packages for interfacing with other languages, such as Python, R, and C++.
 We can use Julia to call external programs directly, which means we can use it as an efficient, robust, parallelizable glue language instead of shell scripting.
+
+
 
 Parallel programming in Julia
 -----------------------------
@@ -64,13 +70,16 @@ Julia has external packages for GPU computing.
 This lesson will cover aspects of multithreading, distributed computing and GPU computing with Julia on HPC clusters.
 
 
+
 See also
 --------
 
-.. [#c1] `Bridging HPC Communities through the Julia Programming Language <https://arxiv.org/abs/2211.02740>`_
-.. [#c5] `Julia Joins Petaflop Club <https://www.hpcwire.com/off-the-wire/julia-joins-petaflop-club/>`_
-.. [#c2] `MPI.jl: Julia bindings for the Message Passing Interface <https://proceedings.juliacon.org/papers/10.21105/jcon.00068>`_
-.. [#c3] `High-level GPU programming in Julia <https://arxiv.org/abs/1604.03410>`_
-.. [#c4] `Comparing Julia to Performance Portable Parallel Programming Models for HPC <https://ieeexplore.ieee.org/abstract/document/9652798>`_
-.. [#c6] `Julia: come for the syntax, stay for the speed <https://www.nature.com/articles/d41586-019-02310-3>`_
-.. [#c7] Storopoli, Huijzer and Alonso (2021). Julia Data Science. https://juliadatascience.io. ISBN: 9798489859165.
+- `Bridging HPC Communities through the Julia Programming Language <https://arxiv.org/abs/2211.02740>`_.
+- `Julia Joins Petaflop Club <https://www.hpcwire.com/off-the-wire/julia-joins-petaflop-club/>`_.
+- `MPI.jl: Julia bindings for the Message Passing Interface <https://proceedings.juliacon.org/papers/10.21105/jcon.00068>`_.
+- `High-level GPU programming in Julia <https://arxiv.org/abs/1604.03410>`_.
+- `Comparing Julia to Performance Portable Parallel Programming Models for HPC <https://ieeexplore.ieee.org/abstract/document/9652798>`_.
+- `Julia: come for the syntax, stay for the speed <https://www.nature.com/articles/d41586-019-02310-3>`_.
+- `Julia Data Science <https://juliadatascience.io>`_.
+- Lin, Wei-Chen, and Simon McIntosh-Smith. `Comparing Julia to Performance Portable Parallel Programming Models for HPC. <https://ieeexplore.ieee.org/abstract/document/9652798>`_, 2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.
+

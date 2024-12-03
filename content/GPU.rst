@@ -1212,3 +1212,4 @@ See also
 - `AMDGPU.jl documentation <https://amdgpu.juliagpu.org/stable/>`_.
 - `JuliaCon2021 GPU workshop <https://github.com/maleadt/juliacon21-gpu_workshop>`_.
 - `Advanced GPU programming tutorials <https://github.com/JuliaComputing/Training/tree/master/AdvancedGPU>`_.
+

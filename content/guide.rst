@@ -1,6 +1,8 @@
 Instructor's guide
 ==================
 
+
+
 Prerequisites
 -------------
 
@@ -8,6 +10,7 @@ This lesson material assumes some familiarity with Julia's syntax. The necessary
 prerequisites are covered in the Prerequisites section which should be required  
 reading for participants prior to attending a workshop. It can also be covered in 
 10-15 minutes by the instructor at the start of a workshop.
+
 
 
 Mode of teaching

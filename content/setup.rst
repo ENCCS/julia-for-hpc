@@ -378,6 +378,8 @@ for your operating system and follow the instructions.  After
 activating a ``conda`` environment in your terminal, you can install
 JupyterLab with the command ``conda install jupyterlab``.
 
+
+
 Add Julia to JupyterLab
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -386,6 +388,8 @@ install the ``IJulia`` Julia package. Open the Julia REPL and type::
 
   using Pkg
   Pkg.add("IJulia")
+
+
 
 Create a Julia notebook
 ^^^^^^^^^^^^^^^^^^^^^^^

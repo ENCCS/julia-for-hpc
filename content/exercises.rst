@@ -1,10 +1,14 @@
 Advanced exercises
 ==================
 
+
+
 .. instructor-note::
 
    - 0 min teaching
    - 30 min exercises
+
+
 
 Example use case: heat flow in two-dimensional area
 ---------------------------------------------------
@@ -15,6 +19,8 @@ Heat flows in objects according to local temperature differences, as if seeking 
    :align: center
    
    Over time, the temperature distribution progresses from the initial state toward an end state where upper triangle is warm and lower is cold. The average temperature tends to (70 + 85 + 20 + 5) / 4 = 45.
+
+
 
 Technique: stencil computation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

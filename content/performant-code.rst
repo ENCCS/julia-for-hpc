@@ -1,6 +1,8 @@
 Writing performant Julia code
 =============================
 
+
+
 .. questions::
 
    - How should performance be measured?
@@ -11,6 +13,8 @@ Writing performant Julia code
 
    - 30 min teaching
    - 20 min exercises
+
+
 
 Introducing a toy example
 -------------------------
@@ -267,6 +271,8 @@ Julia's official documentation has an important page on
 Before embarking on any research software project in Julia you
 should carefully read this page!
 
+
+
 Exercises
 ---------
 
@@ -280,6 +286,8 @@ See also
 --------
 
 - https://docs.julialang.org/en/v1/manual/performance-tips/
+
+
 
 .. keypoints::
 
