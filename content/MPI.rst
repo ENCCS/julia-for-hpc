@@ -48,8 +48,7 @@ This is how a hello world MPI program looks like in Julia:
 - ``Comm_size`` returns the total number of ranks.
 
 To run this code with a specific number of processes we use the ``mpiexecjl`` command which 
-can be installed as a wrapper of the MPI command ``mpiexec`` 
-(see :doc:`setup`):
+can be installed as a wrapper of the MPI command ``mpiexec`` (see :doc:`setup`):
 
 .. code-block:: console
 
@@ -59,6 +58,29 @@ can be installed as a wrapper of the MPI command ``mpiexec``
    # Hello from process 0 out of 4
    # Hello from process 2 out of 4
    # Hello from process 3 out of 4
+
+
+
+.. topic:: MPI configuration 
+
+   MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Point-to-point and collective communication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
