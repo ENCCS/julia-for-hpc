@@ -16,7 +16,7 @@ Julia on HPC systems
 Despite rapid growth in the HPC domain in recent years, Julia is still not considered as mainstream as C/C++ and Fortran in the HPC world, and even Python is more commonly used (and generally available) than Julia.
 Fortunately, even if Julia is not already available as an environment module on your favorite cluster, it is easy to install Julia from scratch.
 Moreover, there is little reason to expect the performance of official Julia binaries to be any worse than if a system administrator built Julia from scratch with architecture-specific optimization.
-`Julia on HPC clusters <https://juliahpc.github.io/JuliaOnHPCClusters/>`_ gives an overview of the availability and documentation of Julia on a range of HPC systems around the world, including EuroHPC systems.
+`Julia on HPC clusters <https://juliahpc.github.io/>`_ gives an overview of the availability and documentation of Julia on a range of HPC systems around the world, including EuroHPC systems.
 
 
 Terminology of an HPC cluster

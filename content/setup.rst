@@ -24,6 +24,7 @@ Both installation methods are documented here. If you are on Windows we recommen
 `juliaup`. If you are on MacOS or Linux, choose the installation method you feel most 
 comfortable with.
 
+
 1. Using the Julia installer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -47,18 +48,32 @@ we recommend to install the
 2. Using Juliaup      
 ^^^^^^^^^^^^^^^^
 
-Full instructions can be found at https://github.com/JuliaLang/juliaup.
+Full instructions can be found at `HERE <https://github.com/JuliaLang/juliaup>`_.
 
 In short:
 
 - On Windows you can install Julia and Juliaup either through the 
-  `Windows store <https://www.microsoft.com/store/apps/9NJNWW8PVKMN>`__ or on a command line 
-  by executing `winget install julia -s msstore`.
-- On MacOS or Linux, type `curl -fsSL https://install.julialang.org | sh` on a command line 
-  and follow the instructions.  
+  `Windows store <https://www.microsoft.com/store/apps/9NJNWW8PVKMN>`_ or on a command line 
+  by executing ``winget install julia -s msstore``.
+- On MacOS or Linux, type ``curl -fsSL https://install.julialang.org | sh`` on a command line 
+  and follow the instructions.
 
-Checking your installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+	- If your home directory is not the optimal location for installing Julia, answer "no" to the question "Do you want to install with these default configuration choices?" and enter the appropriate directory path.
+	- After the installation your shell configuration file(s) will be updated (e.g. ``.bashrc``). 
+    - Source this file to update your PATH variable: ``. $HOME/.bashrc``.
+
+If you want or need to install Julia yourself on an HPC system, keep the following points in mind:
+
+- Install Julia on the cluster's high-performance parallel file system as this will 
+  improve performance of large parallel Julia jobs.
+- Installation of Julia packages can take up significant disk space and include a large number 
+  of files - make sure to use a file system with sufficiently high quotas for both disk space 
+  and number of files.
+- When in doubt, ask the support team of the cluster for guidance!
+
+
+3. Checking your installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Regardless of how you installed Julia, please ensure that you can open the Julia REPL by
 typing ``julia`` on the command line in a terminal, or by clicking the Julia 
@@ -69,6 +84,35 @@ see something like in the image below (nevermind the version number).
    :align: center
 
 To exit the REPL again, hit ``CTRL-d`` or type ``exit()``.
+
+
+4. Installing other packages (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On HPC systems it is often recommended to install own programs and packages in a directory different 
+from the home directory (``$HOME``). The ``JULIA_DEPOT_PATH`` variable controls where Julia's 
+package manager (as well as Julia's code loading mechanisms) looks for package registries, 
+installed packages, named environments, repo clones, cached compiled package images, configuration files, 
+and the default location of the REPL's history file.
+
+Since the available file systems can differ significantly between HPC centers, 
+it is hard to make a general statement about where the Julia depot folder should be placed.
+ 
+Generally speaking, the file system hosting the Julia depot should have
+
+- Good parallel I/O
+- No tight quotas on disk space or number of files
+- Read and write access by the user
+- No mechanism for the automatic deletion of unused files (or the depot should be excluded as an exception)
+
+On some systems, it resides in the user's home directory. On other systems, it is put on a parallel 
+scratch file system.
+
+To prepend the ``JULIA_DEPOT_PATH`` variable with a new directory, type 
+``export JULIA_DEPOT_PATH="/path_to_directory/v$(VERSION.major).$(VERSION.minor):$JULIA_DEPOT_PATH``
+(put this in the shell configuration file, e.g. ``.bashrc`` or ``.bash_profile``).
+
+
 
 Installing Visual Studio Code
 -----------------------------
