@@ -141,7 +141,7 @@ DIRECTIVES = [TypealongDirective, ParametersDirective, DemoDirective]
 def setup(app):
     for obj in DIRECTIVES:
         app.add_directive(obj.get_cssname(), obj)
-#    app.add_css_file("overrides.css")
+    app.add_css_file("overrides.css")
 
 
 

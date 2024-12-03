@@ -63,10 +63,10 @@ can be installed as a wrapper of the MPI command ``mpiexec`` (see :doc:`setup`):
 
 :::{MPI configuration}
 
-:class: dropdown
-MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
-The `MPIPreferences.jl <https://juliaparallel.org/MPI.jl/latest/reference/mpipreferences/>`_ package, based on `Preferences.jl <https://github.com/JuliaPackaging/Preferences.jl/>`_ which is used to store various package configuration switches in persistent TOML files, is used to select which MPI implementation to use. 
-:::
+   :class: dropdown
+   MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
+   The `MPIPreferences.jl <https://juliaparallel.org/MPI.jl/latest/reference/mpipreferences/>`_ package, based on `Preferences.jl <https://github.com/JuliaPackaging/Preferences.jl/>`_ which is used to store various package configuration switches in persistent TOML files, is used to select which MPI implementation to use. 
+   :::
 
 
 .. typealong:: MPI configuration1
