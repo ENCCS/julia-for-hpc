@@ -79,7 +79,9 @@ html_title = project
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["css"]
+# html_static_path = ["css"]
+html_static_path = ['_static']
+html_css_files = ["overrides.css"]
 
 # HTML context:
 from os.path import dirname, realpath, basename
@@ -136,12 +138,12 @@ class DemoDirective(_BaseCRDirective):
 DIRECTIVES = [TypealongDirective, ParametersDirective, DemoDirective]
 
 
-
-
 def setup(app):
-#    for obj in DIRECTIVES:
-#        app.add_directive(obj.get_cssname(), obj)
-    app.add_css_file("overrides.css")
+    for obj in DIRECTIVES:
+        app.add_directive(obj.get_cssname(), obj)
+#    app.add_css_file("overrides.css")
+
+
 
 import os
 if os.environ.get('GITHUB_REF', '') == 'refs/heads/main':
