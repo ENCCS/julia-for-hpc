@@ -11,8 +11,9 @@ Message passing
    - 20 min teaching
    - 20 min exercises
 
-MPI
----
+
+The ``MPI.jl``
+--------------
 
 `MPI.jl <https://github.com/JuliaParallel/MPI.jl>`_ is a Julia interface to 
 the Message Passing Interface, which has been the standard workhorse of 
@@ -60,36 +61,43 @@ can be installed as a wrapper of the MPI command ``mpiexec`` (see :doc:`setup`):
    # Hello from process 3 out of 4
 
 
+.. demo:: MPI configuration
 
-:::{MPI configuration}
+   ``MPI.jl`` can use either a JLL-provided MPI library, which can be automatically installed when installing ``MPI.jl``, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
 
-   :class: dropdown
-   MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
-   The `MPIPreferences.jl <https://juliaparallel.org/MPI.jl/latest/reference/mpipreferences/>`_ package, based on `Preferences.jl <https://github.com/JuliaPackaging/Preferences.jl/>`_ which is used to store various package configuration switches in persistent TOML files, is used to select which MPI implementation to use. 
-   :::
-
-
-.. typealong:: MPI configuration1
-
-   MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
-
-
-.. demo:: MPI configuration2
-
-   MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
-
-.. parameter:: MPI configuration2
-
-   MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
-
-
-
-
+   To install and configure ``MPI.jl`` with a particular MPI backend on a cluster, first load the preferred MPI library, e.g.
+   
+   .. code-block:: console
+   
+      $ module load OpenMPI
+   
+   Then, in a Julia session:
+   
+   .. code-block:: julia
+   
+      using Pkg
+      Pkg.add("MPI")
+      Pkg.add("MPIPreferences")
+   
+      using MPIPreferences
+      MPIPreferences.use_system_binary()
+   
+   This will create a file ``LocalPreferences.toml`` in the default Julia directory, e.g. 
+   ``$HOME/.julia/environments/v1.8``, with content similar to the following:
+   
+   .. code-block:: toml
+   
+      [MPIPreferences]
+      _format = "1.0"
+      abi = "OpenMPI"
+      binary = "system"
+      libmpi = "libmpi"
+      mpiexec = "mpiexec"  
 
 
 
 Point-to-point and collective communication
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
 
 The MPI standard contains a `lot of functionality <https://juliaparallel.org/MPI.jl/stable/refindex/>`_, 
 but in principle one can get away with only point-to-point communication (:meth:`MPI.send` and 
@@ -103,11 +111,13 @@ In any case, it is good to have a mental model of different communication patter
 
    ``send`` and ``recv``: blocking point-to-point communication between two ranks.    
 
+
 .. figure:: img/gather.png
    :align: right
    :scale: 80 %
 
    ``gather``: all ranks send data to rank ``root``.
+
 
 .. figure:: img/scatter.png
    :align: center
@@ -128,6 +138,7 @@ In any case, it is good to have a mental model of different communication patter
    :scale: 100 %
 
    ``reduce``: ranks send data which are reduced on rank ``root``
+
 
 .. callout:: Serialised vs buffer-like objects
 
@@ -152,7 +163,7 @@ In any case, it is good to have a mental model of different communication patter
 .. _Examples:
 
 Examples
-~~~~~~~~
+--------
 
 .. tabs::
  
@@ -182,13 +193,14 @@ Examples
          :language: julia
 
 
+
 Blocking and non-blocking communication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------
 
 Point-to-point communication can be *blocking* or *non-blocking*: 
-:meth:`MPI.Send` will only return when the program can safely modify the send buffer and 
-:meth:`MPI.Recv` will only return once the data has been received and written to the receive 
-buffer.
+
+- :meth:`MPI.Send` will only return when the program can safely modify the send buffer and 
+- :meth:`MPI.Recv` will only return once the data has been received and written to the receive buffer.
 
 Consider the following example of a **deadlock** caused by blocking communication. 
 The problem can be circumvented by introducing sequential sends and receives, but 
@@ -210,6 +222,7 @@ it's more conveniently solved by using non-blocking send and receive.
 
       .. literalinclude:: code/deadlock_nonblocking_solution.jl
          :language: julia
+
 
 
 Exercises
@@ -391,17 +404,18 @@ Exercises
 Limitations
 -----------
 
-MPI.jl has (as of October 2023) not reached v1.0 so future changes could be backwards incompatible. 
+``MPI.jl`` has (as of October 2023) not reached v1.0 so future changes could be backwards incompatible. 
 
-The MPI.jl documentation has a section on `known issues <https://juliaparallel.org/MPI.jl/latest/knownissues/>`__. 
+The ``MPI.jl`` documentation has a section on `known issues <https://juliaparallel.org/MPI.jl/latest/knownissues/>`_. 
 
 
 
 See also
 --------
 
-- `MPI.jl documentation <https://juliaparallel.org/MPI.jl/stable/>`__
-- `Introductory MPI lesson <https://pdc-support.github.io/introduction-to-mpi/>`__
+- `MPI.jl documentation <https://juliaparallel.org/MPI.jl/stable/>`_.
+- `Introductory MPI lesson <https://pdc-support.github.io/introduction-to-mpi/>`_.
+
 
 .. keypoints::
 
