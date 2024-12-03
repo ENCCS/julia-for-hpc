@@ -124,14 +124,16 @@ todo_include_todos = True
 # add few new directives
 from sphinx_lesson.directives import _BaseCRDirective
 
-
-class OptionalDirective(_BaseCRDirective):
+class TypealongDirective(_BaseCRDirective):
     extra_classes = ["toggle-shown", "dropdown"]
+
+class ParametersDirective(_BaseCRDirective):
+    extra_classes = ["dropdown"]
 
 class DemoDirective(_BaseCRDirective):
     extra_classes = ["toggle-shown", "dropdown"]
 
-DIRECTIVES = [OptionalDirective, DemoDirective]
+DIRECTIVES = [TypealongDirective, ParametersDirective, DemoDirective]
 
 
 

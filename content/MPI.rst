@@ -69,7 +69,7 @@ The `MPIPreferences.jl <https://juliaparallel.org/MPI.jl/latest/reference/mpipre
 :::
 
 
-.. optional:: MPI configuration1
+.. typealong:: MPI configuration1
 
    MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
 
@@ -78,7 +78,9 @@ The `MPIPreferences.jl <https://juliaparallel.org/MPI.jl/latest/reference/mpipre
 
    MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
 
+.. parameter:: MPI configuration2
 
+   MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
 
 
 
@@ -89,7 +91,7 @@ The `MPIPreferences.jl <https://juliaparallel.org/MPI.jl/latest/reference/mpipre
 Point-to-point and collective communication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The MPI standard contains a `lot of functionality <https://juliaparallel.org/MPI.jl/stable/refindex/>`__, 
+The MPI standard contains a `lot of functionality <https://juliaparallel.org/MPI.jl/stable/refindex/>`_, 
 but in principle one can get away with only point-to-point communication (:meth:`MPI.send` and 
 :meth:`MPI.recv`). However, collective communication can sometimes require less effort as you 
 will learn in an exercise below.
