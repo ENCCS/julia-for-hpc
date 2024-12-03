@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motivation &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx_lesson.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/overrides.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Writing performant Julia code" href="../performant-code/" />
+    <link rel="prev" title="Setup" href="../setup/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Motivation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-was-julia-created">Why was Julia created?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#speed">Speed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-two-language-problem">The two-language problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#composability">Composability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#drawbacks-and-workarounds">Drawbacks and workarounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-will-learn">What you will learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-you-will-not-learn">What you will not learn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cluster/">Running on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C and Fortran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Motivation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/motivation.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="motivation">
+<h1>Motivation<a class="headerlink" href="#motivation" title="Permalink to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>What is the two-language problem?</p></li>
+<li><p>How performant is Julia?</p></li>
+<li><p>What is composability?</p></li>
+<li><p>What will we learn and not learn in this lesson?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>15 min teaching</p></li>
+</ul>
+</div>
+<section id="why-was-julia-created">
+<h2>Why was Julia created?<a class="headerlink" href="#why-was-julia-created" title="Permalink to this heading"></a></h2>
+<p>Julia has been designed to be both fast and dynamic.
+In the words of its developers:</p>
+<blockquote>
+<div><p><em>We want a language that’s open source, with a liberal license. We
+want the speed of C with the dynamism of Ruby. We want a language
+that’s homoiconic, with true macros like Lisp, but with obvious,
+familiar mathematical notation like Matlab. We want something as
+usable for general programming as Python, as easy for statistics as
+R, as natural for string processing as Perl, as powerful for linear
+algebra as Matlab, as good at gluing programs together as the
+shell. Something that is dirt simple to learn, yet keeps the most
+serious hackers happy. We want it interactive and we want it
+compiled. (Did we mention it should be as fast as C?)</em></p>
+</div></blockquote>
+<p>From <a class="reference external" href="https://julialang.org/blog/2012/02/why-we-created-julia/">Why We Created Julia</a> by
+Jeff Bezanson Stefan Karpinski Viral B. Shah Alan Edelman</p>
+</section>
+<section id="speed">
+<h2>Speed<a class="headerlink" href="#speed" title="Permalink to this heading"></a></h2>
+<p>Many researchers and programmers are drawn to Julia because of its
+speed. Indeed, Julia is among the few languages in the exclusive
+<a class="reference external" href="https://www.hpcwire.com/off-the-wire/julia-joins-petaflop-club/">petaflop club</a>
+(along with C, C++ and Fortran).</p>
+<figure class="align-center" id="id1">
+<img alt="../_images/benchmarks.svg" src="../_images/benchmarks.svg" /><figcaption>
+<p><span class="caption-text">Micro-benchmarks comparing Julia with many other languages. Taken
+from the <a class="reference external" href="https://julialang.org/benchmarks/">Julia benchmarks section</a></span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="the-two-language-problem">
+<h2>The two-language problem<a class="headerlink" href="#the-two-language-problem" title="Permalink to this heading"></a></h2>
+<div class="admonition-combining-languages discussion important admonition" id="discussion-0">
+<p class="admonition-title">Combining languages</p>
+<p>Have you ever written and prototyped code in a high-level language and then
+found it necessary to rewrite or port it to a different language for performance?</p>
+</div>
+<p>To run code in any programming language, some sort of translation into
+machine instructions (assembly code) needs to take place, but how
+this translation takes place differs between programming languages:</p>
+<ul class="simple">
+<li><p><em>Interpreted</em> languages like Python and R translate instructions line
+by line.</p></li>
+<li><p><em>Compiled</em> languages like C/C++ and Fortran are translated by a compiler
+prior to running the program.</p></li>
+</ul>
+<p>The benefits of
+interpreted languages are that they are easier to read and write
+because less information on aspects like types and array sizes needs
+to be provided.  <strong>Programmer productivity</strong> is thus higher in interpreted
+languages, but compiled languages can perform <strong>faster by orders of
+magnitude</strong> because the compiler can perform optimizations during the
+translation to assembly. This is also known as the two-language problem.</p>
+<p>In many ways <strong>Julia looks like an
+interpreted language</strong>, and mostly behaves like one. But before each
+function is executed, the Julia engine Low-Level Virtual Machine (LLVM) will
+compile it “just in time” (JIT). More on that later.
+Thus you get the flexibility of an interpreted language and the
+execution speed of the compiled language at the cost of waiting a bit
+longer for the first execution of any function.</p>
+</section>
+<section id="composability">
+<h2>Composability<a class="headerlink" href="#composability" title="Permalink to this heading"></a></h2>
+<p>Julia is highly <a class="reference external" href="https://en.wikipedia.org/wiki/Composability">composable</a>,
+which means that by writing generic code,
+components (packages) that have been developed independently can simply be used
+together and the result is exactly what you would have dreamed about.</p>
+<p>A well known example is the interplay between
+<a class="reference external" href="https://diffeq.sciml.ai/stable/">DifferentialEquations.jl</a>,  a package for
+solving differential equations, and
+<a class="reference external" href="https://github.com/JuliaPhysics/Measurements.jl">Measurements.jl</a>, a package for
+working with magnitudes where uncertainties are explicitly reckoned.
+Here’s an example solving the simple pendulum equation:</p>
+<div class="math notranslate nohighlight">
+\[\ddot{\theta} + \frac{g}{L}\theta = 0\]</div>
+<p>(adapted from <a class="reference external" href="https://tutorials.sciml.ai/">https://tutorials.sciml.ai/</a>)</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">DifferentialEquations</span><span class="p">,</span><span class="w"> </span><span class="n">Measurements</span><span class="p">,</span><span class="w"> </span><span class="n">Plots</span>
+
+<span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">9.79</span><span class="w"> </span><span class="o">±</span><span class="w"> </span><span class="mf">0.02</span><span class="p">;</span><span class="w"> </span><span class="c"># Gravitational constants</span>
+<span class="n">L</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.00</span><span class="w"> </span><span class="o">±</span><span class="w"> </span><span class="mf">0.01</span><span class="p">;</span><span class="w"> </span><span class="c"># Length of the pendulum</span>
+
+<span class="c">#Initial Conditions</span>
+<span class="n">u₀</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="w"> </span><span class="o">±</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">π</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="o">±</span><span class="w"> </span><span class="mf">0.02</span><span class="p">]</span><span class="w"> </span><span class="c"># Initial speed and initial angle</span>
+<span class="n">tspan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">6.3</span><span class="p">)</span>
+
+<span class="c">#Define the problem</span>
+<span class="k">function</span><span class="w"> </span><span class="n">simplependulum</span><span class="p">(</span><span class="n">du</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+<span class="w">    </span><span class="n">θ</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">    </span><span class="n">dθ</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="w">    </span><span class="n">du</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dθ</span>
+<span class="w">    </span><span class="n">du</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="p">(</span><span class="n">g</span><span class="o">/</span><span class="n">L</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">θ</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c">#Pass to solvers</span>
+<span class="n">prob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ODEProblem</span><span class="p">(</span><span class="n">simplependulum</span><span class="p">,</span><span class="w"> </span><span class="n">u₀</span><span class="p">,</span><span class="w"> </span><span class="n">tspan</span><span class="p">)</span>
+<span class="n">sol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solve</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="n">Tsit5</span><span class="p">(),</span><span class="w"> </span><span class="n">reltol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">)</span>
+
+<span class="n">plot</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">t</span><span class="p">,</span><span class="w"> </span><span class="n">getindex</span><span class="o">.</span><span class="p">(</span><span class="n">sol</span><span class="o">.</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">label</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Numerical&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result is a plot of the solution to the differential
+equation with error bars!</p>
+<figure class="align-default">
+<img alt="../_images/composability.png" src="../_images/composability.png" />
+</figure>
+</section>
+<section id="drawbacks-and-workarounds">
+<h2>Drawbacks and workarounds<a class="headerlink" href="#drawbacks-and-workarounds" title="Permalink to this heading"></a></h2>
+<p><strong>Time to first plot</strong>: If you open the Julia REPL and type in a plotting command, it
+will take a few seconds for the plot to appear because
+Julia needs to <em>precompile</em> the fairly large Plots.jl package. This
+makes Julia unsuitable for small scripts that get called frequently
+to perform light work.</p>
+<ul class="simple">
+<li><p>Workaround 1: Use instead long-running REPL sessions</p></li>
+<li><p>Workaround 2: One can use
+<a class="reference external" href="https://github.com/JuliaLang/PackageCompiler.jl">PackageCompiler.jl</a> to
+create a precompiled package including Julia’s base libraries which
+can be run on a different computer.</p></li>
+</ul>
+<p><strong>Ecosystem</strong>: The ecosystem of packages is less mature than e.g. Python and R,
+so you might not find a package that corresponds exactly to your favorite
+package in another language.</p>
+<ul class="simple">
+<li><p>Workaround 1: It’s straightforward to use external libraries in Python or R</p></li>
+<li><p>Workaround 2: Writing fast Julia code is easier than in most other languages
+so you might consider writing your own version!</p></li>
+</ul>
+<p><strong>Rapid package evolution</strong>: Although most major packages have stabilized, there are still
+many packages that go through frequent large changes that can break your code.</p>
+<ul class="simple">
+<li><p>Workaround: Julia comes with a powerful package manager and in-built support
+for isolated software environments where dependencies can be recorded exactly.</p></li>
+</ul>
+<p><strong>Large memory footprint</strong>: Because of precompilation of Julia’s Base libraries
+the runtime of a running process can be very large. This can take away valuable
+memory for actual computation.</p>
+<ul class="simple">
+<li><p>Workaround: There are plans to enable building more lightweight runtimes
+in future versions of Julia.</p></li>
+</ul>
+</section>
+<section id="what-you-will-learn">
+<h2>What you will learn<a class="headerlink" href="#what-you-will-learn" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>What’s different in Julia compared to most other languages.</p></li>
+<li><p>How to efficiently develop Julia packages and write unit tests.</p></li>
+<li><p>How to benchmark and profile Julia code.</p></li>
+<li><p>How to write efficient serial code.</p></li>
+<li><p>How to use multithreading, multiprocessing and MPI.</p></li>
+<li><p>How to write Julia code for GPUs.</p></li>
+</ul>
+<p>We will be focusing on high-level performance considerations and parallelization
+approaches and not dig deep into low-level aspects. There is always a tradeoff;
+to squeeze as much performance out of a code as possible one often needs to drop
+down to lower levels of memory management, interprocess communication etc.
+But using higher-level approaches can lead to significant performance gain
+for many scientific problems which makes it a good (initial) time investment.</p>
+</section>
+<section id="what-you-will-not-learn">
+<h2>What you will not learn<a class="headerlink" href="#what-you-will-not-learn" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>We will only be scratching the surface of the topics we do cover. Make
+sure to go through the recommended additional reading at the end of each
+episode if you want to learn more.</p></li>
+<li><p>How to interoperate with other languages. Calling code in Python, R,
+<a class="reference external" href="https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/">C/C++ and Fortran</a>
+is relatively straightforward but is outside the current scope.</p></li>
+<li><p>Julia has mature packages for scientific computing in many different scientific disciplines.
+An overview of the package ecosystem will be provided but we
+will not go into any details.</p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Jeffrey M. Perkel. <a class="reference external" href="https://www.nature.com/articles/d41586-019-02310-3">Julia: come for the syntax, stay for the speed</a></p></li>
+<li><p>Lin, Wei-Chen, and Simon McIntosh-Smith.
+<a class="reference external" href="https://ieeexplore.ieee.org/abstract/document/9652798">Comparing Julia to Performance Portable Parallel Programming Models for HPC.</a>,
+2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.</p></li>
+<li><p><a class="reference external" href="https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/">Interfacing with C and Fortran</a>.</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaPy/PyCall.jl">Interfacing with Python via PyCall</a>.</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaInterop">Interfacing to various other languages</a>.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../setup/" class="btn btn-neutral float-left" title="Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../performant-code/" class="btn btn-neutral float-right" title="Writing performant Julia code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
