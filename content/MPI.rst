@@ -66,7 +66,7 @@ can be installed as a wrapper of the MPI command ``mpiexec`` (see :doc:`setup`):
    MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate on an HPC cluster.
    The `MPIPreferences.jl <https://juliaparallel.org/MPI.jl/latest/reference/mpipreferences/>`_ package, based on `Preferences.jl <https://github.com/JuliaPackaging/Preferences.jl/>`_ which is used to store various package configuration switches in persistent TOML files, is used to select which MPI implementation to use. 
 
-.. typealong:: The internal dependency tree-Test
+.. signature:: The internal dependency tree-Test
 
    You can visualize the dependencies between targets in the project with Graphviz (make sure that you have installed the Graphviz package):
 

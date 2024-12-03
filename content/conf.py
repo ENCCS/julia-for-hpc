@@ -119,6 +119,23 @@ todo_include_todos = True
 #"""
 
 
+
+
+# add few new directives
+from sphinx_lesson.directives import _BaseCRDirective
+
+
+class OptionalDirective(_BaseCRDirective):
+    extra_classes = ["toggle-shown", "dropdown"]
+
+class DemoDirective(_BaseCRDirective):
+    extra_classes = ["toggle-shown", "dropdown"]
+
+DIRECTIVES = [OptionalDirective, DemoDirective]
+
+
+
+
 def setup(app):
 #    for obj in DIRECTIVES:
 #        app.add_directive(obj.get_cssname(), obj)
