@@ -1,6 +1,7 @@
 Using Julia on an HPC cluster
 =============================
 
+
 .. questions::
 
    - How do we run Julia in an HPC cluster?
@@ -11,12 +12,15 @@ Using Julia on an HPC cluster
    - 30 min teaching
    - 30 min exercises
 
+
+
 Julia on HPC systems
 --------------------
 Despite rapid growth in the HPC domain in recent years, Julia is still not considered as mainstream as C/C++ and Fortran in the HPC world, and even Python is more commonly used (and generally available) than Julia.
 Fortunately, even if Julia is not already available as an environment module on your favorite cluster, it is easy to install Julia from scratch.
 Moreover, there is little reason to expect the performance of official Julia binaries to be any worse than if a system administrator built Julia from scratch with architecture-specific optimization.
 `Julia on HPC clusters <https://juliahpc.github.io/>`_ gives an overview of the availability and documentation of Julia on a range of HPC systems around the world, including EuroHPC systems.
+
 
 
 Terminology of an HPC cluster
@@ -35,6 +39,7 @@ We demonstrate the popular **Lmod** software and how to use Julia module environ
 Finally, HPC clusters use a **workload manager** to manage resources and run jobs on compute nodes.
 We demonstrate the popular **Slurm** workload manager and how to run Julia programs that perform various forms of parallel computing with Slurm.
 We refer to a single workload run through a workload manager as a **job**.
+
 
 
 Using module environments
@@ -100,6 +105,7 @@ In case everything works well, we should be ready to move forward.
           module load julia-amdgpu
 
 
+
 Running interactive jobs
 ------------------------
 We can launch an interactive job on a compute node via Slurm.
@@ -144,6 +150,7 @@ The :code:`srun` command launches the job with options that declare the resource
              --time="00:15:00" \
              --pty \
              bash
+
 
 
 Running batch jobs
@@ -217,8 +224,10 @@ The :code:`sbatch` command launches the batch job, with options that declare the
          #SBATCH --time="00:15:00"
 
 
+
 Running Julia application in a job
 ----------------------------------
+
 Let's consider a standalone Julia application that contains the following files:
 
 - :code:`Project.toml` for describing project metadata and dependencies.
@@ -268,8 +277,20 @@ We assume that our current working directory is the Julia application.
 Now, we can run the batch script as a batch job or supply the commands in the batch script individually to an interactive session.
 
 
+
+.. demo:: The ``ClusterManagers.jl`` package
+
+   The `ClusterManagers.jl <https://github.com/JuliaParallel/ClusterManagers.jl>`_ is a package for interactive HPC work with all commonly used HPC scheduling systems, including SLURM, PBS, LSF, SGE, HTCondor, Kubernetes, etc.
+   
+   The usage of ``ClusterManagers.jl`` is cluster-dependent and it is better to consult the system administrator use before using ``ClusterManagers.jl`` for Julia programming.
+   
+   An additional package named `SlurmClusterManager.jl <https://juliahub.com/ui/Packages/General/SlurmClusterManager>`_ can also provide support for using julia within the Slurm cluster environment. Its code is adapted from `ClusterManagers.jl <https://github.com/JuliaParallel/ClusterManagers.jl>`_ with some modifications.
+
+
+
 Exercises
 ---------
+
 In these exercises you should create the three files ``Project.toml``, ``script.jl``, and ``script.sh`` and run them via Slurm in the LUMI cluster.
 If the course has a resource reservation, we can use the :code:`--reservation="<name>"` option to use it.
 

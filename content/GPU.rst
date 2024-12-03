@@ -1,6 +1,7 @@
 GPU programming
 ===============
 
+
 .. questions::
 
    - What are the high-level and low-level methods for GPU programming in Julia?
@@ -13,20 +14,21 @@ GPU programming
    - 40 min exercises
 
 
+
 Julia has first-class support for GPU programming through the following packages that target GPUs from all major vendors:
 
-- `CUDA.jl <https://cuda.juliagpu.org/stable/>`_ for NVIDIA GPUs
-- `AMDGPU.jl <https://amdgpu.juliagpu.org/stable/>`_ for AMD GPUs
-- `oneAPI.jl <https://github.com/JuliaGPU/oneAPI.jl>`_ for Intel GPUs
-- `Metal.jl <https://github.com/JuliaGPU/Metal.jl>`_ for Apple M-series GPUs
+- `CUDA.jl <https://cuda.juliagpu.org/stable/>`_ for NVIDIA GPUs;
+- `AMDGPU.jl <https://amdgpu.juliagpu.org/stable/>`_ for AMD GPUs;
+- `oneAPI.jl <https://github.com/JuliaGPU/oneAPI.jl>`_ for Intel GPUs;
+- `Metal.jl <https://github.com/JuliaGPU/Metal.jl>`_ for Apple M-series GPUs.
 
-``CUDA.jl`` is the most mature, ``AMDGPU.jl`` is somewhat behind but still 
-ready for general use, while ``oneAPI.jl`` and ``Metal.jl`` are functional but might 
-contain bugs, miss some features and provide suboptimal performance.
+``CUDA.jl`` is the most mature, ``AMDGPU.jl`` is somewhat behind but still ready for general use, 
+while ``oneAPI.jl`` and ``Metal.jl`` are functional but might contain bugs, miss some features and provide suboptimal performance.
 
 NVIDIA still dominates the HPC accelerator market, but AMD has recently made big strides in this sector and both Frontier and LUMI (ranked 1st and 3rd on the Top500 list in June 2023) are built on AMD GPUs. This section will show code examples targeting all four frameworks, but for certain functionalities only the ``CUDA.jl`` version will be shown. 
 
 ``CUDA.jl``, ``AMDGPU.jl``, ``oneAPI.jl`` and ``Metal.jl`` offer both user-friendly high-level abstractions that require very little programming effort and a lower level approach for writing kernels for fine-grained control.
+
 
 Setup
 -----
@@ -118,6 +120,7 @@ to a GPU device and the necessary software stack.
   has created a Colab notebook that can be reused for Julia computing on Colab.
 
 
+
 GPUs vs CPUs
 ------------
 
@@ -140,6 +143,7 @@ Some key aspects of GPUs that need to be kept in mind:
 - Cores in a GPU are arranged into a particular structure. At the highest level 
   they are divided into "streaming multiprocessors" (SMs). Some of these details are 
   important when writing own GPU kernels.
+
 
 
 The array interface
@@ -1203,8 +1207,8 @@ Exercises
 See also
 --------
 
-- `JuliaGPU organisation <https://juliagpu.org/>`__
-- `CUDA.jl documentation <https://cuda.juliagpu.org/stable/>`__
-- `AMDGPU.jl documentation <https://amdgpu.juliagpu.org/stable/>`__
-- `JuliaCon2021 GPU workshop <https://github.com/maleadt/juliacon21-gpu_workshop>`__
-- `Advanced GPU programming tutorials <https://github.com/JuliaComputing/Training/tree/master/AdvancedGPU>`__
+- `JuliaGPU organisation <https://juliagpu.org/>`_.
+- `CUDA.jl documentation <https://cuda.juliagpu.org/stable/>`_.
+- `AMDGPU.jl documentation <https://amdgpu.juliagpu.org/stable/>`_.
+- `JuliaCon2021 GPU workshop <https://github.com/maleadt/juliacon21-gpu_workshop>`_.
+- `Advanced GPU programming tutorials <https://github.com/JuliaComputing/Training/tree/master/AdvancedGPU>`_.

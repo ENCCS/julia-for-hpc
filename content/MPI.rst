@@ -331,8 +331,7 @@ Exercises
    There are several ways in which this function could be parallelised with MPI. Below you will 
    find two working solutions using collective communication: 
    
-   - One implements an unnecessarily complicated algorithm, which nonetheless is illustrative for 
-     more general cases.
+   - One implements an unnecessarily complicated algorithm, which nonetheless is illustrative for more general cases.
    - The other implements a more compact and efficient solution. 
    
    Inspect the complicated solution first and answer the questions!
