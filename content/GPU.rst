@@ -25,9 +25,16 @@ Julia has first-class support for GPU programming through the following packages
 ``CUDA.jl`` is the most mature, ``AMDGPU.jl`` is somewhat behind but still ready for general use, 
 while ``oneAPI.jl`` and ``Metal.jl`` are functional but might contain bugs, miss some features and provide suboptimal performance.
 
-NVIDIA still dominates the HPC accelerator market, but AMD has recently made big strides in this sector and both Frontier and LUMI (ranked 1st and 3rd on the Top500 list in June 2023) are built on AMD GPUs. This section will show code examples targeting all four frameworks, but for certain functionalities only the ``CUDA.jl`` version will be shown. 
+NVIDIA still dominates the HPC accelerator market, but AMD has recently made big strides in this sector and 
+El Capitan, Frontier and LUMI (ranked 1st, 2nd and 8th on the Top500 list in November 2024) are built on AMD GPUs. 
+This section will show code examples targeting all four frameworks, but for certain functionalities only 
+the ``CUDA.jl`` version will be shown. 
 
-``CUDA.jl``, ``AMDGPU.jl``, ``oneAPI.jl`` and ``Metal.jl`` offer both user-friendly high-level abstractions that require very little programming effort and a lower level approach for writing kernels for fine-grained control.
+``CUDA.jl``, ``AMDGPU.jl``, ``oneAPI.jl`` and ``Metal.jl`` offer both user-friendly high-level abstractions that 
+require very little programming effort and a lower level approach for writing kernels for fine-grained control.
+
+Moreover, the ``KernelAbstractions.jl`` package can be used to write vendor-agnostic code that can run on any of the aforementioned
+GPUs as well as fallback onto CPU.
 
 
 Setup
@@ -75,7 +82,8 @@ Setup
 To use the Julia GPU stack, one needs to have the relevant GPU drivers and 
 programming toolkits installed. GPU drivers are already installed on HPC systems 
 while on your own machine you will need to install them yourself (see e.g.  these 
-`instructions from NVIDIA <https://www.nvidia.com/Download/index.aspx>`_). 
+instructions from `NVIDIA <https://www.nvidia.com/Download/index.aspx>`_ and 
+`AMD <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/index.html>`_). 
 Programming toolkits for CUDA can be installed automatically through 
 Julia's artifact system upon the first usage:
 
@@ -259,7 +267,10 @@ performance:
       
          @btime $A * $A;
          # FIXME: how to synchronize with oneAPI
-         @btime $A_d * $A_d;
+         @btime  begin 
+            $A_d * $A_d;
+            oneAPI.synchronize()
+         end
 
    .. group-tab:: Apple
 
@@ -284,7 +295,7 @@ There should be a considerable speedup!
 
    .. solution::
 
-      For example, on an Mi250X AMD GPU:
+      For example, on an MI250X AMD GPU:
 
       .. code-block:: julia
 
@@ -360,34 +371,40 @@ Vendor libraries
 ^^^^^^^^^^^^^^^^
 
 Support for using GPU vendor libraries from Julia is currently only supported on 
-NVIDIA GPUs.
-NVIDIA libraries contain precompiled kernels for common 
-operations like matrix multiplication (`cuBLAS`), fast Fourier transforms 
-(`cuFFT`), linear solvers (`cuSOLVER`), etc. These kernels are wrapped
-in ``CUDA.jl`` and can be used directly with ``CuArrays``:
+NVIDIA and AMD GPUs. CUDA and ROCm libraries contain precompiled kernels for common 
+operations like matrix multiplication (`cuBLAS`/`rocBLAS`), fast Fourier transforms 
+(`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocSolver`), as well as primitives 
+useful for the implementation of deep neural networks (`cuDNN`/`MIOpen`). These kernels are wrapped
+in their respective vendor libraries and can be used with the corresponding ``GPUArray``:
 
-.. code-block:: julia
 
-   # create a 100x100 Float32 random array and an uninitialized array
-   A = CUDA.rand(2^9, 2^9);
-   B = CuArray{Float32, 2}(undef, 2^9, 2^9);
+.. tabs:: 
 
-   # regular matrix multiplication uses cuBLAS under the hood
-   A * A
+   .. group-tab:: CUDA 
 
-   # use LinearAlgebra for matrix multiplication
-   using LinearAlgebra
-   mul!(B, A, A)
+      .. code-block:: julia
 
-   # use cuSOLVER for QR factorization
-   qr(A)
+         # create a 100x100 Float32 random array and an uninitialized array
+         A = CUDA.rand(2^9, 2^9);
+         B = CuArray{Float32, 2}(undef, 2^9, 2^9);
+         # regular matrix multiplication uses cuBLAS under the hood
+         A * A
 
-   # solve equation A*X == B
-   A \ B
+         # use LinearAlgebra for matrix multiplication
+         using LinearAlgebra
+         mul!(B, A, A)
 
-   # use cuFFT for FFT
-   using CUDA.CUFFT
-   fft(A)
+         # use cuSOLVER for QR factorization
+         qr(A)
+
+         # solve equation A*X == B
+         A \ B
+
+         # use cuFFT for FFT
+         using CUDA.CUFFT
+         fft(A)
+   
+
 
 .. challenge:: Convert from Base.Array or use GPU methods?
 
