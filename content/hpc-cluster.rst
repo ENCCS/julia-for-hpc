@@ -44,8 +44,8 @@ We refer to a single workload run through a workload manager as a **job**.
 
 Using module environments
 -------------------------
-We can load a shared Julia installation as a module environment if one is available.
-The module environment modifies the path to make the Julia command line client available and may set environment variables for Julia thread count and modify the depot and load paths to make shared packages available.
+We can load a Julia installation as a module environment if one is available.
+The module environment modifies the path to make the Julia command line client available and may set environment variables for Julia thread count.
 
 Available module environments are controlled by the module path (:code:`MODULEPATH`) environment variable.
 Sometimes, it is necessary to add custom directories to the module path as follows:
