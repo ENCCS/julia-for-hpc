@@ -44,8 +44,8 @@ We refer to a single workload run through a workload manager as a **job**.
 
 Using module environments
 -------------------------
-We can load a shared Julia installation as a module environment if one is available.
-The module environment modifies the path to make the Julia command line client available and may set environment variables for Julia thread count and modify the depot and load paths to make shared packages available.
+We can load a Julia installation as a module environment if one is available.
+The module environment modifies the path to make the Julia command line client available and may set environment variables for Julia thread count.
 
 Available module environments are controlled by the module path (:code:`MODULEPATH`) environment variable.
 Sometimes, it is necessary to add custom directories to the module path as follows:
@@ -109,6 +109,22 @@ In case everything works well, we should be ready to move forward.
    .. code-block::
 
        module load julia-amdgpu
+
+
+Installing packages
+-------------------
+We can install Julia packages normally using the package manager on a login node in a cluster.
+We also recommend to precompile Julia environments on the login node using them on the compute nodes.
+Precompiling and installing Julia packages on a compute node may run into issues with limited temporary disk space and it consumes the resources allocated to the job.
+
+.. code-block:: julia
+
+   using Pkg
+   Pkg.add("MPI.jl")
+   Pkg.precompile()
+
+Packages such as MPI.jl, CUDA.jl, AMDGPU.jl and other can be installed normally.
+The cluster specific preferences are required only to use system installed MPI and GPU libraries at runtime.
 
 
 Running interactive jobs
@@ -293,194 +309,193 @@ In these exercises you should create the three files ``Project.toml``, ``script.
 If the course has a resource reservation, we can use the :code:`--reservation="<name>"` option to use it.
 
 
-Run multithreaded job
-^^^^^^^^^^^^^^^^^^^^^
-Run the following files in a single node job with two CPU cores and one julia thread per core.
+.. exercise:: Run multithreaded job on LUMI cluster
 
-``Project.toml``
+   Run the following files in a single node job with two CPU cores and one julia thread per core.
 
-.. code-block:: toml
+   ``Project.toml``
 
-   # empty Project.toml
+   .. code-block:: toml
 
-``script.jl``
+      # empty Project.toml
 
-.. code-block:: julia
+   ``script.jl``
 
-   using Base.Threads
-   a = zeros(Int, 2*nthreads())
-   @threads for i in eachindex(a)
-       a[i] = threadid()
-   end
-   println(a)
+   .. code-block:: julia
 
-.. solution::
+      using Base.Threads
+      a = zeros(Int, 2*nthreads())
+      @threads for i in eachindex(a)
+          a[i] = threadid()
+      end
+      println(a)
 
-   ``script.sh``
+   .. solution::
 
-   .. code-block:: bash
+      ``script.sh``
 
-      #!/bin/bash
-      #SBATCH --account="<project>"
-      #SBATCH --partition=small
-      #SBATCH --nodes=1
-      #SBATCH --ntasks-per-node=1
-      #SBATCH --cpus-per-task=2
-      #SBATCH --mem-per-cpu=1000
-      #SBATCH --time="00:15:00"
+      .. code-block:: bash
 
-      module use /appl/local/csc/modulefiles
-      module load julia
-      julia --project=. -e 'using Pkg; Pkg.instantiate()'
-      julia --project=. script.jl
+         #!/bin/bash
+         #SBATCH --account="<project>"
+         #SBATCH --partition=small
+         #SBATCH --nodes=1
+         #SBATCH --ntasks-per-node=1
+         #SBATCH --cpus-per-task=2
+         #SBATCH --mem-per-cpu=1000
+         #SBATCH --time="00:15:00"
 
-   .. code-block:: bash
+         module use /appl/local/csc/modulefiles
+         module load julia
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+         julia --project=. script.jl
 
-      sbatch script.sh
+      .. code-block:: bash
 
-
-Run distributed job
-^^^^^^^^^^^^^^^^^^^
-Run the following files a single node job with three CPU cores and one julia process per core.
-
-``Project.toml``
-
-.. code-block:: toml
-
-   [deps]
-   Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
-
-``script.jl``
-
-.. code-block:: julia
-
-   using Distributed
-   addprocs(Sys.CPU_THREADS-1)
-
-   @everywhere task() = myid()
-   futures = [@spawnat id task() for id in workers()]
-   outputs = fetch.(futures)
-   println(outputs)
-
-.. solution::
-
-   ``script.sh``
-
-   .. code-block:: bash
-
-      #!/bin/bash
-      #SBATCH --account="<project>"
-      #SBATCH --partition=small
-      #SBATCH --nodes=1
-      #SBATCH --ntasks-per-node=1
-      #SBATCH --cpus-per-task=3
-      #SBATCH --mem-per-cpu=1000
-      #SBATCH --time="00:15:00"
-
-      module use /appl/local/csc/modulefiles
-      module load julia
-      julia --project=. -e 'using Pkg; Pkg.instantiate()'
-      julia --project=. script.jl
-
-   .. code-block:: bash
-
-      sbatch script.sh
+         sbatch script.sh
 
 
-Run MPI job
-^^^^^^^^^^^
-Run the following files MPI code using two nodes with two slurm tasks per node and one CPU per task.
+.. exercise:: Run distributed job on LUMI cluster
 
-``Project.toml``
+   Run the following files a single node job with three CPU cores and one julia process per core.
 
-.. code-block:: toml
+   ``Project.toml``
 
-   [deps]
-   MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
+   .. code-block:: toml
 
-``script.jl``
+      [deps]
+      Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
-.. code-block:: julia
+   ``script.jl``
 
-   using MPI
+   .. code-block:: julia
 
-   MPI.Init()
-   comm = MPI.COMM_WORLD
-   rank = MPI.Comm_rank(comm)
-   size = MPI.Comm_size(comm)
-   println("Hello from rank $(rank) out of $(size) from host $(gethostname()) and process $(getpid()).")
-   MPI.Barrier(comm)
+      using Distributed
+      addprocs(Sys.CPU_THREADS-1)
 
-.. solution::
+      @everywhere task() = myid()
+      futures = [@spawnat id task() for id in workers()]
+      outputs = fetch.(futures)
+      println(outputs)
 
-   ``script.sh``
+   .. solution::
 
-   .. code-block:: bash
+      ``script.sh``
 
-      #!/bin/bash
-      #SBATCH --account="<project>"
-      #SBATCH --partition=small
-      #SBATCH --nodes=2
-      #SBATCH --ntasks-per-node=2
-      #SBATCH --cpus-per-task=1
-      #SBATCH --mem-per-cpu=1000
-      #SBATCH --time="00:15:00"
+      .. code-block:: bash
 
-      module use /appl/local/csc/modulefiles
-      module load julia
-      module load julia-mpi
-      julia --project=. -e 'using Pkg; Pkg.instantiate()'
-      srun julia --project=. script.jl
+         #!/bin/bash
+         #SBATCH --account="<project>"
+         #SBATCH --partition=small
+         #SBATCH --nodes=1
+         #SBATCH --ntasks-per-node=1
+         #SBATCH --cpus-per-task=3
+         #SBATCH --mem-per-cpu=1000
+         #SBATCH --time="00:15:00"
 
-   .. code-block:: bash
+         module use /appl/local/csc/modulefiles
+         module load julia
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+         julia --project=. script.jl
 
-      sbatch script.sh
+      .. code-block:: bash
+
+         sbatch script.sh
 
 
-Run GPU job
-^^^^^^^^^^^
-Run the following files GPU code using one node with one slurm tasks per node, one GPU per node and sixteen CPUs per task.
+.. exercise:: Run MPI job on LUMI cluster
 
-``Project.toml``
+   Run the following files MPI code using two nodes with two slurm tasks per node and one CPU per task.
 
-.. code-block:: toml
+   ``Project.toml``
 
-   [deps]
-   AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+   .. code-block:: toml
 
-``script.jl``
+      [deps]
+      MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 
-.. code-block:: julia
+   ``script.jl``
 
-   using AMDGPU
+   .. code-block:: julia
 
-   A = rand(2^9, 2^9)
-   A_d = ROCArray(A)
-   B_d = A_d * A_d
+      using MPI
 
-.. solution::
+      MPI.Init()
+      comm = MPI.COMM_WORLD
+      rank = MPI.Comm_rank(comm)
+      size = MPI.Comm_size(comm)
+      println("Hello from rank $(rank) out of $(size) from host $(gethostname()) and process $(getpid()).")
+      MPI.Barrier(comm)
 
-   ``script.sh``
+   .. solution::
 
-   .. code-block:: bash
+      ``script.sh``
 
-      #!/bin/bash
-      #SBATCH --account=<project>
-      #SBATCH --partition=small-g
-      #SBATCH --time=00:15:00
-      #SBATCH --nodes=1
-      #SBATCH --ntasks-per-node=1
-      #SBATCH --cpus-per-task=16
-      #SBATCH --gpus-per-node=1
-      #SBATCH --mem-per-cpu=1750
+      .. code-block:: bash
 
-      module use /appl/local/csc/modulefiles
-      module load julia
-      module load julia-amdgpu
-      julia --project=. -e 'using Pkg; Pkg.instantiate()'
-      julia --project=. script.jl
+         #!/bin/bash
+         #SBATCH --account="<project>"
+         #SBATCH --partition=small
+         #SBATCH --nodes=2
+         #SBATCH --ntasks-per-node=2
+         #SBATCH --cpus-per-task=1
+         #SBATCH --mem-per-cpu=1000
+         #SBATCH --time="00:15:00"
 
-   .. code-block:: bash
+         module use /appl/local/csc/modulefiles
+         module load julia
+         module load julia-mpi
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+         srun julia --project=. script.jl
 
-      sbatch script.sh
+      .. code-block:: bash
 
+         sbatch script.sh
+
+
+.. exercise:: Run GPU job on LUMI cluster
+
+   Run the following files GPU code using one node with one slurm tasks per node, one GPU per node and sixteen CPUs per task.
+
+   ``Project.toml``
+
+   .. code-block:: toml
+
+      [deps]
+      AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+
+   ``script.jl``
+
+   .. code-block:: julia
+
+      using AMDGPU
+
+      A = rand(2^9, 2^9)
+      A_d = ROCArray(A)
+      B_d = A_d * A_d
+
+   .. solution::
+
+      ``script.sh``
+
+      .. code-block:: bash
+
+         #!/bin/bash
+         #SBATCH --account=<project>
+         #SBATCH --partition=small-g
+         #SBATCH --time=00:15:00
+         #SBATCH --nodes=1
+         #SBATCH --ntasks-per-node=1
+         #SBATCH --cpus-per-task=16
+         #SBATCH --gpus-per-node=1
+         #SBATCH --mem-per-cpu=1750
+
+         module use /appl/local/csc/modulefiles
+         module load julia
+         module load julia-amdgpu
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+         julia --project=. script.jl
+
+      .. code-block:: bash
+
+         sbatch script.sh
