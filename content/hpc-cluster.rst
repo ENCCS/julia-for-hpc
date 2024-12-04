@@ -229,7 +229,6 @@ The :code:`sbatch` command launches the batch job, with options that declare the
          #SBATCH --time="00:15:00"
 
 
-
 Running Julia application in a job
 ----------------------------------
 
@@ -240,24 +239,22 @@ Let's consider a standalone Julia application that contains the following files:
   Optionally, it can implement a command line client if we want to parse arguments that are supplied to the script.
 - :code:`script.sh` for a batch script for setting up the Julia environment and running the Julia workload.
 
-Below, we show examples of the batch script :code:`script.sh`.
-We assume that our current working directory is the Julia application.
-
 .. demo:: Example of running Julia application on LUMI.
 
-   Assume we have a Julia script called `script.jl`.
+   We assume that our current working directory is the Julia application.
+   Let's write our Julia script to file named ``script.jl``.
 
    .. code-block:: julia
 
       println("Hello, world!")
 
-   We our application has no dependencies to the `Project.toml` file is empty.
+   Our application has no dependencies thus ``Project.toml`` file is empty.
 
    .. code-block:: toml
 
       # empty
 
-   Instantiate the project enviroment on the login node.
+   We should instantiate the project enviroment on the login node.
 
    .. code-block:: bash
 
@@ -265,7 +262,8 @@ We assume that our current working directory is the Julia application.
       module load julia
       julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
-   We have a batch scripts called `batch.sh` that run the Julia script using the Julia environment.
+   Next we write the batch script to file named ``batch.sh``.
+   It runs the Julia script using the Julia environment with predefined slurm parameters.
 
    .. code-block:: bash
 
@@ -281,22 +279,11 @@ We assume that our current working directory is the Julia application.
       module load julia
       julia --project=. script.jl
 
-   We can run the batch script using Slurm.
+   Finally, we can run the batch script using Slurm.
 
    .. code-block:: bash
 
       sbatch batch.sh
-
-Now, we can run the batch script as a batch job or supply the commands in the batch script individually to an interactive session.
-
-.. demo:: The ``ClusterManagers.jl`` package
-
-   The `ClusterManagers.jl <https://github.com/JuliaParallel/ClusterManagers.jl>`_ is a package for interactive HPC work with all commonly used HPC scheduling systems, including SLURM, PBS, LSF, SGE, HTCondor, Kubernetes, etc.
-   
-   The usage of ``ClusterManagers.jl`` is cluster-dependent and it is better to consult the system administrator use before using ``ClusterManagers.jl`` for Julia programming.
-   
-   An additional package named `SlurmClusterManager.jl <https://juliahub.com/ui/Packages/General/SlurmClusterManager>`_ can also provide support for using julia within the Slurm cluster environment. Its code is adapted from `ClusterManagers.jl <https://github.com/JuliaParallel/ClusterManagers.jl>`_ with some modifications.
-
 
 
 Exercises
