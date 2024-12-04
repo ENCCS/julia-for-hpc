@@ -198,7 +198,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
 
       .. code-block:: bash
 
-         srun \
+         sbatch \
              --account="<project>" \
              --partition=small-g \
              --nodes=1 \
@@ -400,9 +400,6 @@ Run the following files MPI code using two nodes with two slurm tasks per node a
    [deps]
    MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 
-   [compat]
-   MPI = "=0.20.8"
-
 ``script.jl``
 
 .. code-block:: julia
@@ -433,6 +430,7 @@ Run the following files MPI code using two nodes with two slurm tasks per node a
 
       module use /appl/local/csc/modulefiles
       module load julia
+      module load julia-mpi
       julia --project=. -e 'using Pkg; Pkg.instantiate()'
       srun julia --project=. script.jl
 
@@ -451,9 +449,6 @@ Run the following files GPU code using one node with one slurm tasks per node, o
 
    [deps]
    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
-
-   [compat]
-   AMDGPU = "=0.4.13"
 
 ``script.jl``
 
@@ -482,6 +477,7 @@ Run the following files GPU code using one node with one slurm tasks per node, o
       #SBATCH --mem-per-cpu=1750
 
       module use /appl/local/csc/modulefiles
+      module load julia
       module load julia-amdgpu
       julia --project=. -e 'using Pkg; Pkg.instantiate()'
       julia --project=. script.jl
