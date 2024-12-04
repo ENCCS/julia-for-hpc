@@ -82,28 +82,31 @@ We can list the loaded module and check that Julia is available as follows:
 
 In case everything works well, we should be ready to move forward.
 
-.. tabs::
+.. demo:: On LUMI, we can use Julia as follows:
 
-   .. tab:: LUMI CPU
+   .. code-block::
 
-      .. code-block::
+      # Add CSC's local module files to the module path
+      module use /appl/local/csc/modulefiles
 
-          # Add CSC's local module files to the module path
-          module use /appl/local/csc/modulefiles
+      # Load the Julia module
+      module load julia
 
-          # Load the Julia module
-          module load julia
+   We can load MPI preferences to use system the MPI with MPI.jl as runtime.
+   They are not required for installing MPI.jl.
 
-   .. tab:: LUMI GPU
+   .. code-block::
 
-      .. code-block::
+       # Load the Julia MPI module
+       module load julia-mpi
 
-          # Add CSC's local module files to the module path
-          module use /appl/local/csc/modulefiles
+   We can load AMDGPU preferences to use the system AMDGPU and ROCm with AMDGPU.jl at runtime.
+   They are not required for installing AMDGPU.jl
 
-          # Load the Julia AMDGPU module
-          module load julia-amdgpu
+   .. code-block::
 
+       # Load the Julia AMDGPU module
+       module load julia-amdgpu
 
 
 Running interactive jobs
@@ -238,45 +241,28 @@ Let's consider a standalone Julia application that contains the following files:
 Below, we show examples of the batch script :code:`script.sh`.
 We assume that our current working directory is the Julia application.
 
-.. tabs::
+.. demo:: Here is an example on LUMI:
 
-   .. tab:: LUMI CPU
+   .. code-block:: bash
 
-      .. code-block:: bash
+      #!/bin/bash
+      # Add CSC's local modulefiles to the modulepath
+      module use /appl/local/csc/modulefiles
 
-         #!/bin/bash
-         # Add CSC's local modulefiles to the modulepath
-         module use /appl/local/csc/modulefiles
+      # Load the Julia module
+      module load julia
 
-         # Load the Julia module
-         module load julia
+      # You can load MPI and AMDGPU preferences if needed
+      #module load julia-mpi
+      #module load julia-amdgpu
 
-         # Instantiate the project environment
-         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      # Instantiate the project environment
+      julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
-         # Run the julia script
-         julia --project=. script.jl
-
-   .. tab:: LUMI GPU
-
-      .. code-block:: bash
-
-         #!/bin/bash
-         # Add CSC's local modulefiles to the modulepath
-         module use /appl/local/csc/modulefiles
-
-         # Load the Julia AMDGPU module
-         module load julia-amdgpu
-
-         # Instantiate the project environment
-         julia --project=. -e 'using Pkg; Pkg.instantiate()'
-
-         # Run the julia script
-         julia --project=. script.jl
+      # Run the julia script
+      julia --project=. script.jl
 
 Now, we can run the batch script as a batch job or supply the commands in the batch script individually to an interactive session.
-
-
 
 .. demo:: The ``ClusterManagers.jl`` package
 
