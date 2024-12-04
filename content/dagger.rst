@@ -25,18 +25,17 @@ Task graphs are commonly used to represent scientific workflows.
    The graph has two paths :math:`(1,2,4)` and :math:`(1,3,4).`
    We can see that the vertices :math:`2` and :math:`3` are independent because there is no path between them.
 
-Formally, a **task graph** is a directed acyclic graph consisting of a set of vertices :math:`V=\{1,2,...,n\}` called **tasks** and a set of directed edges :math:`E\subseteq \{(i,j) \mid i\in V, j\in V, i<j \}` called **dependencies**.
-We say that a task :math:`j` `depends` on task :math:`i` if there is a path from :math:`i` to :math:`j.`
-Otherwise, the tasks are `independent`.
-**We can compute independent tasks in parallel.**
+Formally, a **task graph** is a directed acyclic graph consisting of a set of vertices :math:`V=\{1,2,...,n\}` called **tasks** and a set of directed edges :math:`E\subseteq \{(i,j) \mid i\in V, j\in V, i<j \}` that represent **dependencies** between tasks.
+We say that a task :math:`j` **depends** on task :math:`i` if there is a path from :math:`i` to :math:`j.`
+Otherwise, the tasks are **independent**.
+We can compute independent tasks in **parallel**.
 
 We also focus on task graphs that are **dynamically generated** such that a task can create new tasks and dependencies based on the inputs it receives.
-In these cases, the complete task graph is known after computing it.
+In these cases, the complete task graph is not known prior to computing it.
 
 Some frameworks, such as `Dask` for Python and `Dagger.jl` for Julia, can express task graphs and automatically execute independent tasks in parallel.
 Furthermore, they may support features such as out-of-core execution to process data larger than the memory and checkpointing for saving intermediate results to disk.
 We focus on defining task graphs and parallel execution.
-
 
 
 Dagger
