@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interfacing to C and Fortran &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx_lesson.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/overrides.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Summary and outlook" href="../conclusions/" />
+    <link rel="prev" title="GPU programming" href="../GPU/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cluster/">Running on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interfacing to C and Fortran</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-julia-interfacing-with-other-languages">Why Julia interfacing with other languages?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interfacing-julia-with-c">Interfacing Julia with C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interfacing-julia-with-fortran">Interfacing Julia with Fortran</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interfacing-julia-with-other-languages">Interfacing Julia with other languages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Interfacing to C and Fortran</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/interfacing.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="interfacing-to-c-and-fortran">
+<h1>Interfacing to C and Fortran<a class="headerlink" href="#interfacing-to-c-and-fortran" title="Permalink to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><ol class="arabic simple">
+<li></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="2">
+<li></li>
+</ol>
+</li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>20 min teaching</p></li>
+<li><p>20 min exercises</p></li>
+</ul>
+</div>
+<section id="why-julia-interfacing-with-other-languages">
+<h2>Why Julia interfacing with other languages?<a class="headerlink" href="#why-julia-interfacing-with-other-languages" title="Permalink to this heading"></a></h2>
+<p>One of the most significant advantages of Julia is its speed. As we have shown in the Episode
+<a class="reference external" href="https://enccs.github.io/julia-for-hpc/motivation/#speed">Motivation</a>, Julia is fast out-of-box
+without the necessity to do any additional steps. As such, Julia solves the so-called <strong>two-Language problem</strong>.</p>
+<p>Since Julia is fast enough, most of the libraries are written in pure Julia, and there is no need to use C or Fortran for performance.
+However, there are many high-quality, mature libraries for numerical computing already written in C and Fortran.
+It would be resource-wasting if it is not possible to use them in Julia.</p>
+<p>In fact, to allow easy use of existing C and Fortran code, Julia has native support for calling C and Fortran functions.
+Julia has a <strong>no boilerplate</strong> philosophy: <em>functions can be called directly from Julia without any glue code generation
+or compilation – even from the interactive prompt</em>.</p>
+<p>In this episode, we will show examples of Julia interfacing with C and Fortran.
+Extensive description of all provided functionality can be found in the
+<a class="reference external" href="https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/">official manual</a>.</p>
+</section>
+<section id="interfacing-julia-with-c">
+<h2>Interfacing Julia with C<a class="headerlink" href="#interfacing-julia-with-c" title="Permalink to this heading"></a></h2>
+<p>The interfacing of Julia with C and Fortran is accomplished by making an appropriate call with
+the <code class="docutils literal notranslate"><span class="pre">ccall</span></code> syntax, which looks like an ordinary function call.</p>
+<p>The C and Fortran code to be called must be available as a shared library.
+Most C and Fortran libraries ship compiled as shared libraries already.
+However, if you want to compile the code yourself using <cite>GCC</cite> (or <cite>Clang</cite>),
+you will need to use the <cite>-shared</cite> and <cite>-fPIC</cite> options.
+The machine instructions generated by Julia’s JIT are the same as a native C call would be,
+so the resulting overhead is the same as calling a library function from C code.</p>
+<p>By default, Fortran compilers generate mangled names (for example, converting function names to lowercase or uppercase,
+often appending an underscore), and so to call a Fortran function you must pass the mangled identifier corresponding
+to the rule followed by your Fortran compiler. When calling a Fortran function, all inputs must be passed as pointers
+to allocated values on the heap or stack. This applies not only to arrays and other mutable objects which are normally
+heap-allocated, but also to scalar values such as integers and floats which are normally stack-allocated and commonly
+passed in registers when using C or Julia calling conventions.</p>
+<p>When calling C and Fortran functions, the name of the function and the library it lives in
+are passed as a tuple in the first argument, followed by the return type of the function and the types
+of the function arguments, and finally the argument themselves. It’s a bit klunky, but it works!</p>
+<p>Here is one example to calculate the square root of a number (herein, it is 64.0).</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="k">ccall</span><span class="p">((</span><span class="ss">:sqrt</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;libm&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Float64</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Float64</span><span class="p">,),</span><span class="w"> </span><span class="mf">64.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It also makes sense to wrap a call like that in a native Julia function.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="n">csqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">ccall</span><span class="p">((</span><span class="ss">:sqrt</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;libm&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Float64</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Float64</span><span class="p">,),</span><span class="w"> </span><span class="n">x</span><span class="p">);</span>
+<span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="n">csqrt</span><span class="p">(</span><span class="mf">81.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following example is adapted from <a class="reference external" href="https://craftofcoding.wordpress.com/2017/02/08/calling-c-from-julia-i-simple-arrays/">Calling C from Julia</a> by <cite>The Craft of Coding</cite>.
+Let’s conside the following C function which computes the mean from an array of integer values.
+We will name the file as <code class="code docutils literal notranslate"><span class="pre">mean.c</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="nf">vectorMean</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="o">*</span><span class="n">arr</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">sum</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">mean</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="w">    </span><span class="n">mean</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">n</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">mean</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Next, we need to compile the code in <code class="code docutils literal notranslate"><span class="pre">mean.c</span></code> into a shared object named as <code class="code docutils literal notranslate"><span class="pre">mean.so</span></code>.
+We use the GNU C compiler (GCC) with the flags <code class="code docutils literal notranslate"><span class="pre">-Wall</span></code> to enable warnings, <code class="code docutils literal notranslate"><span class="pre">-fpic</span></code> to make the shared object relocatable and <code class="code docutils literal notranslate"><span class="pre">-shared</span></code> to produce a shared object.
+A collection of shared objects is usually referred to as a library.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gcc<span class="w"> </span>-Wall<span class="w"> </span>-fpic<span class="w"> </span>-shared<span class="w"> </span>-o<span class="w"> </span>mean.so<span class="w"> </span>mean.c
+</pre></div>
+</div>
+<p>Now, we can call the shared object from Julia using the <code class="code docutils literal notranslate"><span class="pre">ccall</span></code> function as
+follows:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># Define the array in Julia</span>
+<span class="n">arr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+
+<span class="c"># Length of the array</span>
+<span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">arr_c</span><span class="p">)</span>
+
+<span class="c"># Convert the inputs to native C integer types</span>
+<span class="n">arr_c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">collect</span><span class="p">(</span><span class="kt">Cint</span><span class="p">,</span><span class="w"> </span><span class="n">arr</span><span class="p">)</span>
+<span class="n">n_c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">convert</span><span class="p">(</span><span class="kt">Cint</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+
+<span class="c"># Call the shared library</span>
+<span class="k">ccall</span><span class="p">((</span><span class="ss">:vectorMean</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;./mean.so&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Cdouble</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Ptr</span><span class="p">{</span><span class="kt">Cint</span><span class="p">},</span><span class="w"> </span><span class="kt">Cint</span><span class="p">),</span><span class="w"> </span><span class="n">arr_c</span><span class="p">,</span><span class="w"> </span><span class="n">n_c</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="interfacing-julia-with-fortran">
+<h2>Interfacing Julia with Fortran<a class="headerlink" href="#interfacing-julia-with-fortran" title="Permalink to this heading"></a></h2>
+<p>During the compilation, the Fortran compilers usually generate mangled names by appending an underscore to the lowercased/uppercased function names.
+Therefore, if you want to call a Fortran function using Julia, you must pass the mangled identifier corresponding to the rule followed by your Fortran compiler.
+In addition, all inputs must be passed by reference when calling a Fortran function.</p>
+<p>Below we provide an example for interfacing Julia with Frotran.</p>
+<div class="highlight-fortran notranslate"><div class="highlight"><pre><span></span><span class="cp"># fortran_julia.f90</span>
+<span class="k">module </span><span class="n">fortran_julia</span>
+<span class="w">   </span><span class="k">implicit none</span>
+<span class="k">   public</span>
+<span class="k">   contains</span>
+
+<span class="k">   </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="k">function </span><span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">      </span><span class="k">implicit none</span>
+<span class="k">      </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="n">add</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="k">return</span>
+<span class="k">   end function </span><span class="n">add</span>
+
+<span class="w">   </span><span class="k">subroutine </span><span class="n">addsub</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">      </span><span class="k">implicit none</span>
+<span class="k">      </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>
+<span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="k">return</span>
+<span class="k">   end subroutine </span><span class="n">addsub</span>
+
+<span class="w">   </span><span class="k">subroutine </span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">      </span><span class="k">implicit none</span>
+<span class="k">      </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">x</span>
+<span class="w">      </span><span class="kt">character</span><span class="p">(</span><span class="o">*</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="k">return</span>
+<span class="k">   end subroutine </span><span class="n">concatenate</span>
+
+<span class="w">   </span><span class="k">subroutine </span><span class="n">add_array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="w">      </span><span class="k">implicit none</span>
+<span class="k">      </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">n</span>
+<span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">x</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="w">      </span><span class="kt">real</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span><span class="w"> </span><span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span><span class="w">  </span><span class="kd">::</span><span class="w"> </span><span class="n">a</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="w"> </span><span class="n">b</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="w">      </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span>
+<span class="w">      </span><span class="k">return</span>
+<span class="k">   end subroutine </span><span class="n">add_array</span>
+
+<span class="k">end module </span><span class="n">fortran_julia</span>
+</pre></div>
+</div>
+<p>Then we compile the code <code class="code docutils literal notranslate"><span class="pre">fortran_julia.f90</span></code> using  into a shared object named as <code class="code docutils literal notranslate"><span class="pre">fortran_julia.so</span></code>.
+The flags</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>gfortran<span class="w"> </span>fortran_julia.f90<span class="w"> </span>-O3<span class="w"> </span>-shared<span class="w"> </span>-fPIC<span class="w"> </span>-o<span class="w"> </span>fortran_julia.so
+</pre></div>
+</div>
+<p>Next we can call the shared object from Julia using the <code class="code docutils literal notranslate"><span class="pre">ccall</span></code> function:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="k">ccall</span><span class="p">((</span><span class="ss">:__fortran_julia_MOD_add</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fortran_julia.so&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Float64</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}),</span><span class="w"> </span><span class="mf">1.1</span><span class="p">,</span><span class="w"> </span><span class="mf">3.5</span><span class="p">)</span>
+<span class="mf">4.6</span>
+</pre></div>
+</div>
+<p>In addition, the <cite>add</cite> function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convension.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">add</span><span class="p">(</span><span class="n">a</span><span class="o">::</span><span class="kt">Float64</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">::</span><span class="kt">Float64</span><span class="p">)</span>
+<span class="w">           </span><span class="k">ccall</span><span class="p">((</span><span class="ss">:__fortran_julia_MOD_add</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fortran_julia.so&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Float64</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}),</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">       </span><span class="k">end</span>
+<span class="n">add</span><span class="w"> </span><span class="p">(</span><span class="n">generic</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">method</span><span class="p">)</span>
+
+<span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="n">add</span><span class="p">(</span><span class="mf">6.7</span><span class="p">,</span><span class="w"> </span><span class="mf">3.9</span><span class="p">)</span>
+<span class="mf">10.6</span>
+</pre></div>
+</div>
+<p>Calling a Fortran subroutine is similar to calling a Fortran function. In fact, the subroutine in Fortran can be regarded as a special function, and its return value is void (corresponding to the <cite>Nothing</cite> type in Julia).
+Here is another Fortran wrapper example.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">addsub</span><span class="p">(</span><span class="n">a</span><span class="o">::</span><span class="kt">Float64</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">::</span><span class="kt">Float64</span><span class="p">)</span>
+<span class="w">       </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}()</span>
+<span class="w">       </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}()</span>
+<span class="w">       </span><span class="k">ccall</span><span class="p">((</span><span class="ss">:__fortran_julia_MOD_addsub</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fortran_julia.so&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Nothing</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}),</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">       </span><span class="n">x</span><span class="p">[],</span><span class="w"> </span><span class="n">y</span><span class="p">[]</span>
+<span class="w">       </span><span class="k">end</span>
+<span class="n">addsub</span><span class="w"> </span><span class="p">(</span><span class="n">generic</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">method</span><span class="p">)</span>
+
+<span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="n">addsub</span><span class="p">(</span><span class="mf">5.9</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">)</span>
+<span class="p">(</span><span class="mf">7.4</span><span class="w"> </span><span class="mf">4.4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters.
+In this example, x and y are the output results to the caller.
+Therefore two pointers should be defined using <cite>Ref{Float64}()</cite> and then passed to the Fortran subroutine.
+After calling the Fortran subroutine, we will use <cite>x[]</cite> and <cite>y[]</cite> to extract the results from the addresses the pre-defined pointers pointing to.
+The rest of the this process is similar as calling the Fortran function.</p>
+<p>Here is another example to concatenate two strings via calling a Fortran subroutine.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">concatenate</span><span class="p">(</span><span class="n">a</span><span class="o">::</span><span class="kt">String</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">::</span><span class="kt">String</span><span class="p">)</span>
+<span class="w">       </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Vector</span><span class="p">{</span><span class="kt">UInt8</span><span class="p">}(</span><span class="nb">undef</span><span class="p">,</span><span class="w"> </span><span class="n">sizeof</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">sizeof</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+<span class="w">       </span><span class="k">ccall</span><span class="p">((</span><span class="ss">:__fortran_julia_MOD_concatenate</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fortran_julia.so&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Nothing</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Ref</span><span class="p">{</span><span class="kt">UInt8</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">UInt8</span><span class="p">},</span><span class="w"> </span><span class="kt">Ptr</span><span class="p">{</span><span class="kt">UInt8</span><span class="p">},</span><span class="w"> </span><span class="kt">UInt</span><span class="p">,</span><span class="w"> </span><span class="kt">UInt</span><span class="p">,</span><span class="w"> </span><span class="kt">UInt</span><span class="p">),</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">Vector</span><span class="p">{</span><span class="kt">UInt8</span><span class="p">}(</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">sizeof</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="n">sizeof</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="n">sizeof</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+<span class="w">       </span><span class="kt">String</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="w">       </span><span class="k">end</span>
+<span class="n">concatenate</span><span class="w"> </span><span class="p">(</span><span class="n">generic</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">method</span><span class="p">)</span>
+
+<span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="n">concatenate</span><span class="p">(</span><span class="s">&quot;Hello &quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Julia!!!&quot;</span><span class="p">)</span>
+<span class="s">&quot;Hello Julia!!!&quot;</span>
+</pre></div>
+</div>
+<p>Finally, we have the sample to passing to and fetching an output array from the Fourtran subroutine.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">add_array</span><span class="p">(</span><span class="n">a</span><span class="o">::</span><span class="kt">Array</span><span class="p">{</span><span class="kt">Float64</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span><span class="w"> </span><span class="n">b</span><span class="o">::</span><span class="kt">Array</span><span class="p">{</span><span class="kt">Float64</span><span class="p">,</span><span class="mi">1</span><span class="p">})</span>
+<span class="w">       </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Array</span><span class="p">{</span><span class="kt">Float64</span><span class="p">,</span><span class="mi">1</span><span class="p">}(</span><span class="nb">undef</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+<span class="w">       </span><span class="k">ccall</span><span class="p">((</span><span class="ss">:__fortran_julia_MOD_add_array</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fortran_julia.so&quot;</span><span class="p">),</span><span class="w"> </span><span class="kt">Nothing</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">Float64</span><span class="p">},</span><span class="w"> </span><span class="kt">Ref</span><span class="p">{</span><span class="kt">UInt32</span><span class="p">}),</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="w">       </span><span class="n">x</span>
+<span class="w">       </span><span class="k">end</span>
+<span class="n">add_array</span><span class="w"> </span><span class="p">(</span><span class="n">generic</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">method</span><span class="p">)</span>
+
+<span class="n">julia</span><span class="o">&gt;</span><span class="w"> </span><span class="n">add_array</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">1.3</span><span class="p">,</span><span class="w"> </span><span class="mf">1.6</span><span class="p">,</span><span class="w"> </span><span class="mf">4.6</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="o">-</span><span class="mf">1.8</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">1.1</span><span class="p">,</span><span class="w"> </span><span class="mf">2.4</span><span class="p">])</span>
+<span class="mi">4</span><span class="o">-</span><span class="n">element</span><span class="w"> </span><span class="kt">Vector</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}</span><span class="o">:</span>
+<span class="w"> </span><span class="o">-</span><span class="mf">1.6</span>
+<span class="w">  </span><span class="mf">1.0</span>
+<span class="w">  </span><span class="mf">2.7</span>
+<span class="w">  </span><span class="mf">7.0</span>
+</pre></div>
+</div>
+<p>The <code class="code docutils literal notranslate"><span class="pre">fortran_julia.f90</span></code> file and an Jupyter notebook file containing the above examples for interfacing Julia with Fortran are provided in the <a class="reference external" href="https://github.com/ENCCS/julia-for-hpc/tree/main/content/code">github repository</a>.</p>
+</section>
+<section id="interfacing-julia-with-other-languages">
+<h2>Interfacing Julia with other languages<a class="headerlink" href="#interfacing-julia-with-other-languages" title="Permalink to this heading"></a></h2>
+<p>Besides C and Fortran that can be called directly using <cite>ccall</cite> function, it is possible for Julia to interact with other programming languages using third-party packages.
+The following table shows an overview of those packages.</p>
+<table class="docutils align-center" id="id1">
+<caption><span class="caption-text">Interfacing Julia with other languages</span><a class="headerlink" href="#id1" title="Permalink to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Language</p></th>
+<th class="head"><p>Calling from Julia</p></th>
+<th class="head"><p>Calling Julia</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Python</p></td>
+<td><p><a class="reference external" href="https://github.com/JuliaPy/PyCall.jl">PyCall.jl</a></p></td>
+<td><p><a class="reference external" href="https://github.com/JuliaPy/pyjulia">PyJulia</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>R</p></td>
+<td><p><a class="reference external" href="https://github.com/JuliaInterop/RCall.jl">RCall.jl</a></p></td>
+<td><p><a class="reference external" href="https://github.com/Non-Contradiction/JuliaCall">JuliaCall</a></p></td>
+</tr>
+<tr class="row-even"><td><p>MATLAB</p></td>
+<td><p><a class="reference external" href="https://github.com/JuliaInterop/MATLAB.jl">MATLAB.jl</a></p></td>
+<td><p><a class="reference external" href="https://github.com/jebej/Mex.jl/">Mex.jl</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Java</p></td>
+<td><p><a class="reference external" href="https://github.com/JuliaInterop/JavaCall.jl">JavaCall.jl</a></p></td>
+<td><p><a class="reference external" href="https://github.com/jbytecode/juliacaller">JuliaCaller</a></p></td>
+</tr>
+</tbody>
+</table>
+<p>Moreover, other Julia packages provide Julia interface for some well-known libraries from other languages. As an example, we can mention <a class="reference external" href="https://github.com/cstjean/ScikitLearn.jl">ScikitLear.jl</a>, which provides an interface for the <a class="reference external" href="https://scikit-learn.org/">scikit-learn</a> library from Python or the <a class="reference external" href="https://github.com/JuliaStats/RDatasets.jl">RDatasets.jl</a> that provides an easy way to load famous R datasets.</p>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://juliateachingctu.github.io/Julia-for-Optimization-and-Learning/stable/">Julia for Optimization and Learning</a>.</p></li>
+</ul>
+<div class="admonition-keypoints keypoints admonition" id="keypoints-0">
+<p class="admonition-title">Keypoints</p>
+<ul class="simple">
+<li><p>One</p></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../GPU/" class="btn btn-neutral float-left" title="GPU programming" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../conclusions/" class="btn btn-neutral float-right" title="Summary and outlook" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
