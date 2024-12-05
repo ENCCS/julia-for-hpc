@@ -1,5 +1,5 @@
-Using Julia on an HPC cluster
-=============================
+Julia on HPC cluster
+====================
 
 
 .. questions::
