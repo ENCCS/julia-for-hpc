@@ -232,6 +232,104 @@ Using EuroHPC systems
 
 .. tabs:: 
 
+   .. tab:: LUMI
+
+      We can load the Julia environment on LUMI as follows:
+
+      .. code-block:: console
+
+         $ module use /appl/local/csc/modulefiles
+         $ module load julia
+
+      Let's start an interactive Julia session on the login node using multiple threads:
+
+      .. code-block:: console
+
+         $ julia --threads 8
+
+      Next, we install and precompile packages for distributed, MPI and GPU computing:
+
+      .. code-block:: julia
+
+         import Pkg
+         Pkg.add("MPI")
+         Pkg.add("AMDGPU")
+         Pkg.add("ClusterManagers")
+         Pkg.add("Dagger")
+         Pkg.precompile()
+
+      To start a new bash session on a reserved interactive **CPU node** for **multithreaded** or **distributed** jobs:
+
+      .. code-block:: console
+
+         $ srun --account=project_465001310 --partition=small --nodes=1 --ntasks-per-node=1 --cpus-per-task=8 --mem-per-cpu=1000 --time=00:15:00 --pty bash
+
+      To run **MPI** jobs on a **CPU node**:
+
+      .. code-block:: console
+
+         $ srun --account=project_465001310 --partition=small --nodes=1 --ntasks-per-node=8 --cpus-per-task=1 --mem-per-cpu=1000 --time=00:15:00 --pty bash
+
+      To run instead on a **GPU node**:
+
+      .. code-block:: console
+
+         $ srun --account=project_465001310 --partition=small-g --nodes=1 --ntasks-per-node=1 --cpus-per-task=16 --gpus-per-node=1 --mem-per-cpu=1750 --time=00:15:00 --pty  bash
+
+      To run a batch job to run an MPI job, create a job script similar to the following:
+
+      .. tabs:: 
+
+         .. tab:: CPU - multithreaded or distributed jobs
+
+            .. code-block:: bash
+
+               #!/bin/bash -l
+               #SBATCH --account project_465001310
+               #SBATCH --time 00:15:00
+               #SBATCH --partition small
+               #SBATCH --nodes 1
+               #SBATCH --ntasks-per-node=1
+               #SBATCH --cpus-per-task=8
+
+               module use /appl/local/csc/modulefiles
+               module load julia
+               julia script.jl
+
+         .. tab:: CPU - MPI jobs
+
+            .. code-block:: bash
+
+               #!/bin/bash -l
+               #SBATCH --account project_465001310
+               #SBATCH --time 00:15:00
+               #SBATCH --partition small
+               #SBATCH --nodes 1
+               #SBATCH --ntasks-per-node=8
+
+               module use /appl/local/csc/modulefiles
+               module load julia
+               module load julia-mpi
+               julia script.jl
+
+         .. tab:: GPU
+
+            .. code-block:: bash
+
+               #!/bin/bash -l
+               #SBATCH --account project_465001310
+               #SBATCH --ttime 00:15:00
+               #SBATCH --partition small-g
+               #SBATCH --nodes 1
+               #SBATCH --ntasks-per-node=8
+               #SBATCH --cpus-per-task=16
+               #SBATCH --gpus-per-node=1
+
+               module use /appl/local/csc/modulefiles
+               module load julia
+               module load julia-amdgpu
+               srun julia --project script.jl
+
    .. tab:: Meluxina
 
       To reserve an interactive node (replace project (-A), QOS (-q) and reservation (--res) 
@@ -258,105 +356,6 @@ Using EuroHPC systems
 
          n=$SLURM_NTASKS
          srun -n $n julia mpi_program.jl
-
-   .. tab:: LUMI
-
-      To load Julia, type:
-
-      .. code-block:: console
-
-         $ module use /appl/local/csc/modulefiles
-         
-         $ module load julia           # for non-GPU version
-         $ module load julia-amdgpu    # for GPU version
-
-      To start a new bash session on a reserved interactive **CPU node** for **multithreaded** or **distributed** jobs:
-
-      .. code-block:: console
-
-         $ srun --account=project_465001310 --partition=small --nodes=1 --ntasks-per-node=1 --cpus-per-task=8 --mem-per-cpu=1000 --time=00:15:00 --pty bash
-
-      To run **MPI** jobs on a **CPU node**:
-
-      .. code-block:: console
-
-         $ srun --account=project_465001310 --partition=small --nodes=1 --ntasks-per-node=8 --cpus-per-task=1 --mem-per-cpu=1000 --time=00:15:00 --pty bash
-
-      To run instead on a **GPU node**:
-
-      .. code-block:: console
-
-         $ srun --account=project_465001310 --partition=small-g --nodes=1 --ntasks-per-node=1 --cpus-per-task=16 --gpus-per-node=1 --mem-per-cpu=1750 --time=00:15:00 --pty  bash
-
-
-      To run a batch job to run an MPI job, create a job script similar to the following:
-
-      .. tabs:: 
-
-         .. tab:: CPU - multithreaded or distributed jobs
-
-            .. code-block:: bash
-            
-               #!/bin/bash -l
-               #SBATCH -A project_465001310
-               #SBATCH -t 00:15:00
-               #SBATCH -p small
-               #SBATCH --nodes 1
-               #SBATCH --ntasks-per-node=1
-               #SBATCH --cpus-per-task=8
-
-               module use /appl/local/csc/modulefiles
-               module load julia
-
-               # Instantiate the project environment
-               julia --project -e 'using Pkg; Pkg.instantiate()'
-
-               # Run the julia script
-               julia --project script.jl
-
-
-         .. tab:: CPU - MPI jobs
-
-            .. code-block:: bash
-            
-               #!/bin/bash -l
-               #SBATCH -A project_465001310
-               #SBATCH -t 00:15:00
-               #SBATCH -p small
-               #SBATCH --nodes 1
-               #SBATCH --ntasks-per-node=8
-
-               module use /appl/local/csc/modulefiles
-               module load julia
-
-               # Instantiate the project environment
-               julia --project -e 'using Pkg; Pkg.instantiate()'
-
-               # Run the julia script
-               julia --project script.jl
-
-
-         .. tab:: GPU
-
-            .. code-block:: bash
-            
-               #!/bin/bash -l
-               #SBATCH -A project_465001310
-               #SBATCH -t 00:15:00
-               #SBATCH -p small-g
-               #SBATCH --nodes 1
-               #SBATCH --ntasks-per-node=8
-               #SBATCH --cpus-per-task=16 
-               #SBATCH --gpus-per-node=1               
-
-               module use /appl/local/csc/modulefiles
-               module load julia-amdgpu
-
-               # Instantiate the project environment
-               julia --project -e 'using Pkg; Pkg.instantiate()'
-
-               # Run the julia script
-               srun julia --project script.jl
 
 
 
