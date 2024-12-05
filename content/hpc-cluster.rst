@@ -375,7 +375,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
    .. code-block:: julia
 
       using Distributed
-      addprocs(Sys.CPU_THREADS-1, exeflags="--project=.")
+      addprocs(Sys.CPU_THREADS-1; exeflags="--project=.")
 
       @everywhere task() = myid()
       futures = [@spawnat id task() for id in workers()]
