@@ -308,6 +308,10 @@ Exercises
 In these exercises you should create the three files ``Project.toml``, ``script.jl``, and ``script.sh`` and run them via Slurm in the LUMI cluster.
 If the course has a resource reservation, we can use the :code:`--reservation="<name>"` option to use it.
 
+.. prereq::
+
+   Setup Julia environment on LUMI as described in the Setup section.
+
 
 .. exercise:: Run multithreaded job on LUMI cluster
 
@@ -355,7 +359,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
          sbatch script.sh
 
 
-.. exercise:: Run distributed job on LUMI cluster
+.. exercise:: Run single node distributed job on LUMI cluster
 
    Run the following files a single node job with three CPU cores and one julia process per core.
 
@@ -371,7 +375,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
    .. code-block:: julia
 
       using Distributed
-      addprocs(Sys.CPU_THREADS-1)
+      addprocs(Sys.CPU_THREADS-1, exeflags="--project=.")
 
       @everywhere task() = myid()
       futures = [@spawnat id task() for id in workers()]
@@ -392,6 +396,54 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
          #SBATCH --cpus-per-task=3
          #SBATCH --mem-per-cpu=1000
          #SBATCH --time="00:15:00"
+
+         module use /appl/local/csc/modulefiles
+         module load julia
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+         julia --project=. script.jl
+
+      .. code-block:: bash
+
+         sbatch script.sh
+
+
+.. exercise:: Run multi node distributed job on LUMI cluster
+
+   Run the following files on two node job with 128 tasks per node and one CPU code per task.
+   Add Julia workers using ``SlurmManager`` from the ClusterManager.jl package.
+
+   .. code-block:: toml
+
+      [deps]
+      ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
+      Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+
+   .. code-block:: julia
+
+      using Distributed
+      using ClusterManagers
+      proc_num = parse(Int, ENV["SLURM_NTASKS"])
+      addprocs(SlurmManager(proc_num); exeflags="--project=.")
+
+      @everywhere task() = myid()
+      futures = [@spawnat id task() for id in workers()]
+      outputs = fetch.(futures)
+      println(outputs)
+
+   .. solution::
+
+      ``script.sh``
+
+      .. code-block:: bash
+
+         #!/bin/bash
+         #SBATCH --account=<project>
+         #SBATCH --partition=standard
+         #SBATCH --time=00:15:00
+         #SBATCH --nodes=2
+         #SBATCH --ntasks-per-node=128
+         #SBATCH --cpus-per-task=1
+         #SBATCH --mem-per-cpu=0
 
          module use /appl/local/csc/modulefiles
          module load julia
@@ -499,3 +551,4 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          sbatch script.sh
+
