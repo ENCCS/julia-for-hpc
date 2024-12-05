@@ -1,5 +1,5 @@
-Dagger
-======
+Parallel execution with Dagger
+==============================
 
 .. questions::
 

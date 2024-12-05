@@ -227,8 +227,8 @@ This installs a ``mpiexecjl`` under ``~/.julia/bin``, which should be added to y
 ``PATH`` variable. 
 
 
-Using EuroHPC systems
----------------------
+Using HPC systems
+-----------------
 
 .. tabs:: 
 
