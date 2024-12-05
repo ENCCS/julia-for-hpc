@@ -310,7 +310,7 @@ Using EuroHPC systems
                module use /appl/local/csc/modulefiles
                module load julia
                module load julia-mpi
-               julia script.jl
+               srun julia script.jl
 
          .. tab:: GPU
 
@@ -328,7 +328,7 @@ Using EuroHPC systems
                module use /appl/local/csc/modulefiles
                module load julia
                module load julia-amdgpu
-               srun julia --project script.jl
+               julia --project script.jl
 
    .. tab:: Meluxina
 
@@ -359,7 +359,7 @@ Using EuroHPC systems
 
 
 
-(Optional) Installing JupyterLab and a Julia kernel
+Installing JupyterLab and a Julia kernel (Optional)
 ---------------------------------------------------
 
 JupyterLab can most easily be installed through the full
