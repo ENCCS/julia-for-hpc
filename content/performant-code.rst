@@ -11,8 +11,8 @@ Writing performant Julia code
 
 .. instructor-note::
 
-   - 30 min teaching
-   - 20 min exercises
+   - 40 min teaching
+   - 30 min exercises
 
 
 

@@ -8,7 +8,7 @@ Motivation
 
 .. instructor-note::
 
-   - 15 min teaching
+   - 20 min teaching
 
 
 
