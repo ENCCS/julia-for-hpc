@@ -50,35 +50,35 @@ The module environment modifies the path to make the Julia command line client a
 Available module environments are controlled by the module path (:code:`MODULEPATH`) environment variable.
 Sometimes, it is necessary to add custom directories to the module path as follows:
 
-.. code-block:: bash
+.. code-block:: console
 
-   module use <path>
+   $ module use <path>
 
 We can check the availability of a Julia module environment as follows.
 
-.. code-block:: bash
+.. code-block:: console
 
-   module avail julia
+   $ module avail julia
 
 If the Julia module is not available, we can install Julia manually to the cluster.
 On the other hand, if a Julia module is available, we can take a look at what the Julia sets when it is loaded as follows:
 
-.. code-block:: bash
+.. code-block:: console
 
-   module show julia
+   $ module show julia
 
 We can load the Julia module as follows:
 
-.. code-block:: bash
+.. code-block:: console
 
-   module load julia
+   $ module load julia
 
 We can list the loaded module and check that Julia is available as follows:
 
-.. code-block:: bash
+.. code-block:: console
 
-   module list
-   julia --version
+   $ module list
+   $ julia --version
 
 In case everything works well, we should be ready to move forward.
 
@@ -86,29 +86,29 @@ In case everything works well, we should be ready to move forward.
 
    First, add CSC's local module files to the module path.
 
-   .. code-block::
+   .. code-block:: console
 
-      module use /appl/local/csc/modulefiles
+      $ module use /appl/local/csc/modulefiles
 
    The, load the Julia module.
 
-   .. code-block::
+   .. code-block:: console
 
-      module load julia
+      $ module load julia
 
    We can load MPI preferences to use system the MPI with MPI.jl as runtime.
    They are not required for installing MPI.jl.
 
-   .. code-block::
+   .. code-block:: console
 
-       module load julia-mpi
+       $ module load julia-mpi
 
    We can load AMDGPU preferences to use the system AMDGPU and ROCm with AMDGPU.jl at runtime.
    They are not required for installing AMDGPU.jl
 
-   .. code-block::
+   .. code-block:: console
 
-       module load julia-amdgpu
+       $ module load julia-amdgpu
 
 
 Installing packages
@@ -116,15 +116,30 @@ Installing packages
 We can install Julia packages normally using the package manager on a login node in a cluster.
 We also recommend to precompile Julia environments on the login node using them on the compute nodes.
 Precompiling and installing Julia packages on a compute node may run into issues with limited temporary disk space and it consumes the resources allocated to the job.
-
-.. code-block:: julia
-
-   using Pkg
-   Pkg.add("MPI.jl")
-   Pkg.precompile()
-
 Packages such as MPI.jl, CUDA.jl, AMDGPU.jl and other can be installed normally.
 The cluster specific preferences are required only to use system installed MPI and GPU libraries at runtime.
+
+.. demo:: Installing Julia packages on the LUMI cluster.
+
+   Load the Julia module and start interactive Julia session with multiple threads to speed up package installation.
+
+   .. code-block:: console 
+
+      $ module use /appl/local/csc/modulefiles
+      $ module load julia
+      $ julia --threads 8
+
+   In the Julia session, load the package manager and install packages for MPI, GPU and parallel computing.
+   Finally, precompile the packages.
+
+   .. code-block:: julia
+
+      using Pkg
+      Pkg.add("MPI.jl")
+      Pkg.add("AMDGPU.jl")
+      Pkg.add("ClusterManagers.jl")
+      Pkg.add("Dagger.jl")
+      Pkg.precompile()
 
 
 Running interactive jobs
@@ -133,9 +148,9 @@ We can launch an interactive job on a compute node via Slurm.
 Interactive jobs are useful for developing, testing, debugging, and exploring Slurm jobs.
 We can run an interactive job as follows:
 
-.. code-block:: bash
+.. code-block:: console
 
-   srun [options] --pty bash
+   $ srun [options] --pty bash
 
 The :code:`srun` command launches the job with options that declare the resources we want to reserve, :code:`--pty` flag attached a pseudoterminal to the job and the argument to run :code:`bash`.
 
@@ -146,7 +161,7 @@ The :code:`srun` command launches the job with options that declare the resource
       .. code-block:: bash
 
          srun \
-             --account="<project>" \
+             --account=project_465001310 \
              --partition=small \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -161,7 +176,7 @@ The :code:`srun` command launches the job with options that declare the resource
       .. code-block:: bash
 
          srun \
-             --account="<project>" \
+             --account=project_465001310 \
              --partition=small-g \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -180,9 +195,9 @@ We can run batch jobs via Slurm.
 We use batch jobs to run workloads from start to finish without interacting with them.
 We can run a batch job as follows:
 
-.. code-block:: bash
+.. code-block:: console
 
-   sbatch [options] script.sh
+   $ sbatch [options] script.sh
 
 The :code:`sbatch` command launches the batch job, with options that declare the resources we want to reserve, and the batch script :code:`script.sh` contains the commands to run the job.
 
@@ -193,7 +208,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          sbatch \
-             --account="<project>" \
+             --account=project_465001310 \
              --partition=small \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -207,7 +222,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account=project_465001310
          #SBATCH --partition=small
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -220,7 +235,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          sbatch \
-             --account="<project>" \
+             --account=project_465001310 \
              --partition=small-g \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -235,7 +250,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account=project_465001310
          #SBATCH --partition=small-g
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -272,11 +287,11 @@ Let's consider a standalone Julia application that contains the following files:
 
    We should instantiate the project enviroment on the login node.
 
-   .. code-block:: bash
+   .. code-block:: console
 
-      module use /appl/local/csc/modulefiles
-      module load julia
-      julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      $ module use /appl/local/csc/modulefiles
+      $ module load julia
+      $ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
    Next we write the batch script to file named ``batch.sh``.
    It runs the Julia script using the Julia environment with predefined slurm parameters.
@@ -284,7 +299,7 @@ Let's consider a standalone Julia application that contains the following files:
    .. code-block:: bash
 
       #!/bin/bash
-      #SBATCH --account="<project>"
+      #SBATCH --account=project_465001310
       #SBATCH --partition=small
       #SBATCH --nodes=1
       #SBATCH --ntasks-per-node=1
@@ -297,9 +312,9 @@ Let's consider a standalone Julia application that contains the following files:
 
    Finally, we can run the batch script using Slurm.
 
-   .. code-block:: bash
+   .. code-block:: console
 
-      sbatch batch.sh
+      $ sbatch batch.sh
 
 
 Exercises
@@ -341,7 +356,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account=project_465001310
          #SBATCH --partition=small
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -389,7 +404,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account=project_465001310
          #SBATCH --partition=small
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -437,7 +452,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account=<project>
+         #SBATCH --account=project_465001310
          #SBATCH --partition=standard
          #SBATCH --time=00:15:00
          #SBATCH --nodes=2
@@ -486,7 +501,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account=project_465001310
          #SBATCH --partition=small
          #SBATCH --nodes=2
          #SBATCH --ntasks-per-node=2
@@ -533,7 +548,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account=<project>
+         #SBATCH --account=project_465001310
          #SBATCH --partition=small-g
          #SBATCH --time=00:15:00
          #SBATCH --nodes=1

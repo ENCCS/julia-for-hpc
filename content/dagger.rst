@@ -40,6 +40,12 @@ We focus on defining task graphs and parallel execution.
 
 Dagger
 ------
+Let's start Julia with two threads using the command:
+
+.. code-block:: console
+
+   $ julia --threads=2
+
 `Dagger.jl` can dynamically execute tasks on a task graph to execute independent tasks in parallel with available threads and distributed workers.
 We can install Dagger with the package manager:
 
@@ -47,12 +53,6 @@ We can install Dagger with the package manager:
 
    using Pkg
    Pkg.add("Dagger")
-
-Let's start Julia with two threads using the command:
-
-.. code-block:: bash
-
-   julia --threads=2
 
 Then, we can add distributed workers and import Dagger as follows:
 
