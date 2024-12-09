@@ -161,7 +161,7 @@ The :code:`srun` command launches the job with options that declare the resource
       .. code-block:: bash
 
          srun \
-             --account="<project>" \
+             --account="project_465001310" \
              --partition=small \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -176,7 +176,7 @@ The :code:`srun` command launches the job with options that declare the resource
       .. code-block:: bash
 
          srun \
-             --account="<project>" \
+             --account="project_465001310" \
              --partition=small-g \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -208,7 +208,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          sbatch \
-             --account="<project>" \
+             --account="project_465001310" \
              --partition=small \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -222,7 +222,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account="project_465001310"
          #SBATCH --partition=small
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -235,7 +235,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          sbatch \
-             --account="<project>" \
+             --account="project_465001310" \
              --partition=small-g \
              --nodes=1 \
              --ntasks-per-node=1 \
@@ -250,7 +250,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account="project_465001310"
          #SBATCH --partition=small-g
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -299,7 +299,7 @@ Let's consider a standalone Julia application that contains the following files:
    .. code-block:: bash
 
       #!/bin/bash
-      #SBATCH --account="<project>"
+      #SBATCH --account="project_465001310"
       #SBATCH --partition=small
       #SBATCH --nodes=1
       #SBATCH --ntasks-per-node=1
@@ -356,7 +356,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account="project_465001310"
          #SBATCH --partition=small
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -404,7 +404,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account="project_465001310"
          #SBATCH --partition=small
          #SBATCH --nodes=1
          #SBATCH --ntasks-per-node=1
@@ -452,7 +452,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account=<project>
+         #SBATCH --account=project_465001310
          #SBATCH --partition=standard
          #SBATCH --time=00:15:00
          #SBATCH --nodes=2
@@ -501,7 +501,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account="<project>"
+         #SBATCH --account="project_465001310"
          #SBATCH --partition=small
          #SBATCH --nodes=2
          #SBATCH --ntasks-per-node=2
@@ -548,7 +548,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
       .. code-block:: bash
 
          #!/bin/bash
-         #SBATCH --account=<project>
+         #SBATCH --account=project_465001310
          #SBATCH --partition=small-g
          #SBATCH --time=00:15:00
          #SBATCH --nodes=1
