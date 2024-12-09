@@ -116,15 +116,19 @@ Installing packages
 We can install Julia packages normally using the package manager on a login node in a cluster.
 We also recommend to precompile Julia environments on the login node using them on the compute nodes.
 Precompiling and installing Julia packages on a compute node may run into issues with limited temporary disk space and it consumes the resources allocated to the job.
-
-.. code-block:: julia
-
-   using Pkg
-   Pkg.add("MPI.jl")
-   Pkg.precompile()
-
 Packages such as MPI.jl, CUDA.jl, AMDGPU.jl and other can be installed normally.
 The cluster specific preferences are required only to use system installed MPI and GPU libraries at runtime.
+
+.. demo:: Installing Julia packages on the LUMI cluster.
+
+   .. code-block:: julia
+
+      using Pkg
+      Pkg.add("MPI.jl")
+      Pkg.add("AMDGPU.jl")
+      Pkg.add("ClusterManagers.jl")
+      Pkg.add("Dagger.jl")
+      Pkg.precompile()
 
 
 Running interactive jobs
