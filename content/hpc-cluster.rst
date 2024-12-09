@@ -287,11 +287,11 @@ Let's consider a standalone Julia application that contains the following files:
 
    We should instantiate the project enviroment on the login node.
 
-   .. code-block:: bash
+   .. code-block:: console
 
-      module use /appl/local/csc/modulefiles
-      module load julia
-      julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      $ module use /appl/local/csc/modulefiles
+      $ module load julia
+      $ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
    Next we write the batch script to file named ``batch.sh``.
    It runs the Julia script using the Julia environment with predefined slurm parameters.
@@ -312,9 +312,9 @@ Let's consider a standalone Julia application that contains the following files:
 
    Finally, we can run the batch script using Slurm.
 
-   .. code-block:: bash
+   .. code-block:: console
 
-      sbatch batch.sh
+      $ sbatch batch.sh
 
 
 Exercises
