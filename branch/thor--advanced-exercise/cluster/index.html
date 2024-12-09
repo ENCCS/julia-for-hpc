@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running on a cluster &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx_lesson.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/overrides.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="GPU programming" href="../GPU/" />
+    <link rel="prev" title="Message passing" href="../MPI/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running on a cluster</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#julia-on-hpc-systems">Julia on HPC systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-julia-yourself">Installing Julia yourself</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-packages">Installing packages</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mpi-configuration">MPI configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-on-gpus">Running on GPUs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clustermanagers">ClusterManagers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C and Fortran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Running on a cluster</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/cluster.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="running-on-a-cluster">
+<h1>Running on a cluster<a class="headerlink" href="#running-on-a-cluster" title="Permalink to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>How should Julia be run on a cluster?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>20 min teaching</p></li>
+<li><p>20 min exercises</p></li>
+</ul>
+</div>
+<section id="julia-on-hpc-systems">
+<h2>Julia on HPC systems<a class="headerlink" href="#julia-on-hpc-systems" title="Permalink to this heading"></a></h2>
+<p>Despite rapid growth in the HPC domain in recent years, Julia is still not considered as mainstream
+as C/C++ and Fortran in the HPC world, and even Python is more commonly used (and generally available)
+than Julia. Fortunately, even if Julia is not already available as an environment module on your
+favorite cluster, it is easy to install Julia from scratch. Moreover, there is little reason to
+expect the performance of official Julia binaries to be any worse compared to if a system administrator
+built Julia from scratch with architecture-specific optimization.</p>
+<p>An overview of the availability and documentation of Julia on a range of HPC systems around the
+world (including EuroHPC systems) can be found at <a class="reference external" href="https://github.com/hlrs-tasc/julia-on-hpc-systems">https://github.com/hlrs-tasc/julia-on-hpc-systems</a>.</p>
+</section>
+<section id="installing-julia-yourself">
+<h2>Installing Julia yourself<a class="headerlink" href="#installing-julia-yourself" title="Permalink to this heading"></a></h2>
+<p>If you want or need to install Julia yourself on an HPC system, keep the following points in mind:</p>
+<ul class="simple">
+<li><p>Install Julia on the cluster’s high-performance parallel file system as this will improve
+performance of large parallel Julia jobs.</p></li>
+<li><p>Installation of Julia packages can take up significant disk space and include a large number
+of files - make sure to use a file system with sufficiently high quotas for both disk space
+and number of files.</p></li>
+<li><p>When in doubt, ask the support team of the cluster for guidance!</p></li>
+</ul>
+<div class="admonition-install-julia-on-the-cluster type-along important admonition" id="type-along-0">
+<p class="admonition-title">Install Julia on the cluster</p>
+<ol class="arabic">
+<li><p>Log in to the cluster used for the workshop or (if you’re browsing this material independently)
+some cluster you have access to.</p></li>
+<li><p>Install Julia using <a class="reference external" href="https://github.com/JuliaLang/juliaup">Juliaup</a>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://install.julialang.org<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</pre></div>
+</div>
+<p>If your home directory is not the optimal location for installing Julia, answer “no” to the
+question “Do you want to install with these default configuration choices?” and enter the
+appropriate directory path.</p>
+<p>After the installation your shell configuration file(s) will be updated (e.g. <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code>).
+Source this file to update your PATH variable: <code class="docutils literal notranslate"><span class="pre">.</span> <span class="pre">$HOME/.bashrc</span></code>.</p>
+</li>
+</ol>
+</div>
+<section id="installing-packages">
+<h3>Installing packages<a class="headerlink" href="#installing-packages" title="Permalink to this heading"></a></h3>
+<p>On HPC systems it is often recommended to install own programs and packages in a directory different
+from the home directory (<code class="docutils literal notranslate"><span class="pre">$HOME</span></code>). The <code class="docutils literal notranslate"><span class="pre">JULIA_DEPOT_PATH</span></code> variable controls where Julia’s
+package manager (as well as Julia’s code loading mechanisms) looks for package registries,
+installed packages, named environments, repo clones, cached compiled package images, configuration
+files, and the default location of the REPL’s history file.</p>
+<p>Since the available file systems can differ significantly between HPC centers,
+it is hard to make a general statement about where the Julia depot folder should be placed.
+Generally speaking, the file system hosting the Julia depot should have</p>
+<ul class="simple">
+<li><p>Good parallel I/O</p></li>
+<li><p>No tight quotas on disk space or number of files</p></li>
+<li><p>Read and write access by the user</p></li>
+<li><p>No mechanism for the automatic deletion of unused files (or the depot should be excluded as an exception)</p></li>
+</ul>
+<p>On some systems, it resides in the user’s home directory. On other systems, it is put on a parallel
+scratch file system.</p>
+<p>To prepend the <code class="docutils literal notranslate"><span class="pre">JULIA_DEPOT_PATH</span></code> variable with a new directory, type
+<code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">JULIA_DEPOT_PATH=&quot;/path_to_directory/v$(VERSION.major).$(VERSION.minor):$JULIA_DEPOT_PATH</span></code>
+(put this in the shell configuration file, e.g. <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code> or <code class="docutils literal notranslate"><span class="pre">.bash_profile</span></code>).</p>
+</section>
+</section>
+<section id="mpi-configuration">
+<h2>MPI configuration<a class="headerlink" href="#mpi-configuration" title="Permalink to this heading"></a></h2>
+<p>MPI.jl can use either a JLL-provided MPI library, which can be automatically installed when installing
+MPI.jl, or a system-provided MPI backend. Normally the latter option is appropriate
+on an HPC cluster. The <a class="reference external" href="https://juliaparallel.org/MPI.jl/latest/reference/mpipreferences/">MPIPreferences.jl</a>
+package, based on <a class="reference external" href="https://github.com/JuliaPackaging/Preferences.jl/">Preferences.jl</a> which is
+used to store various package configuration switches in persistent TOML files,
+is used to select which MPI implementation to use.</p>
+<p>To install and configure MPI.jl with a particular MPI backend on a cluster, first load the
+preferred MPI library, e.g.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>module<span class="w"> </span>load<span class="w"> </span>OpenMPI
+</pre></div>
+</div>
+<p>Then, in a Julia session:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Pkg</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;MPI&quot;</span><span class="p">)</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;MPIPreferences&quot;</span><span class="p">)</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">MPIPreferences</span>
+<span class="n">MPIPreferences</span><span class="o">.</span><span class="n">use_system_binary</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will create a file <code class="docutils literal notranslate"><span class="pre">LocalPreferences.toml</span></code> in the default Julia directory, e.g.
+<code class="docutils literal notranslate"><span class="pre">$HOME/.julia/environments/v1.8</span></code>, with content similar to the following:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[MPIPreferences]</span>
+<span class="n">_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1.0&quot;</span>
+<span class="n">abi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;OpenMPI&quot;</span>
+<span class="n">binary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;system&quot;</span>
+<span class="n">libmpi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;libmpi&quot;</span>
+<span class="n">mpiexec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;mpiexec&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="running-on-gpus">
+<h2>Running on GPUs<a class="headerlink" href="#running-on-gpus" title="Permalink to this heading"></a></h2>
+<p>Julia packages for running code on GPUs (e.g. CUDA.jl and AMDGPU.jl) need both GPU drivers
+and development toolkits installed on the system you’re using. On a cluster these are normally
+available through environment modules which need to be loaded before importing and using
+the Julia GPU package.</p>
+<p>On NVIDIA GPUs, the CUDA.jl package needs NVIDIA drivers and toolkits.
+When installing the CUDA.jl package and importing it, Julia will look for libraries in the
+<code class="docutils literal notranslate"><span class="pre">CUDA_PATH</span></code> (or <code class="docutils literal notranslate"><span class="pre">CUDA_HOME</span></code>) environment variable. If these are not found they will be
+automatically installed but it’s strongly recommended to use instead optimised pre-installed
+libraries. These are typically available in environment modules <code class="docutils literal notranslate"><span class="pre">CUDA</span></code>, <code class="docutils literal notranslate"><span class="pre">cuDNN</span></code> etc.</p>
+<p>For example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>module<span class="w"> </span>load<span class="w"> </span>CUDA
+<span class="gp">$ </span>julia
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Pkg</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;CUDA&quot;</span><span class="p">)</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">CUDA</span>
+<span class="n">CUDA</span><span class="o">.</span><span class="n">versioninfo</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="clustermanagers">
+<h2>ClusterManagers<a class="headerlink" href="#clustermanagers" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://github.com/JuliaParallel/ClusterManagers.jl">ClusterManagers.jl</a> is a package for
+interactive HPC work with all commonly used HPC scheduling systems, including SLURM, PBS,
+LSF, SGE, HTCondor, Kubernetes, etc.</p>
+<p>To use ClusterManagers.jl we need access to Julia on the login node of a cluster. The following
+script uses the <code class="docutils literal notranslate"><span class="pre">SlurmManager</span></code> for HPC systems using the SLURM scheduler:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span><span class="p">,</span><span class="w"> </span><span class="n">ClusterManagers</span>
+
+<span class="c"># request 4 tasks</span>
+<span class="n">addprocs</span><span class="p">(</span><span class="n">SlurmManager</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="w"> </span><span class="n">partition</span><span class="o">=</span><span class="s">&quot;cpu&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="o">=</span><span class="s">&quot;00:5:00&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="o">=</span><span class="s">&quot;p200051&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">qos</span><span class="o">=</span><span class="s">&quot;short&quot;</span><span class="p">)</span>
+<span class="c"># if using reservation:</span>
+<span class="c">#addprocs(SlurmManager(4), partition=&quot;cpu&quot;, t=&quot;00:5:00&quot;, A=&quot;p200051&quot;, reservation=&quot;2022-11-enccs-julia-cpu&quot;)</span>
+
+<span class="c"># let workers do some work</span>
+<span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">workers</span><span class="p">()</span>
+<span class="w">    </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="n">host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fetch</span><span class="p">(</span><span class="nd">@spawnat</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">(</span><span class="n">myid</span><span class="p">(),</span><span class="w"> </span><span class="n">getpid</span><span class="p">(),</span><span class="w"> </span><span class="n">gethostname</span><span class="p">()))</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">,</span><span class="w"> </span><span class="n">host</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c"># The Slurm resource allocation is released when all the workers have exited</span>
+<span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">workers</span><span class="p">()</span>
+<span class="w">    </span><span class="n">rmprocs</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="admonition-use-clustermanagers-jl-to-launch-parallel-job exercise important admonition" id="exercise-0">
+<p class="admonition-title">Use ClusterManagers.jl to launch parallel job</p>
+<p>Take the parallelised version of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate_pi()</span></code> function encountered in an
+earlier exercise:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<ul>
+<li><p>Open a Julia REPL on the cluster login node. Import ClusterManagers, Distributed and BenchmarkTools.</p></li>
+<li><p>Request one SLURM task with the <code class="xref py py-meth docutils literal notranslate"><span class="pre">addprocs()</span></code> method (see cluster-specific info above).</p></li>
+<li><p>Define the <code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate_pi()</span></code> function with the <code class="docutils literal notranslate"><span class="pre">&#64;everywhere</span></code> macro.</p></li>
+<li><p>Benchmark the serial version:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">^</span><span class="mi">9</span>
+<span class="n">num_jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span>
+<span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_points</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_jobs</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_jobs</span><span class="p">]</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="n">mean</span><span class="p">(</span><span class="n">pmap</span><span class="p">(</span><span class="n">estimate_pi</span><span class="p">,</span><span class="w"> </span><span class="o">$</span><span class="n">chunks</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p>Now add 7 more cores by repeating the <code class="xref py py-meth docutils literal notranslate"><span class="pre">addprocs()</span></code> command and benchmark it again.
+Note that you need to redefine <code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate_pi()</span></code> every time you add workers!</p></li>
+<li><p>Add another 8 workers and benchmark one final time.</p></li>
+<li><p>Finally remove the workers to release the allocations.</p></li>
+</ul>
+<div class="admonition-solution solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Solution</p>
+<p>Request 1 worker (core). Replace “PROJECT-ID” and “QOS” appropriately:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">addprocs</span><span class="p">(</span><span class="n">SlurmManager</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">partition</span><span class="o">=</span><span class="s">&quot;cpu&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="o">=</span><span class="s">&quot;00:5:00&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="o">=</span><span class="s">&quot;PROJECT-ID&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">qos</span><span class="o">=</span><span class="s">&quot;QOS&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then define the function on the worker:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Run on all the cores and time it:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">^</span><span class="mi">9</span>
+<span class="n">num_jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span>
+<span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_points</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_jobs</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_jobs</span><span class="p">]</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="n">mean</span><span class="p">(</span><span class="n">pmap</span><span class="p">(</span><span class="n">estimate_pi</span><span class="p">,</span><span class="w"> </span><span class="n">chunks</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Repeat the process with 7 more cores:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">addprocs</span><span class="p">(</span><span class="n">SlurmManager</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span><span class="w"> </span><span class="n">partition</span><span class="o">=</span><span class="s">&quot;cpu&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="o">=</span><span class="s">&quot;00:5:00&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="o">=</span><span class="s">&quot;PROJECT-ID&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">qos</span><span class="o">=</span><span class="s">&quot;QOS&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@btime</span><span class="w"> </span><span class="n">mean</span><span class="p">(</span><span class="n">pmap</span><span class="p">(</span><span class="n">estimate_pi</span><span class="p">,</span><span class="w"> </span><span class="n">chunks</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The redo exact same thing with 8 more workers.</p>
+</div>
+</div>
+<div class="admonition-run-an-mpi-job exercise important admonition" id="exercise-1">
+<p class="admonition-title">Run an MPI job</p>
+<p>Take the MPI version of the <code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate_pi()</span></code> code that we encountered in the MPI episode:</p>
+<div class="admonition-estimate-pi-jl solution important dropdown admonition" id="solution-1">
+<p class="admonition-title">estimate_pi.jl</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">main</span><span class="p">()</span>
+<span class="w">    </span><span class="n">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">()</span>
+<span class="w">    </span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">^</span><span class="mi">9</span>
+
+<span class="w">    </span><span class="c"># divide work evenly between ranks</span>
+<span class="w">    </span><span class="n">my_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">floor</span><span class="p">(</span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">num_points</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+<span class="w">    </span><span class="n">remainder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">num_points</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">size</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">remainder</span>
+<span class="w">        </span><span class="n">my_points</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="k">end</span>
+
+<span class="w">    </span><span class="c"># each rank computes pi for their points</span>
+<span class="w">    </span><span class="nb">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">my_points</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c"># sum up all estimates and average on root tank</span>
+<span class="w">    </span><span class="n">pi_sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Reduce</span><span class="p">(</span><span class="nb">pi</span><span class="p">,</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="w">    </span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;pi = </span><span class="si">$</span><span class="p">(</span><span class="n">pi_sum</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">()</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;elapsed time = </span><span class="si">$</span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Use the following batch script to submit a Julia job to the queue (modify the SLURM options
+as needed):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash -l</span>
+<span class="c1">#SBATCH -A p200051</span>
+<span class="c1">#SBATCH -t 00:10:00</span>
+<span class="c1">#SBATCH -q short</span>
+<span class="c1">#SBATCH -p cpu</span>
+<span class="c1">#SBATCH -N 1</span>
+<span class="c1">#SBATCH --ntasks-per-node=8</span>
+
+module<span class="w"> </span>load<span class="w"> </span>OpenMPI
+module<span class="w"> </span>load<span class="w"> </span>Julia
+
+<span class="nv">n</span><span class="o">=</span><span class="nv">$SLURM_NTASKS</span>
+srun<span class="w"> </span>-n<span class="w"> </span><span class="nv">$n</span><span class="w"> </span>julia<span class="w"> </span>estimate_pi.jl<span class="w">         </span>
+</pre></div>
+</div>
+<p>Try running it with different number of nodes and/or cores. Does it scale well up to a full node?</p>
+</div>
+<div class="admonition-keypoints keypoints admonition" id="keypoints-0">
+<p class="admonition-title">Keypoints</p>
+<ul class="simple">
+<li><p>Julia can usually be installed and configured without too much hassle on HPC systems.</p></li>
+<li><p>ClusterManagers is a useful package for working interactively on a cluster through the Julia REPL.</p></li>
+<li><p>For non-interactive work, Julia jobs can also be submitted through the scheduler.</p></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../MPI/" class="btn btn-neutral float-left" title="Message passing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../GPU/" class="btn btn-neutral float-right" title="GPU programming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

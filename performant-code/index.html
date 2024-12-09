@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing performant Julia code &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="../_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Multithreading" href="../multithreading/" />
+    <link rel="prev" title="Motivation" href="../motivation-hpc/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Writing performant Julia code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introducing-a-toy-example">Introducing a toy example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#profiling">Profiling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optimization-options">Optimization options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#column-major-vs-row-major-order">Column-major vs row-major order</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inbounds">&#64;inbounds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#staticarrays">StaticArrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-performance-considerations">Other performance considerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exercises">Exercises</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Parallel execution with Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Writing performant Julia code</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/performant-code.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writing-performant-julia-code">
+<h1>Writing performant Julia code<a class="headerlink" href="#writing-performant-julia-code" title="Link to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>How should performance be measured?</p></li>
+<li><p>How can I profile my Julia code?</p></li>
+<li><p>Are there any performance pitfalls in Julia?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>40 min teaching</p></li>
+<li><p>30 min exercises</p></li>
+</ul>
+</div>
+<section id="introducing-a-toy-example">
+<h2>Introducing a toy example<a class="headerlink" href="#introducing-a-toy-example" title="Link to this heading"></a></h2>
+<p>As an example numerical problem, we will consider the discretized Laplace operator which is
+used widely in applications including numerical analysis, many physical problems, image processing
+and even machine learning. Here we will consider a simple two-dimensional implementation with a
+finite-difference formula, which reads:</p>
+<div class="math notranslate nohighlight">
+\[u_{out}(i,j) = 0.25 [u(i−1,j) + u(i+1,j) + u(i,j−1) + u(i,j+1)]\]</div>
+<figure class="align-center" id="id3">
+<img alt="../_images/2D-Laplace-operator.png" src="../_images/2D-Laplace-operator.png" />
+<figcaption>
+<p><span class="caption-text">An example of the discretization of the 2D Laplace operator.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>In Julia, this can be implemented as:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="w">    </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">            </span><span class="n">unew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="w">        </span><span class="k">end</span><span class="w"> </span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Note that we follow the Julia convention of appending an exclamation mark to functions that
+mutate their arguments.</p>
+<p>We now start by initializing the two 64-bit floating point arrays <span class="math notranslate nohighlight">\(u\)</span> and <span class="math notranslate nohighlight">\(unew\)</span>,
+and arbitrarily set the boundaries to 10.0 to have something interesting to simulate:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">setup</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="o">=</span><span class="mi">4096</span><span class="p">)</span>
+<span class="w">    </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">)</span>
+<span class="w">    </span><span class="c"># set boundary conditions</span>
+<span class="w">    </span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="k">end</span><span class="p">,</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="k">end</span><span class="p">]</span><span class="w"> </span><span class="o">.=</span><span class="w"> </span><span class="mf">10.0</span>
+<span class="w">    </span><span class="n">unew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>To simulate something that resembles e.g. the evolution of temperature in a 2D heat conductor
+(although we’ve completely ignored physical constants and time-stepping involved in solving the
+heat equation), we could run a loop of say 1000 “time” steps and visualize the results with the
+<code class="docutils literal notranslate"><span class="pre">heatmap</span></code> method of the <code class="docutils literal notranslate"><span class="pre">Plots</span></code> package:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setup</span><span class="p">()</span>
+
+<span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">1000</span>
+<span class="w">    </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="w">    </span><span class="c"># copy new computed field to old array</span>
+<span class="w">    </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">unew</span><span class="p">)</span>
+<span class="w">    </span><span class="c"># you can using the following expression if you get a warning &quot;Assignment to `u` in soft scope is ambiguous because ...&quot;</span>
+<span class="w">    </span><span class="c"># global u = copy(unew)</span>
+<span class="k">end</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">Plots</span>
+<span class="n">heatmap</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="benchmarking">
+<h2>Benchmarking<a class="headerlink" href="#benchmarking" title="Link to this heading"></a></h2>
+<p>Base Julia already has the <code class="docutils literal notranslate"><span class="pre">&#64;time</span></code> macro to print the time it takes to
+execute an expression. However, to get more accurate values it is better to
+rely on the <a class="reference external" href="https://juliaci.github.io/BenchmarkTools.jl/dev/manual/">BenchmarkTools.jl</a>
+framework, which provides convenient macros to perform benchmarking:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;btime</span></code>: for quick sanity checks, prints the time an expression takes and the memory allocated</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;benchmark</span></code>: runs a fuller benchmark on a given expression.</p></li>
+</ul>
+<p>As with <cite>Revise.jl</cite> and <cite>Test.jl</cite>, <cite>BenchmarkTools.jl</cite> should be installed in the base environment:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;BenchmarkTools&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let us all try it out on the HeatEquation package in the REPL.
+We could use the <code class="docutils literal notranslate"><span class="pre">Pkg.develop()</span></code> function to clone the repository
+into our <cite>~/.julia/dev</cite> folder, which is a good way to work on existing
+Julia packages. Here, we instead imagine that we wrote this package and it
+exists on our computer, so we start by cloning the repository (or download and
+unpack a zip archive) to a new folder:</p>
+<div class="admonition-benchmarking type-along important admonition" id="type-along-0">
+<p class="admonition-title">Benchmarking</p>
+<p>To perform benchmarking on the <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> function, simply insert <code class="docutils literal notranslate"><span class="pre">&#64;benchmark</span></code>:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+<span class="nd">@benchmark</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can also capture the output of <code class="docutils literal notranslate"><span class="pre">&#64;benchmark</span></code>:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">bench_results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@benchmark</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="n">typeof</span><span class="p">(</span><span class="n">bench_results</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="n">minimum</span><span class="p">(</span><span class="n">bench_results</span><span class="o">.</span><span class="n">times</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="profiling">
+<h2>Profiling<a class="headerlink" href="#profiling" title="Link to this heading"></a></h2>
+<p>The <a class="reference external" href="https://docs.julialang.org/en/v1/manual/profile/">Profile module</a>, part of <code class="docutils literal notranslate"><span class="pre">Base</span></code>,
+provides tools to help improve the performance of Julia code.
+It relies on <cite>sampling</cite> code at runtime and thus gathering statistical information on where time is spent.
+Profiling is particularly useful for identifying bottlenecks in code -
+we should remember that “premature optimization is the root of all evil” (Donald Knuth).</p>
+<p>Let’s go ahead and profile the <cite>lap2d!</cite> function:</p>
+<div class="admonition-profiling type-along important admonition" id="type-along-1">
+<p class="admonition-title">Profiling</p>
+<p>This is how we can profile the <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> function and
+print its results in a tree structure:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;Profile&quot;</span><span class="p">)</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Profile</span>
+
+<span class="n">Profile</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span><span class="w"> </span><span class="c"># clear backtraces from earlier runs</span>
+<span class="nd">@profile</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="n">Profile</span><span class="o">.</span><span class="n">print</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The information shown is not that easily digestible. Fortunately, the Julia extension
+for VSCode includes a <code class="docutils literal notranslate"><span class="pre">&#64;profview</span></code> macro which provides a clearer graphical view:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;ProfileView&quot;</span><span class="p">)</span>
+<span class="k">using</span><span class="w"> </span><span class="n">ProfileView</span>
+<span class="nd">@profview</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+
+<span class="c"># if you get a warning like &quot;both ProfileView and VSCodeServer export &#39;@profview&#39;&quot;,</span>
+<span class="c"># you can use the following expression in VS Code:</span>
+<span class="c"># VSCodeServer.@profview lap2d!(u, unew)</span>
+</pre></div>
+</div>
+<p>We can also look at the same information in a flamegraph by clicking the little fire
+button next to the search area.
+We should now be able to conclude that <code class="docutils literal notranslate"><span class="pre">setindex!</span></code> and <code class="docutils literal notranslate"><span class="pre">getindex</span></code> functions
+inside <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> take most of the time.</p>
+<p>It should be noted that there are only addition and multiplication operations in
+the <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> function, and these operations just run limited CPU cycles.
+A time-demanding example is provided in <a class="reference external" href="https://www.julia-vscode.org/docs/dev/userguide/profiler/">this page</a>.</p>
+</div>
+<p>Several packages are available for more advanced visualization of profiling results:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/timholy/ProfileView.jl">ProfileView.jl</a> is a stand-alone visualizer
+based on GTK.</p></li>
+<li><p><a class="reference external" href="https://github.com/davidanthoff/ProfileVega.jl">ProfileVega.jl</a>
+uses VegaLight and integrates well with Jupyter notebooks.</p></li>
+<li><p><a class="reference external" href="https://github.com/tkluck/StatProfilerHTML.jl">StatProfilerHTML.jl</a>
+produces HTML and presents some additional summaries,
+and also integrates well with Jupyter notebooks.</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaPerf/PProf.jl">PProf.jl</a> an interactive, web-based profile
+GUI explorer, implemented as a wrapper around google/pprof.</p></li>
+</ul>
+</section>
+<section id="optimization-options">
+<h2>Optimization options<a class="headerlink" href="#optimization-options" title="Link to this heading"></a></h2>
+<section id="column-major-vs-row-major-order">
+<h3>Column-major vs row-major order<a class="headerlink" href="#column-major-vs-row-major-order" title="Link to this heading"></a></h3>
+<p>Multidimensional arrays in Julia are stored in column-major order, i.e.
+arrays are stacked one column at a time in memory. This is the same order
+as in Fortran, Matlab and R, but opposite to that of C/C++ and Python (numpy).
+To avoid cache-misses it is  crucial to order one’s loops such that memory is
+accessed in a contiguous way!</p>
+<p>We can verify this by swapping the loop order in the <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> function and
+measure the performance:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="w">    </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">            </span><span class="n">unew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@benchmark</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In a set of tests this more than doubled the execution time!</p>
+</section>
+<section id="inbounds">
+<h3>&#64;inbounds<a class="headerlink" href="#inbounds" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&#64;inbounds</span></code> macro eliminates array bounds checking within expressions which
+can save considerable time. This should only be used if you are sure that no out-of-bounds
+indices are used!</p>
+<p>Let us add <code class="docutils literal notranslate"><span class="pre">&#64;inbounds</span></code> to the inner loop in <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> and benchmark it:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="w">    </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">unew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="w">        </span><span class="k">end</span><span class="w"> </span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@benchmark</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Significant speedup should be seen! In a set of tests the execution time as
+well as memory consumption were reduced by 50%.</p>
+</section>
+<section id="staticarrays">
+<h3>StaticArrays<a class="headerlink" href="#staticarrays" title="Link to this heading"></a></h3>
+<p>For applications involving <em>many small arrays</em>, significant performance can
+be gained by using <a class="reference external" href="https://github.com/JuliaArrays/StaticArrays.jl">StaticArrays</a>
+instead of normal Arrays. The package provides a range of built-in <code class="docutils literal notranslate"><span class="pre">StaticArray</span></code>
+types, including mutable and immutable arrays, with a <em>static size known at compile time</em>.</p>
+<p>Example:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;StaticArrays&quot;</span><span class="p">)</span>
+<span class="k">using</span><span class="w"> </span><span class="n">StaticArrays</span>
+
+<span class="n">m1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">m2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@SArray</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="n">m1</span><span class="o">*</span><span class="n">m1</span>
+<span class="c"># 311.808 ns (1 allocation: 896 bytes)</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="n">m2</span><span class="o">*</span><span class="n">m2</span>
+<span class="c"># 99.902 ns (1 allocation: 816 bytes)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">StaticArrays</span></code> provide
+<a class="reference external" href="https://juliaarrays.github.io/StaticArrays.jl/stable/pages/quickstart/">many additional features</a>,
+but unfortunately they can only be used for vectors, matrices and arrays with up
+to around 100 elements.</p>
+</section>
+<section id="other-performance-considerations">
+<h3>Other performance considerations<a class="headerlink" href="#other-performance-considerations" title="Link to this heading"></a></h3>
+<p>Julia’s official documentation has an important page on
+<a class="reference external" href="https://docs.julialang.org/en/v1/manual/performance-tips/">Performance tips</a>.
+Before embarking on any research software project in Julia you
+should carefully read this page!</p>
+</section>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<div class="admonition-code-examples-on-lumi-cluster demo toggle-shown dropdown admonition" id="demo-0">
+<p class="admonition-title">Code examples on LUMI cluster.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd /scratch/project_465001310/&lt;YOUR-DIRECTORY&gt;/
+$ git clone https://github.com/ENCCS/julia-for-hpc.git
+$ cd julia-for-hpc/content/code/performant/
+$ sbatch performant-batch.sh
+</pre></div>
+</div>
+</div>
+<div class="admonition-eliminate-array-bounds-checking exercise important admonition" id="exercise-0">
+<p class="admonition-title">Eliminate array bounds checking</p>
+<p>Insert the <code class="docutils literal notranslate"><span class="pre">&#64;inbounds</span></code> macro in the <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> function and
+benchmark it. How large is the speedup?</p>
+</div>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.julialang.org/en/v1/manual/performance-tips/">Performance tips</a>.</p></li>
+</ul>
+<div class="admonition-keypoints keypoints admonition" id="keypoints-0">
+<p class="admonition-title">Keypoints</p>
+<ul class="simple">
+<li><p>Always benchmark and profile before optimizing!</p></li>
+<li><p>Optimize bottlenecks in your serial code before you parallelize!</p></li>
+<li><p><a class="reference external" href="https://docs.julialang.org/en/v1/manual/performance-tips/">There’s a lot to think about</a>.</p></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../motivation-hpc/" class="btn btn-neutral float-left" title="Motivation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../multithreading/" class="btn btn-neutral float-right" title="Multithreading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

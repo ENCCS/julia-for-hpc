@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Julia for high-performance scientific computing &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=187304be"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex/" />
+    <link rel="search" title="Search" href="search/" />
+    <link rel="next" title="Setup" href="setup/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dagger/">Parallel execution with Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Julia for high-performance scientific computing</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/index.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="julia-for-high-performance-scientific-computing">
+<h1>Julia for high-performance scientific computing<a class="headerlink" href="#julia-for-high-performance-scientific-computing" title="Link to this heading"></a></h1>
+<p>Julia is a scientific programming language that is free and open
+source - see <a class="reference external" href="https://julialang.org/">https://julialang.org/</a> for downloads, documentation,
+learning resources etc. Bridging high-level interpreted and low-level
+compiled languages, it offers high performance (comparable to C and
+Fortran) without sacrificing simplicity and programming productivity
+(like in Python or R).</p>
+<p>Julia has a rich ecosystem of libraries aimed
+towards scientific computing and a powerful in-built package manager
+to install and manage their dependencies. Julia is also gaining ground
+in HPC as it supports both threading and distributed-memory
+parallelisation as well as GPU computing.</p>
+<p>After motivating why Julia can be a good option for your next HPC project,
+this lesson goes through various approaches for writing performant and parallel
+code, including how to write fast serial code, how to write multithreaded and
+distributed code, how to run Julia on an HPC system, and how to port Julia code
+to GPUs.</p>
+<p>If you are new to the Julia language, please make sure to go through this
+<a class="reference external" href="https://enccs.github.io/julia-intro/">introductory Julia lesson</a> before
+going through this HPC lesson independently or attending a workshop where
+it is taught.</p>
+<p>To learn about using Julia for problems in data science, please visit the lesson
+<a class="reference external" href="https://enccs.github.io/julia-for-hpda/">Julia for high-performance data analysis</a>.</p>
+<div class="admonition-prerequisites prerequisites admonition" id="prerequisites-0">
+<p class="admonition-title">Prerequisites</p>
+<ul class="simple">
+<li><p>Experience in one or more programming languages.</p></li>
+<li><p>Understanding of basic Julia syntax, best practices and development tools,
+corresponding to what is covered in the <a class="reference external" href="https://enccs.github.io/julia-intro/">ENCCS Julia-intro lesson</a></p></li>
+<li><p>Familiarity with basic concepts in high-performance computing (HPC)
+(including parallelization by threading or multiprocessing)
+and programming graphical processing units (GPUs). No direct experience
+is required.</p></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide/">Instructor’s guide</a></li>
+</ul>
+</div>
+<section id="who-is-the-course-for">
+<span id="learner-personas"></span><h2>Who is the course for?<a class="headerlink" href="#who-is-the-course-for" title="Link to this heading"></a></h2>
+<p>This lesson material is targeted towards students, researchers and developers
+who:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>are already familiar with one or more programming languages (Python, R, C/C++, Fortran, Matlab, …)</p></li>
+<li><p>want to add a new exciting high-level yet performant language to their repertoire</p></li>
+<li><p>might be mixing a high-level and a low-level language for performance reasons but want to make their life easier</p></li>
+<li><p>need to analyze big data or perform computationally demanding modeling, analysis or simulations</p></li>
+<li><p>want to develop high-performance parallelized and/or GPU code but prefer to stay within a
+productive high-level language.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="about-the-course">
+<h2>About the course<a class="headerlink" href="#about-the-course" title="Link to this heading"></a></h2>
+<p>This lesson material is developed by the <a class="reference external" href="https://enccs.se/">EuroCC National Competence Center
+Sweden (ENCCS)</a> and taught in ENCCS workshops. It is aimed
+at researchers and developers who want to learn a modern, high-level, high-performance
+programming language suitable for scientific computing, data science, machine learning
+and high-performance computing on CPUs or GPUs.
+Each lesson episode has clearly defined questions that will be addressed and includes
+multiple exercises along with solutions, and is therefore also useful for
+self-learning.
+The lesson material is licensed under <a class="reference external" href="https://creativecommons.org/licenses/by/4.0/">CC-BY-4.0</a> and can be reused in any form
+(with appropriate credit) in other courses and workshops.
+Instructors who wish to teach this lesson can refer to the <a class="reference internal" href="guide/"><span class="doc">Instructor’s guide</span></a> for
+practical advice.</p>
+<section id="graphical-and-text-conventions">
+<h3>Graphical and text conventions<a class="headerlink" href="#graphical-and-text-conventions" title="Link to this heading"></a></h3>
+<p>Different graphical elements are used to organize the material.</p>
+<section id="type-along-sections">
+<h4>Type-along sections<a class="headerlink" href="#type-along-sections" title="Link to this heading"></a></h4>
+<p>Type-along sections are intended for live coding where all participants
+type-along and appear in a separate text box, marked with a keyboard emoji:</p>
+<div class="admonition-defining-a-variables type-along important admonition" id="type-along-0">
+<p class="admonition-title">Defining a variables</p>
+<p>This is how you set a variable in Julia:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="exercises">
+<h4>Exercises<a class="headerlink" href="#exercises" title="Link to this heading"></a></h4>
+<p>All lesson episodes (sections) end with one or more exercises for participants
+to practice what they’ve learned, marked with a hand-writing emoji. Sometimes
+there’s also a solution:</p>
+<div class="admonition-printing-to-screen exercise important admonition" id="exercise-0">
+<p class="admonition-title">Printing to screen</p>
+<p>Which of these commands prints the value of the variable <code class="docutils literal notranslate"><span class="pre">x</span></code>?</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">print(x)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">println(x)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">write(x)</span></code></p></li>
+</ol>
+<div class="admonition-solution solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Solution</p>
+<p>Correct answer is both 1 and 2! <code class="docutils literal notranslate"><span class="pre">println()</span></code> uses <code class="docutils literal notranslate"><span class="pre">print()</span></code> and adds a new line.</p>
+</div>
+</div>
+</section>
+<section id="important-information">
+<h4>Important information<a class="headerlink" href="#important-information" title="Link to this heading"></a></h4>
+<p>Sometimes important information is displayed inside boxes with an exclamation mark emoji:</p>
+<div class="admonition-important-info callout admonition" id="callout-0">
+<p class="admonition-title">Important info</p>
+<p>Please don’t hesitate to ask questions during the workshop!</p>
+</div>
+</section>
+<section id="discussion">
+<h4>Discussion<a class="headerlink" href="#discussion" title="Link to this heading"></a></h4>
+<p>Discussion exercises are conducted either via voice or through a shared workshop document.</p>
+<div class="admonition-are-these-instructions-clear discussion important admonition" id="discussion-0">
+<p class="admonition-title">Are these instructions clear?</p>
+<p>Discuss any questions about the lesson format either via the shared workshop document or
+in breakout room sessions.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<p>Many resources for learning Julia can be found
+at <a class="reference external" href="https://julialang.org/learning/">https://julialang.org/learning/</a>. The list includes
+<a class="reference external" href="https://juliaacademy.com/">Julia Academy</a> courses,
+the <a class="reference external" href="https://docs.julialang.org/en/v1/manual/getting-started/">Julia manual</a>,
+the <a class="reference external" href="https://www.youtube.com/user/JuliaLanguage/playlists">Julia Youtube channel</a>,
+and an assortment of tutorials and books.</p>
+<p>A recent talk given by Kristoffer Carlsson, developer at Julia Computing in Sweden, gives an
+<a class="reference external" href="https://www.youtube.com/watch?v=bXHe7Kj3Xxg">excellent overview on using Julia for HPC</a>.</p>
+<p><a class="reference external" href="https://github.com/carstenbauer/JuliaHLRS22">This repository</a> is from the Julia for High Performance Computing Course &#64; HLRS
+developed by Carsten Bauer.</p>
+</section>
+<section id="credits">
+<h2>Credits<a class="headerlink" href="#credits" title="Link to this heading"></a></h2>
+<p>The lesson file structure and browsing layout is inspired by and derived from
+<a class="reference external" href="https://github.com/coderefinery/sphinx-lesson">work</a> by <a class="reference external" href="https://coderefinery.org/">CodeRefinery</a> licensed under the <a class="reference external" href="http://opensource.org/licenses/mit-license.html">MIT license</a>. We have copied and adapted
+most of their license text.</p>
+<p>Several examples and formulations are inspired by other Julia
+lessons, particularly:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/cschpc/heat-equation">Educational parallelization/GPU-porting repository with C/C++/Fortran examples</a> developed by CSC</p></li>
+<li><p><a class="reference external" href="https://github.com/csc-training/julia-introduction/">Introduction to Julia</a> provided by CSC and Aalto</p></li>
+<li><p><a class="reference external" href="https://github.com/maleadt/juliacon21-gpu_workshop">Tim Besard’s JuliaCon 2021 GPU tutorial</a></p></li>
+<li><p><a class="reference external" href="https://github.com/carstenbauer/JuliaCologne21">Carsten Bauer’s 3-day Julia workshop</a></p></li>
+<li><p><a class="reference external" href="https://carpentries-incubator.github.io/julia-novice/">The Carpentry lesson Introduction to Julia</a></p></li>
+<li><p><a class="reference external" href="https://juliadatascience.io">Storopoli, Huijzer and Alonso (2021). Julia Data Science. ISBN: 9798489859165.</a></p></li>
+</ul>
+<section id="instructional-material">
+<h3>Instructional Material<a class="headerlink" href="#instructional-material" title="Link to this heading"></a></h3>
+<p>All ENCCS instructional material is made available under the <a class="reference external" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons
+Attribution license (CC-BY-4.0)</a>. The following is a
+human-readable summary of (and not a substitute for) the <a class="reference external" href="https://creativecommons.org/licenses/by/4.0/legalcode">full legal text of the
+CC-BY-4.0 license</a>.
+You are free:</p>
+<ul class="simple">
+<li><p>to <strong>share</strong> - copy and redistribute the material in any medium or format</p></li>
+<li><p>to <strong>adapt</strong> - remix, transform, and build upon the material for any purpose,
+even commercially.</p></li>
+</ul>
+<p>The licensor cannot revoke these freedoms as long as you follow these license terms:</p>
+<ul class="simple">
+<li><p><strong>Attribution</strong> - You must give appropriate credit (mentioning that your work
+is derived from work that is Copyright (c) ENCCS and, where practical, linking
+to <a class="reference external" href="https://enccs.se">https://enccs.se</a>), provide a <a class="reference external" href="https://creativecommons.org/licenses/by/4.0/">link to the license</a>, and indicate if changes were
+made. You may do so in any reasonable manner, but not in any way that suggests
+the licensor endorses you or your use.</p></li>
+<li><p><strong>No additional restrictions</strong> - You may not apply legal terms or
+technological measures that legally restrict others from doing anything the
+license permits. With the understanding that:</p>
+<ul>
+<li><p>You do not have to comply with the license for elements of the material in
+the public domain or where your use is permitted by an applicable exception
+or limitation.</p></li>
+<li><p>No warranties are given. The license may not give you all of the permissions
+necessary for your intended use. For example, other rights such as
+publicity, privacy, or moral rights may limit how you use the material.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="software">
+<h3>Software<a class="headerlink" href="#software" title="Link to this heading"></a></h3>
+<p>Except where otherwise noted, the example programs and other software provided
+by ENCCS are made available under the <a class="reference external" href="http://opensource.org/">OSI</a>-approved
+<a class="reference external" href="http://opensource.org/licenses/mit-license.html">MIT license</a>.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setup/" class="btn btn-neutral float-right" title="Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
