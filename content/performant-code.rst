@@ -238,10 +238,9 @@ StaticArrays
 ^^^^^^^^^^^^
 
 For applications involving *many small arrays*, significant performance can
-be gained by using `StaticArrays <https://github.com/JuliaArrays/StaticArrays.jl>`__
+be gained by using `StaticArrays <https://github.com/JuliaArrays/StaticArrays.jl>`_
 instead of normal Arrays. The package provides a range of built-in ``StaticArray``
-types, including mutable and immutable arrays, with a *static size known at
-compile time*.
+types, including mutable and immutable arrays, with a *static size known at compile time*.
 
 Example:
 
@@ -260,7 +259,7 @@ Example:
    # 99.902 ns (1 allocation: 816 bytes)
 
 ``StaticArrays`` provide
-`many additional features <https://juliaarrays.github.io/StaticArrays.jl/stable/pages/quickstart/>`__,
+`many additional features <https://juliaarrays.github.io/StaticArrays.jl/stable/pages/quickstart/>`_,
 but unfortunately they can only be used for vectors, matrices and arrays with up
 to around 100 elements.
 
@@ -284,9 +283,9 @@ Exercises
    .. code-block::
 
       $ cd /scratch/project_465001310/<YOUR-DIRECTORY>/
-	  $ git clone https://github.com/ENCCS/julia-for-hpc.git
+      $ git clone https://github.com/ENCCS/julia-for-hpc.git
       $ cd julia-for-hpc/content/code/performant/
-	  $ sbatch performant-batch.sh
+      $ sbatch performant-batch.sh
 
 
 .. exercise:: Eliminate array bounds checking
@@ -299,7 +298,7 @@ Exercises
 See also
 --------
 
-- [Performance tips](https://docs.julialang.org/en/v1/manual/performance-tips/)
+- `Performance tips <https://docs.julialang.org/en/v1/manual/performance-tips/>`_.
 
 
 
@@ -307,4 +306,4 @@ See also
 
    - Always benchmark and profile before optimizing!
    - Optimize bottlenecks in your serial code before you parallelize!
-   - `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`__.
+   - `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`_.
