@@ -282,9 +282,8 @@ performance:
          A = rand(2^9, 2^9);
          A_d = MtlArray(A);
       
-         @btime $A * $A;
-         # FIXME: how to synchronize with Metal?         
-         @btime $A_d * $A_d;
+         @btime $A * $A;     
+         @btime @synch $A_d * $A_d;
 
 
 There should be a considerable speedup!
@@ -373,7 +372,7 @@ Vendor libraries
 Support for using GPU vendor libraries from Julia is currently only supported on 
 NVIDIA and AMD GPUs. CUDA and ROCm libraries contain precompiled kernels for common 
 operations like matrix multiplication (`cuBLAS`/`rocBLAS`), fast Fourier transforms 
-(`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocSolver`), as well as primitives 
+(`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocAlution`), as well as primitives 
 useful for the implementation of deep neural networks (`cuDNN`/`MIOpen`). These kernels are wrapped
 in their respective vendor libraries and can be used with the corresponding ``GPUArray``:
 
@@ -403,7 +402,28 @@ in their respective vendor libraries and can be used with the corresponding ``GP
          # use cuFFT for FFT
          using CUDA.CUFFT
          fft(A)
-   
+
+   .. group-tab:: ROCm
+
+      .. code-block:: julia 
+
+         # create a 100x100 Float32 random array and an uninitialized array
+         A = AMDGPU.rand(2^9, 2^9);
+         B = ROCArray{Float32, 2}(undef, 2^9, 2^9);
+
+         # regular matrix multiplication uses rocBLAS under the hood
+         A * A
+
+         # use rocAlution for QR factorization
+         qr(A)
+
+         # solve equation A*X == B
+         A \ B
+
+         # use rocFFT for FFT
+         using AMDGPU.rocFFT
+         fft(A)
+
 
 
 .. challenge:: Convert from Base.Array or use GPU methods?
@@ -528,7 +548,7 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
 .. tabs:: 
 
-   .. group-tab:: NVIDIA
+   .. group-tab:: CUDA
 
       .. code-block:: julia
 
@@ -548,7 +568,7 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
          @roc vadd!(C_d, A_d, B_d)         
 
-   .. group-tab:: Intel
+   .. group-tab:: oneAPI
 
       .. code-block:: julia
 
@@ -558,7 +578,7 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
          @oneapi vadd!(C_d, A_d, B_d)   
 
-   .. group-tab:: Apple
+   .. group-tab:: Metal
 
       .. code-block:: julia
 
