@@ -21,7 +21,8 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+            #python-version: 3.8
+          python-version: 3.9
       - name: Fetch all refs
         run: |
           git fetch
