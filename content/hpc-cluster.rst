@@ -448,52 +448,54 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
          sbatch batch.sh
 
 
-.. exercise:: Run multi node distributed job on LUMI cluster
+.. SlurmManager errors on LUMI.
 
-   Run the following files on two node job with 128 tasks per node and one CPU code per task.
-   Add Julia workers using ``SlurmManager`` from the ClusterManager.jl package.
+   .. exercise:: Run multi node distributed job on LUMI cluster
 
-   .. code-block:: toml
+      Run the following files on two node job with 128 tasks per node and one CPU code per task.
+      Add Julia workers using ``SlurmManager`` from the ClusterManager.jl package.
 
-      [deps]
-      ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
-      Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+      .. code-block:: toml
 
-   .. code-block:: julia
+         [deps]
+         ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
+         Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
-      using Distributed
-      using ClusterManagers
-      proc_num = parse(Int, ENV["SLURM_NTASKS"])
-      addprocs(SlurmManager(proc_num); exeflags="--project=.")
+      .. code-block:: julia
 
-      @everywhere task() = myid()
-      futures = [@spawnat id task() for id in workers()]
-      outputs = fetch.(futures)
-      println(outputs)
+         using Distributed
+         using ClusterManagers
+         proc_num = parse(Int, ENV["SLURM_NTASKS"])
+         addprocs(SlurmManager(proc_num); exeflags="--project=.")
 
-   .. solution::
+         @everywhere task() = myid()
+         futures = [@spawnat id task() for id in workers()]
+         outputs = fetch.(futures)
+         println(outputs)
 
-      ``batch.sh``
+      .. solution::
 
-      .. code-block:: bash
+         ``batch.sh``
 
-         #!/bin/bash
-         #SBATCH --account=project_465001310
-         #SBATCH --partition=standard
-         #SBATCH --time=00:15:00
-         #SBATCH --nodes=2
-         #SBATCH --ntasks-per-node=128
-         #SBATCH --cpus-per-task=1
-         #SBATCH --mem-per-cpu=0
+         .. code-block:: bash
 
-         module use /appl/local/csc/modulefiles
-         module load julia
-         julia --project=. -e 'using Pkg; Pkg.instantiate()'
-         julia --project=. script.jl
+            #!/bin/bash
+            #SBATCH --account=project_465001310
+            #SBATCH --partition=standard
+            #SBATCH --time=00:15:00
+            #SBATCH --nodes=2
+            #SBATCH --ntasks-per-node=128
+            #SBATCH --cpus-per-task=1
+            #SBATCH --mem-per-cpu=0
 
-      .. code-block:: bash
+            module use /appl/local/csc/modulefiles
+            module load julia
+            julia --project=. -e 'using Pkg; Pkg.instantiate()'
+            julia --project=. script.jl
 
-         sbatch batch.sh
+         .. code-block:: bash
+
+            sbatch batch.sh
 
 
 .. exercise:: Run MPI job on LUMI cluster
