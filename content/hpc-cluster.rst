@@ -175,7 +175,7 @@ The :code:`srun` command launches the job with options that declare the resource
 
       srun \
           --account=project_465001310 \
-          --partition=debug-g \
+          --partition=dev-g \
           --nodes=1 \
           --ntasks-per-node=1 \
           --cpus-per-task=16 \
@@ -260,7 +260,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
 
       $ sbatch \
           --account=project_465001310 \
-          --partition=debug-g \
+          --partition=dev-g \
           --nodes=1 \
           --ntasks-per-node=1 \
           --cpus-per-task=16 \
@@ -275,7 +275,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
 
       #!/bin/bash
       #SBATCH --account=project_465001310
-      #SBATCH --partition=debug-g
+      #SBATCH --partition=dev-g
       #SBATCH --nodes=1
       #SBATCH --ntasks-per-node=1
       #SBATCH --cpus-per-task=16
