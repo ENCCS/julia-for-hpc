@@ -115,13 +115,13 @@ Access to GPUs
 --------------
 
 To fully experience the walkthrough in this episode we need to have access 
-to a GPU device and the necessary software stack. 
+to a GPU device and the necessary software stack. Possible ways to use a GPU are:
 
-- Access to a HPC system with GPUs and a Julia installation is optimal. 
-- If you have a powerful GPU on your own machine you can also install the drivers and toolkits yourself. Another option is to use 
+- Access to a HPC system with GPUs and a Julia installation (optimal). 
+- If you have a powerful GPU on your own machine you can also install the drivers and toolkits yourself.
 - `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from `Julia Computing <https://juliacomputing.com/>`_ 
   with access to Julia's ecosystem of packages and GPU hardware. 
-- Or one can use `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
+- One can use `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
   account and a manual Julia installation, but using simple NVIDIA GPUs is free.
   Google Colab does not support Julia, but a
   `helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
@@ -379,7 +379,7 @@ in their respective vendor libraries and can be used with the corresponding ``GP
 
 .. tabs:: 
 
-   .. group-tab:: CUDA 
+   .. tab:: CUDA 
 
       .. code-block:: julia
 
@@ -403,7 +403,7 @@ in their respective vendor libraries and can be used with the corresponding ``GP
          using CUDA.CUFFT
          fft(A)
 
-   .. group-tab:: ROCm
+   .. tab:: ROCm
 
       .. code-block:: julia 
 
@@ -439,7 +439,7 @@ in their respective vendor libraries and can be used with the corresponding ``GP
             A = rand(2^9, 2^9);
             A_d = CuArray(A); # ROCArray(A) for AMDGPU
 
-      .. tab:: :meth:`rand` method from CUDA.jl/AMDGPU.jl
+      .. tab:: ``rand`` method from CUDA.jl/AMDGPU.jl
 
          .. code-block:: julia
 
