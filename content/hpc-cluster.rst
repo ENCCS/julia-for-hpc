@@ -154,9 +154,7 @@ We can run an interactive job as follows:
 
 The :code:`srun` command launches the job with options that declare the resources we want to reserve, :code:`--pty` flag attached a pseudoterminal to the job and the argument to run :code:`bash`.
 
-.. demo:: Running interactive jobs on the LUMI cluster.
-
-   We can run interactive CPU job on LUMI as follows:
+.. demo:: Running interactive CPU job on LUMI.
 
    .. code-block:: bash
 
@@ -171,7 +169,7 @@ The :code:`srun` command launches the job with options that declare the resource
           --pty \
           bash
 
-   We can interactive GPU job on LUMI as follows:
+.. demo:: Running interactive GPU job on LUMI.
 
    .. code-block:: bash
 
@@ -187,8 +185,15 @@ The :code:`srun` command launches the job with options that declare the resource
           --pty \
           bash
 
+.. demo:: Checking partitions
+
    The above job submission use the debug partition for quick testing.
    We should change the partition for real workloads that require more resources.
+   One way to inspect partitions, is to use the `scontrol` as follows:
+
+   .. code-block:: console
+
+      $ scontrol show partition | less -S
 
 
 Running batch jobs
