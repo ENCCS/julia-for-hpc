@@ -185,7 +185,7 @@ The :code:`srun` command launches the job with options that declare the resource
           --pty \
           bash
 
-.. demo:: Checking partitions
+.. demo:: Checking partitions on LUMI.
 
    The above job submission use the debug partition for quick testing.
    We should change the partition for real workloads that require more resources.
