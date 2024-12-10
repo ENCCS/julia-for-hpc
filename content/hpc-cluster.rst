@@ -284,13 +284,15 @@ Let's consider a standalone Julia application that contains the following files:
 
    .. code-block:: julia
 
-      println("Hello, world!")
+      using Example
+      hello("world")
 
-   Our application has no dependencies thus ``Project.toml`` file is empty.
+   Our application depends on the Example.jl package, hence the ``Project.toml`` looks as follows:
 
    .. code-block:: toml
 
-      # empty
+      [deps]
+      Example = "7876af07-990d-54b4-ab0e-23690620f79a"
 
    We should instantiate the project enviroment on the login node.
 
@@ -307,7 +309,7 @@ Let's consider a standalone Julia application that contains the following files:
 
       #!/bin/bash
       #SBATCH --account=project_465001310
-      #SBATCH --partition=small
+      #SBATCH --partition=debug
       #SBATCH --nodes=1
       #SBATCH --ntasks-per-node=1
       #SBATCH --cpus-per-task=1
