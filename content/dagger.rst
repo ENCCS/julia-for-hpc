@@ -21,12 +21,11 @@ Task graphs are commonly used to represent scientific workflows.
 .. figure:: img/dag.png
    :align: center
 
-   An example of a directed acyclic graph with vertices :math:`V=\{1,2,3,4\}` and directed edges :math:`E=\{(1,2), (1,3), (2,4), (3, 4)\}.`
-   The graph has two paths :math:`(1,2,4)` and :math:`(1,3,4).`
-   We can see that the vertices :math:`2` and :math:`3` are independent because there is no path between them.
+   An example of a directed acyclic graph with two paths.
+   We can see that the vertices 2 and 3 are independent because there is no path between them.
 
-Formally, a **task graph** is a directed acyclic graph consisting of a set of vertices :math:`V=\{1,2,...,n\}` called **tasks** and a set of directed edges :math:`E\subseteq \{(i,j) \mid i\in V, j\in V, i<j \}` that represent **dependencies** between tasks.
-We say that a task :math:`j` **depends** on task :math:`i` if there is a path from :math:`i` to :math:`j.`
+Formally, a **task graph** is a directed acyclic graph consisting of a set of vertices called **tasks** and a set of directed edges that represent **dependencies** between tasks.
+We say that one task **depends** on another task if there is a path from the first task to the second task.
 Otherwise, the tasks are **independent**.
 We can compute independent tasks in **parallel**.
 
@@ -108,7 +107,7 @@ Here is an example of a dynamic task graph:
 
 .. code-block:: julia
 
-   using Random
+   @everywhere using Random
 
    @everywhere function task_nested(a::Integer, b::Integer)
        return [Dagger.@spawn b+i for i in one(a):a]

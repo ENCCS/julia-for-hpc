@@ -11,8 +11,8 @@ Writing performant Julia code
 
 .. instructor-note::
 
-   - 30 min teaching
-   - 20 min exercises
+   - 40 min teaching
+   - 30 min exercises
 
 
 
@@ -35,7 +35,7 @@ finite-difference formula, which reads:
 
 In Julia, this can be implemented as:
 
-.. literalinclude:: code/lap2d.jl
+.. literalinclude:: code/performant/lap2d.jl
    :language: julia
 
 Note that we follow the Julia convention of appending an exclamation mark to functions that
@@ -73,6 +73,7 @@ heat equation), we could run a loop of say 1000 "time" steps and visualize the r
 
    using Plots
    heatmap(u)
+
 
 
 Benchmarking
@@ -116,6 +117,7 @@ unpack a zip archive) to a new folder:
       bench_results = @benchmark lap2d!(u, unew)
       typeof(bench_results)
       println(minimum(bench_results.times))
+
 
 
 Profiling
@@ -221,7 +223,7 @@ indices are used!
 
 Let us add ``@inbounds`` to the inner loop in ``lap2d!`` and benchmark it:
 
-.. literalinclude:: code/lap2d_inbounds.jl
+.. literalinclude:: code/performant/lap2d_inbounds.jl
    :language: julia
 
 .. code-block:: julia
@@ -236,10 +238,9 @@ StaticArrays
 ^^^^^^^^^^^^
 
 For applications involving *many small arrays*, significant performance can
-be gained by using `StaticArrays <https://github.com/JuliaArrays/StaticArrays.jl>`__
+be gained by using `StaticArrays <https://github.com/JuliaArrays/StaticArrays.jl>`_
 instead of normal Arrays. The package provides a range of built-in ``StaticArray``
-types, including mutable and immutable arrays, with a *static size known at
-compile time*.
+types, including mutable and immutable arrays, with a *static size known at compile time*.
 
 Example:
 
@@ -258,7 +259,7 @@ Example:
    # 99.902 ns (1 allocation: 816 bytes)
 
 ``StaticArrays`` provide
-`many additional features <https://juliaarrays.github.io/StaticArrays.jl/stable/pages/quickstart/>`__,
+`many additional features <https://juliaarrays.github.io/StaticArrays.jl/stable/pages/quickstart/>`_,
 but unfortunately they can only be used for vectors, matrices and arrays with up
 to around 100 elements.
 
@@ -276,16 +277,28 @@ should carefully read this page!
 Exercises
 ---------
 
+
+.. demo:: Code examples on LUMI cluster.
+
+   .. code-block::
+
+      $ cd /scratch/project_465001310/<YOUR-DIRECTORY>/
+      $ git clone https://github.com/ENCCS/julia-for-hpc.git
+      $ cd julia-for-hpc/content/code/performant/
+      $ sbatch performant-batch.sh
+
+
 .. exercise:: Eliminate array bounds checking
 
    Insert the ``@inbounds`` macro in the ``lap2d!`` function and
    benchmark it. How large is the speedup?
 
 
+
 See also
 --------
 
-- https://docs.julialang.org/en/v1/manual/performance-tips/
+- `Performance tips <https://docs.julialang.org/en/v1/manual/performance-tips/>`_.
 
 
 
@@ -293,4 +306,4 @@ See also
 
    - Always benchmark and profile before optimizing!
    - Optimize bottlenecks in your serial code before you parallelize!
-   - `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`__.
+   - `There's a lot to think about <https://docs.julialang.org/en/v1/manual/performance-tips/>`_.
