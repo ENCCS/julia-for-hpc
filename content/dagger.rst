@@ -107,7 +107,7 @@ Here is an example of a dynamic task graph:
 
 .. code-block:: julia
 
-   using Random
+   @everywhere using Random
 
    @everywhere function task_nested(a::Integer, b::Integer)
        return [Dagger.@spawn b+i for i in one(a):a]
