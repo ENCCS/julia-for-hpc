@@ -154,39 +154,41 @@ We can run an interactive job as follows:
 
 The :code:`srun` command launches the job with options that declare the resources we want to reserve, :code:`--pty` flag attached a pseudoterminal to the job and the argument to run :code:`bash`.
 
-.. tabs::
+.. demo:: Running interactive jobs on the LUMI cluster.
 
-   .. tab:: LUMI CPU (small)
+   We can run interactive CPU job on LUMI as follows:
 
-      .. code-block:: bash
+   .. code-block:: bash
 
-         srun \
-             --account=project_465001310 \
-             --partition=small \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=2 \
-             --mem-per-cpu=1000 \
-             --time="00:15:00" \
-             --pty \
-             bash
+      srun \
+          --account=project_465001310 \
+          --partition=debug \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=2 \
+          --mem-per-cpu=1000 \
+          --time="00:15:00" \
+          --pty \
+          bash
 
-   .. tab:: LUMI GPU (small-g)
+   We can interactive GPU job on LUMI as follows:
 
-      .. code-block:: bash
+   .. code-block:: bash
 
-         srun \
-             --account=project_465001310 \
-             --partition=small-g \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=16 \
-             --gpus-per-node=1 \
-             --mem-per-cpu=1750 \
-             --time="00:15:00" \
-             --pty \
-             bash
+      srun \
+          --account=project_465001310 \
+          --partition=debug-g \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=16 \
+          --gpus-per-node=1 \
+          --mem-per-cpu=1750 \
+          --time="00:15:00" \
+          --pty \
+          bash
 
+   The above job submission use the debug partition for quick testing.
+   We should change the partition for real workloads that require more resources.
 
 
 Running batch jobs
