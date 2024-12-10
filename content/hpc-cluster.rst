@@ -204,67 +204,89 @@ We can run a batch job as follows:
 
 .. code-block:: console
 
-   $ sbatch [options] script.sh
+   $ sbatch [options] batch.sh
 
-The :code:`sbatch` command launches the batch job, with options that declare the resources we want to reserve, and the batch script :code:`script.sh` contains the commands to run the job.
+The :code:`sbatch` command launches the batch job, with options that declare the resources we want to reserve, and the batch script :code:`batch.sh` contains the commands to run the job.
 
-.. tabs::
+.. demo:: Running CPU batch job on LUMI.
 
-   .. tab:: LUMI CPU (small)
+   We can ``batch.sh`` file as follows:
 
-      .. code-block:: bash
+   .. code-block:: bash
 
-         sbatch \
-             --account=project_465001310 \
-             --partition=small \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=2 \
-             --mem-per-cpu=1000 \
-             --time="00:15:00" \
-             script.sh
+      #!/bin/bash
+      echo "Hello, world!"
 
-      Often options are specified as comments in the batch ``script.sh`` as follows.
+   .. code-block:: console
 
-      .. code-block:: bash
+      $ sbatch \
+          --account=project_465001310 \
+          --partition=debug \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=2 \
+          --mem-per-cpu=1000 \
+          --time="00:15:00" \
+          batch.sh
 
-         #!/bin/bash
-         #SBATCH --account=project_465001310
-         #SBATCH --partition=small
-         #SBATCH --nodes=1
-         #SBATCH --ntasks-per-node=1
-         #SBATCH --cpus-per-task=2
-         #SBATCH --mem-per-cpu=1000
-         #SBATCH --time="00:15:00"
+   Alternatively, we can specify the options as comments in the batch ``batch.sh`` and run in without option using `sbatch`:
 
-   .. tab:: LUMI GPU (small-g)
+   .. code-block:: bash
 
-      .. code-block:: bash
+      #!/bin/bash
+      #SBATCH --account=project_465001310
+      #SBATCH --partition=debug
+      #SBATCH --nodes=1
+      #SBATCH --ntasks-per-node=1
+      #SBATCH --cpus-per-task=2
+      #SBATCH --mem-per-cpu=1000
+      #SBATCH --time="00:15:00"
+      echo "Hello, world!"
 
-         sbatch \
-             --account=project_465001310 \
-             --partition=small-g \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=16 \
-             --gpus-per-node=1 \
-             --mem-per-cpu=1750 \
-             --time="00:15:00" \
-             script.sh
+   .. code-block:: console
 
-      Often options are specified as comments in the batch ``script.sh`` as follows.
+      $ sbatch batch.sh
 
-      .. code-block:: bash
+.. demo:: Running GPU batch job on LUMI.
 
-         #!/bin/bash
-         #SBATCH --account=project_465001310
-         #SBATCH --partition=small-g
-         #SBATCH --nodes=1
-         #SBATCH --ntasks-per-node=1
-         #SBATCH --cpus-per-task=16
-         #SBATCH --gpus-per-node=1
-         #SBATCH --mem-per-cpu=1750
-         #SBATCH --time="00:15:00"
+   We can ``batch.sh`` file as follows:
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      echo "Hello, world!"
+
+   .. code-block:: console
+
+      $ sbatch \
+          --account=project_465001310 \
+          --partition=debug-g \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=16 \
+          --gpus-per-node=1 \
+          --mem-per-cpu=1750 \
+          --time="00:15:00" \
+          batch.sh
+
+   Alternatively, we can specify the options as comments in the batch ``batch.sh`` and run in without option using `sbatch`:
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      #SBATCH --account=project_465001310
+      #SBATCH --partition=debug-g
+      #SBATCH --nodes=1
+      #SBATCH --ntasks-per-node=1
+      #SBATCH --cpus-per-task=16
+      #SBATCH --gpus-per-node=1
+      #SBATCH --mem-per-cpu=1750
+      #SBATCH --time="00:15:00"
+      echo "Hello, world!"
+
+   .. code-block:: console
+
+      $ sbatch batch.sh
 
 
 Running Julia application in a job
@@ -275,7 +297,7 @@ Let's consider a standalone Julia application that contains the following files:
 - :code:`Project.toml` for describing project metadata and dependencies.
 - :code:`script.jl` for an entry point to run the desired Julia workload.
   Optionally, it can implement a command line client if we want to parse arguments that are supplied to the script.
-- :code:`script.sh` for a batch script for setting up the Julia environment and running the Julia workload.
+- :code:`batch.sh` for a batch script for setting up the Julia environment and running the Julia workload.
 
 .. demo:: Example of running Julia application on LUMI.
 
@@ -329,13 +351,8 @@ Let's consider a standalone Julia application that contains the following files:
 Exercises
 ---------
 
-In these exercises you should create the three files ``Project.toml``, ``script.jl``, and ``script.sh`` and run them via Slurm in the LUMI cluster.
+In these exercises you should create the three files ``Project.toml``, ``script.jl``, and ``batch.sh`` and run them via Slurm in the LUMI cluster.
 If the course has a resource reservation, we can use the :code:`--reservation="<name>"` option to use it.
-
-.. prereq::
-
-   Setup Julia environment on LUMI as described in the Setup section.
-
 
 .. exercise:: Run multithreaded job on LUMI cluster
 
@@ -360,7 +377,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -380,7 +397,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
 
 .. exercise:: Run single node distributed job on LUMI cluster
@@ -408,7 +425,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -428,7 +445,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
 
 .. exercise:: Run multi node distributed job on LUMI cluster
@@ -456,7 +473,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -476,7 +493,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
 
 .. exercise:: Run MPI job on LUMI cluster
@@ -505,7 +522,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -526,7 +543,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
 
 .. exercise:: Run GPU job on LUMI cluster
@@ -552,7 +569,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -574,5 +591,5 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
