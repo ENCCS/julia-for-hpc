@@ -691,7 +691,10 @@ GPU we are using:
 
    .. group-tab:: AMD
 
-      AMDGPU.HIP.properties(0)
+      .. code-block:: julia
+         
+         AMDGPU.HIP.properties(0)
+
    .. group-tab:: Intel
 
       .. code-block:: julia
@@ -860,10 +863,54 @@ supported, and then launch the compiled kernel:
 
       WRITEME
 
+Using KernelAbstractions.jl
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+The package `KernelAbstractions.jl <https://juliagpu.github.io/KernelAbstractions.jl/stable/>`__ allows to write 
+vendor-agnostic kernels that can also fallback to CPU. This package makes use of the ``@kernel`` macro on functions to be 
+offloaded to GPU. The ``vadd!`` example would look like the following:
+
+.. code-block:: julia
+
+   using KernelAbstractions
+
+   @kernel function vadd!(C, @Const(A), @Const(B))
+       i = @index(Global)
+       @inbounds C[i] = A[i] + B[i]
+   end
+   
+   function my_vadd!(C, A, B)
+       backend = get_backend(A)
+       kernel! = vadd!(backend)
+       kernel!(C,A,B, ndrange = size(C))
+   end
+
+The ``@index`` macro is used to abstract away the size of the workgroup/block. This kernel is then compiled on CPU or GPU
+depending on the vectors that we pass to it. The ``get_backend()`` method returns the device where the array is instantiated
+(CPU, nVidia GPU, AMD, Intel, Metal...) and is used to get the specialised ``kernel!()`` for that backend. This function can then 
+seamlessly be called on a GPU array or a CPU array:
+
+.. code-block:: julia
+
+   A = zeros(10) .+ 3.0;
+   B = ones(10) .* 2;
+   C = similar(B);
+   my_vadd!(C, A, B)
+   C
+
+.. code-block:: julia
+
+   A_d = ROCArray(A);
+   B_d = ROCArray(B);
+   C_d = similar(B_d);
+   
+   my_vadd!(C_d, A_d, B_d)
+   C_d
 
 .. callout:: KernelAbstractions.jl
 
-   If using the `KernelAbstractions.jl` package, the optimal thread number is determined automatically!
+   If using the ``KernelAbstractions.jl`` package, the optimal thread number is determined automatically!
 
 
 .. callout:: Restrictions in kernel programming
