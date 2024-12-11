@@ -115,13 +115,13 @@ Access to GPUs
 --------------
 
 To fully experience the walkthrough in this episode we need to have access 
-to a GPU device and the necessary software stack. 
+to a GPU device and the necessary software stack. Possible ways to use a GPU are:
 
-- Access to a HPC system with GPUs and a Julia installation is optimal. 
-- If you have a powerful GPU on your own machine you can also install the drivers and toolkits yourself. Another option is to use 
+- Access to a HPC system with GPUs and a Julia installation (optimal). 
+- If you have a powerful GPU on your own machine you can also install the drivers and toolkits yourself.
 - `JuliaHub <https://juliahub.com/lp/>`_, a commercial cloud platform from `Julia Computing <https://juliacomputing.com/>`_ 
   with access to Julia's ecosystem of packages and GPU hardware. 
-- Or one can use `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
+- One can use `Google Colab <https://colab.research.google.com/>`_ which requires a Google 
   account and a manual Julia installation, but using simple NVIDIA GPUs is free.
   Google Colab does not support Julia, but a
   `helpful person on the internet <https://github.com/Dsantra92/Julia-on-Colab>`__ 
@@ -282,9 +282,8 @@ performance:
          A = rand(2^9, 2^9);
          A_d = MtlArray(A);
       
-         @btime $A * $A;
-         # FIXME: how to synchronize with Metal?         
-         @btime $A_d * $A_d;
+         @btime $A * $A;     
+         @btime @synch $A_d * $A_d;
 
 
 There should be a considerable speedup!
@@ -371,16 +370,16 @@ Vendor libraries
 ^^^^^^^^^^^^^^^^
 
 Support for using GPU vendor libraries from Julia is currently only supported on 
-NVIDIA and AMD GPUs. CUDA and ROCm libraries contain precompiled kernels for common 
+NVIDIA and AMD GPUs, with experimental efforts on Intel oneAPI. CUDA and ROCm libraries contain precompiled kernels for common 
 operations like matrix multiplication (`cuBLAS`/`rocBLAS`), fast Fourier transforms 
-(`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocSolver`), as well as primitives 
+(`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocSOLVER`), as well as primitives 
 useful for the implementation of deep neural networks (`cuDNN`/`MIOpen`). These kernels are wrapped
 in their respective vendor libraries and can be used with the corresponding ``GPUArray``:
 
 
 .. tabs:: 
 
-   .. group-tab:: CUDA 
+   .. tab:: CUDA 
 
       .. code-block:: julia
 
@@ -403,7 +402,29 @@ in their respective vendor libraries and can be used with the corresponding ``GP
          # use cuFFT for FFT
          using CUDA.CUFFT
          fft(A)
-   
+
+   .. tab:: ROCm
+
+      .. code-block:: julia 
+
+         # create a 100x100 Float32 random array and an uninitialized array
+         A = AMDGPU.rand(2^9, 2^9);
+         B = ROCArray{Float32, 2}(undef, 2^9, 2^9);
+
+         # regular matrix multiplication uses rocBLAS under the hood
+         A * A
+
+         # use rocAlution for QR factorization
+         using AMDGPU.rocSOLVER
+         rocSOLVER.qr(A)
+
+         # solve equation A*X == B
+         A \ B
+
+         # use rocFFT for FFT
+         using AMDGPU.rocFFT
+         rocFFT.fft(A)
+
 
 
 .. challenge:: Convert from Base.Array or use GPU methods?
@@ -419,7 +440,7 @@ in their respective vendor libraries and can be used with the corresponding ``GP
             A = rand(2^9, 2^9);
             A_d = CuArray(A); # ROCArray(A) for AMDGPU
 
-      .. tab:: :meth:`rand` method from CUDA.jl/AMDGPU.jl
+      .. tab:: ``rand`` method from CUDA.jl/AMDGPU.jl
 
          .. code-block:: julia
 
@@ -528,7 +549,7 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
 .. tabs:: 
 
-   .. group-tab:: NVIDIA
+   .. group-tab:: CUDA
 
       .. code-block:: julia
 
@@ -548,7 +569,7 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
          @roc vadd!(C_d, A_d, B_d)         
 
-   .. group-tab:: Intel
+   .. group-tab:: oneAPI
 
       .. code-block:: julia
 
@@ -558,7 +579,7 @@ will compile :meth:`vadd!` into a GPU kernel and launch it:
 
          @oneapi vadd!(C_d, A_d, B_d)   
 
-   .. group-tab:: Apple
+   .. group-tab:: Metal
 
       .. code-block:: julia
 
@@ -670,8 +691,7 @@ GPU we are using:
 
    .. group-tab:: AMD
 
-      Not known
-
+      AMDGPU.HIP.properties(0)
    .. group-tab:: Intel
 
       .. code-block:: julia
@@ -732,15 +752,13 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
          C = similar(A);
          
          groupsize = 256
-         # smallest integer larger than or equal to length(A)/threads
-         gridsize = cld(length(A), nthreads) * groupsize
-         # NOTE: after v0.5.5, gridsize should instead be:  
-         #gridsize = cld(length(A), nthreads) 
+         
+         gridsize = cld(length(A), groupsize) 
 
          # run using 256 threads
          @roc groupsize=groupsize gridsize=gridsize vadd!(C, A, B)
 
-         @assert all(Array(C) .== 5.0)
+         all(Array(C) .== 5.0)
 
       .. warning::
 
@@ -760,7 +778,7 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
    
-         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         A, B = oneArray(ones(2^9)*2), oneArray(ones(2^9)*3);
          C = similar(A);
          
          nthreads = 256
@@ -783,7 +801,7 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
       
-         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         A, B = MtlArray(ones(2^9)*2), MtlArray(ones(2^9)*3);
          C = similar(A);
          
          nthreads = 256
@@ -841,6 +859,11 @@ supported, and then launch the compiled kernel:
    .. group-tab:: Apple
 
       WRITEME
+
+
+.. callout:: KernelAbstractions.jl
+
+   If using the `KernelAbstractions.jl` package, the optimal thread number is determined automatically!
 
 
 .. callout:: Restrictions in kernel programming
@@ -909,7 +932,14 @@ in a GUI, but summary statistics can also be printed in the terminal:
 More information on profiling with NVIDIA tools can be found in the 
 `documentation <https://cuda.juliagpu.org/stable/development/profiling/>`__.
 
-For profiling Julia code running on AMD GPUs one can use rocprof - see the `documentation <https://amdgpu.juliagpu.org/stable/profiling/>`__.
+For profiling Julia code running on AMD GPUs one can use rocprof(v2) - see the `documentation <https://amdgpu.juliagpu.org/stable/profiling/>`__.
+In particular, given a `profile.jl` script that we want to profile, we can run the following:
+
+.. code-block:: console
+
+   $ ENABLE_JITPROFILING=1 rocprofv2 --plugin perfetto --hip-trace --hsa-trace --kernel-trace -o prof julia ./profile.jl
+
+This will produce a `.pftrace` file that can be copied back to your local workstation and visualised with the `Perfetto UI <https://ui.perfetto.dev/>`__.
 
 Conditional use
 ---------------

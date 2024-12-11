@@ -135,10 +135,10 @@ The cluster specific preferences are required only to use system installed MPI a
    .. code-block:: julia
 
       using Pkg
-      Pkg.add("MPI.jl")
-      Pkg.add("AMDGPU.jl")
-      Pkg.add("ClusterManagers.jl")
-      Pkg.add("Dagger.jl")
+      Pkg.add("MPI")
+      Pkg.add("AMDGPU")
+      Pkg.add("ClusterManagers")
+      Pkg.add("Dagger")
       Pkg.precompile()
 
 
@@ -154,39 +154,46 @@ We can run an interactive job as follows:
 
 The :code:`srun` command launches the job with options that declare the resources we want to reserve, :code:`--pty` flag attached a pseudoterminal to the job and the argument to run :code:`bash`.
 
-.. tabs::
+.. demo:: Running interactive CPU job on LUMI.
 
-   .. tab:: LUMI CPU (small)
+   .. code-block:: bash
 
-      .. code-block:: bash
+      srun \
+          --account=project_465001310 \
+          --partition=debug \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=2 \
+          --mem-per-cpu=1000 \
+          --time="00:15:00" \
+          --pty \
+          bash
 
-         srun \
-             --account=project_465001310 \
-             --partition=small \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=2 \
-             --mem-per-cpu=1000 \
-             --time="00:15:00" \
-             --pty \
-             bash
+.. demo:: Running interactive GPU job on LUMI.
 
-   .. tab:: LUMI GPU (small-g)
+   .. code-block:: bash
 
-      .. code-block:: bash
+      srun \
+          --account=project_465001310 \
+          --partition=dev-g \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=16 \
+          --gpus-per-node=1 \
+          --mem-per-cpu=1750 \
+          --time="00:15:00" \
+          --pty \
+          bash
 
-         srun \
-             --account=project_465001310 \
-             --partition=small-g \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=16 \
-             --gpus-per-node=1 \
-             --mem-per-cpu=1750 \
-             --time="00:15:00" \
-             --pty \
-             bash
+.. demo:: Checking partitions on LUMI.
 
+   The above job submission use the debug partition for quick testing.
+   We should change the partition for real workloads that require more resources.
+   One way to inspect partitions, is to use the `scontrol` as follows:
+
+   .. code-block:: console
+
+      $ scontrol show partition | less -S
 
 
 Running batch jobs
@@ -197,67 +204,89 @@ We can run a batch job as follows:
 
 .. code-block:: console
 
-   $ sbatch [options] script.sh
+   $ sbatch [options] batch.sh
 
-The :code:`sbatch` command launches the batch job, with options that declare the resources we want to reserve, and the batch script :code:`script.sh` contains the commands to run the job.
+The :code:`sbatch` command launches the batch job, with options that declare the resources we want to reserve, and the batch script :code:`batch.sh` contains the commands to run the job.
 
-.. tabs::
+.. demo:: Running CPU batch job on LUMI.
 
-   .. tab:: LUMI CPU (small)
+   We can ``batch.sh`` file as follows:
 
-      .. code-block:: bash
+   .. code-block:: bash
 
-         sbatch \
-             --account=project_465001310 \
-             --partition=small \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=2 \
-             --mem-per-cpu=1000 \
-             --time="00:15:00" \
-             script.sh
+      #!/bin/bash
+      echo "Hello, world!"
 
-      Often options are specified as comments in the batch ``script.sh`` as follows.
+   .. code-block:: console
 
-      .. code-block:: bash
+      $ sbatch \
+          --account=project_465001310 \
+          --partition=debug \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=2 \
+          --mem-per-cpu=1000 \
+          --time="00:15:00" \
+          batch.sh
 
-         #!/bin/bash
-         #SBATCH --account=project_465001310
-         #SBATCH --partition=small
-         #SBATCH --nodes=1
-         #SBATCH --ntasks-per-node=1
-         #SBATCH --cpus-per-task=2
-         #SBATCH --mem-per-cpu=1000
-         #SBATCH --time="00:15:00"
+   Alternatively, we can specify the options as comments in the batch ``batch.sh`` and run in without option using `sbatch`:
 
-   .. tab:: LUMI GPU (small-g)
+   .. code-block:: bash
 
-      .. code-block:: bash
+      #!/bin/bash
+      #SBATCH --account=project_465001310
+      #SBATCH --partition=debug
+      #SBATCH --nodes=1
+      #SBATCH --ntasks-per-node=1
+      #SBATCH --cpus-per-task=2
+      #SBATCH --mem-per-cpu=1000
+      #SBATCH --time="00:15:00"
+      echo "Hello, world!"
 
-         sbatch \
-             --account=project_465001310 \
-             --partition=small-g \
-             --nodes=1 \
-             --ntasks-per-node=1 \
-             --cpus-per-task=16 \
-             --gpus-per-node=1 \
-             --mem-per-cpu=1750 \
-             --time="00:15:00" \
-             script.sh
+   .. code-block:: console
 
-      Often options are specified as comments in the batch ``script.sh`` as follows.
+      $ sbatch batch.sh
 
-      .. code-block:: bash
+.. demo:: Running GPU batch job on LUMI.
 
-         #!/bin/bash
-         #SBATCH --account=project_465001310
-         #SBATCH --partition=small-g
-         #SBATCH --nodes=1
-         #SBATCH --ntasks-per-node=1
-         #SBATCH --cpus-per-task=16
-         #SBATCH --gpus-per-node=1
-         #SBATCH --mem-per-cpu=1750
-         #SBATCH --time="00:15:00"
+   We can ``batch.sh`` file as follows:
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      echo "Hello, world!"
+
+   .. code-block:: console
+
+      $ sbatch \
+          --account=project_465001310 \
+          --partition=dev-g \
+          --nodes=1 \
+          --ntasks-per-node=1 \
+          --cpus-per-task=16 \
+          --gpus-per-node=1 \
+          --mem-per-cpu=1750 \
+          --time="00:15:00" \
+          batch.sh
+
+   Alternatively, we can specify the options as comments in the batch ``batch.sh`` and run in without option using `sbatch`:
+
+   .. code-block:: bash
+
+      #!/bin/bash
+      #SBATCH --account=project_465001310
+      #SBATCH --partition=dev-g
+      #SBATCH --nodes=1
+      #SBATCH --ntasks-per-node=1
+      #SBATCH --cpus-per-task=16
+      #SBATCH --gpus-per-node=1
+      #SBATCH --mem-per-cpu=1750
+      #SBATCH --time="00:15:00"
+      echo "Hello, world!"
+
+   .. code-block:: console
+
+      $ sbatch batch.sh
 
 
 Running Julia application in a job
@@ -268,7 +297,7 @@ Let's consider a standalone Julia application that contains the following files:
 - :code:`Project.toml` for describing project metadata and dependencies.
 - :code:`script.jl` for an entry point to run the desired Julia workload.
   Optionally, it can implement a command line client if we want to parse arguments that are supplied to the script.
-- :code:`script.sh` for a batch script for setting up the Julia environment and running the Julia workload.
+- :code:`batch.sh` for a batch script for setting up the Julia environment and running the Julia workload.
 
 .. demo:: Example of running Julia application on LUMI.
 
@@ -277,13 +306,15 @@ Let's consider a standalone Julia application that contains the following files:
 
    .. code-block:: julia
 
-      println("Hello, world!")
+      using Example
+      hello("world")
 
-   Our application has no dependencies thus ``Project.toml`` file is empty.
+   Our application depends on the Example.jl package, hence the ``Project.toml`` looks as follows:
 
    .. code-block:: toml
 
-      # empty
+      [deps]
+      Example = "7876af07-990d-54b4-ab0e-23690620f79a"
 
    We should instantiate the project enviroment on the login node.
 
@@ -300,7 +331,7 @@ Let's consider a standalone Julia application that contains the following files:
 
       #!/bin/bash
       #SBATCH --account=project_465001310
-      #SBATCH --partition=small
+      #SBATCH --partition=debug
       #SBATCH --nodes=1
       #SBATCH --ntasks-per-node=1
       #SBATCH --cpus-per-task=1
@@ -320,13 +351,8 @@ Let's consider a standalone Julia application that contains the following files:
 Exercises
 ---------
 
-In these exercises you should create the three files ``Project.toml``, ``script.jl``, and ``script.sh`` and run them via Slurm in the LUMI cluster.
+In these exercises you should create the three files ``Project.toml``, ``script.jl``, and ``batch.sh`` and run them via Slurm in the LUMI cluster.
 If the course has a resource reservation, we can use the :code:`--reservation="<name>"` option to use it.
-
-.. prereq::
-
-   Setup Julia environment on LUMI as described in the Setup section.
-
 
 .. exercise:: Run multithreaded job on LUMI cluster
 
@@ -351,7 +377,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -371,7 +397,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
 
 .. exercise:: Run single node distributed job on LUMI cluster
@@ -399,7 +425,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -419,55 +445,57 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
 
-.. exercise:: Run multi node distributed job on LUMI cluster
+.. SlurmManager errors on LUMI.
 
-   Run the following files on two node job with 128 tasks per node and one CPU code per task.
-   Add Julia workers using ``SlurmManager`` from the ClusterManager.jl package.
+   .. exercise:: Run multi node distributed job on LUMI cluster
 
-   .. code-block:: toml
+      Run the following files on two node job with 128 tasks per node and one CPU code per task.
+      Add Julia workers using ``SlurmManager`` from the ClusterManager.jl package.
 
-      [deps]
-      ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
-      Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+      .. code-block:: toml
 
-   .. code-block:: julia
+         [deps]
+         ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
+         Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
-      using Distributed
-      using ClusterManagers
-      proc_num = parse(Int, ENV["SLURM_NTASKS"])
-      addprocs(SlurmManager(proc_num); exeflags="--project=.")
+      .. code-block:: julia
 
-      @everywhere task() = myid()
-      futures = [@spawnat id task() for id in workers()]
-      outputs = fetch.(futures)
-      println(outputs)
+         using Distributed
+         using ClusterManagers
+         proc_num = parse(Int, ENV["SLURM_NTASKS"])
+         addprocs(SlurmManager(proc_num); exeflags="--project=.")
 
-   .. solution::
+         @everywhere task() = myid()
+         futures = [@spawnat id task() for id in workers()]
+         outputs = fetch.(futures)
+         println(outputs)
 
-      ``script.sh``
+      .. solution::
 
-      .. code-block:: bash
+         ``batch.sh``
 
-         #!/bin/bash
-         #SBATCH --account=project_465001310
-         #SBATCH --partition=standard
-         #SBATCH --time=00:15:00
-         #SBATCH --nodes=2
-         #SBATCH --ntasks-per-node=128
-         #SBATCH --cpus-per-task=1
-         #SBATCH --mem-per-cpu=0
+         .. code-block:: bash
 
-         module use /appl/local/csc/modulefiles
-         module load julia
-         julia --project=. -e 'using Pkg; Pkg.instantiate()'
-         julia --project=. script.jl
+            #!/bin/bash
+            #SBATCH --account=project_465001310
+            #SBATCH --partition=standard
+            #SBATCH --time=00:15:00
+            #SBATCH --nodes=2
+            #SBATCH --ntasks-per-node=128
+            #SBATCH --cpus-per-task=1
+            #SBATCH --mem-per-cpu=0
 
-      .. code-block:: bash
+            module use /appl/local/csc/modulefiles
+            module load julia
+            julia --project=. -e 'using Pkg; Pkg.instantiate()'
+            julia --project=. script.jl
 
-         sbatch script.sh
+         .. code-block:: bash
+
+            sbatch batch.sh
 
 
 .. exercise:: Run MPI job on LUMI cluster
@@ -496,7 +524,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -517,7 +545,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
 
 .. exercise:: Run GPU job on LUMI cluster
@@ -543,7 +571,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``script.sh``
+      ``batch.sh``
 
       .. code-block:: bash
 
@@ -565,5 +593,5 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
       .. code-block:: bash
 
-         sbatch script.sh
+         sbatch batch.sh
 
