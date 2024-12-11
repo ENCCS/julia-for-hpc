@@ -118,6 +118,7 @@ We can also create a wrapper function for convenient access to the function as f
        mean(convert(Vector{Clong}, arr), convert(Clong, length(arr)))
    end
 
+The ``mean.c`` file, the shared library ``main.so`` after compilation of the C code, and a Jupyter notebook document ``julia-c.ipynb`` containing the above examples for interfacing Julia with C are provided at the ``/content/code/interfacing`` directory in the github repository in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code/interfacing>`_.
 
 
 
