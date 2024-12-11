@@ -292,7 +292,7 @@ The "standard" way to call Python code in Julia is to use the `PyCall <https://g
 - Type conversions are automatically performed for numeric, boolean, string, and I/O streams plus all tuples, arrays, and dictionaries of these types. Other types are converted to the generic PyObject type.
 
 
-Before calling Python code from Julia, make sure you have PyCall installed in Julia
+Before calling Python code from Julia, make sure you have ``PyCall`` installed in Julia
 
 .. code-block:: julia
 
@@ -338,14 +338,15 @@ Note that the py-strings are not part of the Julia itself: they are defined by t
     py"getNElement"(1)
     # 1
 
-It is noted that
+
+It is noted that:
 
 - you don’t need to convert complex data like arrays, and the results are automatically converted to Julia types
 - in the last line of the example that PyCall doesn’t attempt index conversion (Python arrays are zero-based while Julia arrays are one-based).
 Calling the Python ``getNElement()`` function with `1` being the argument will retrieve what in Python is the first element of the array.
 
-It is very easy to mix Julia and Python code.
-So if you like a developed module in Python, you can directly use it in Julia.
+
+It is very easy to mix Julia and Python code. So if you like a developed module in Python, you can directly use it in Julia.
 
 .. code-block:: julia
 
@@ -361,6 +362,7 @@ So if you like a developed module in Python, you can directly use it in Julia.
     # 2×3 Matrix{Float64}:
     # 1.05745  1.88021  1.11563
     # 1.24652  1.72931  2.6177
+
 
 
 (Optional) Calling Julia from Python
@@ -487,11 +489,11 @@ Moreover, other Julia packages provide Julia interface for some well-known libra
 See also
 --------
 
-- `Interfacing with C and Fortran <https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/>`__.
-- `Interfacing with Python via PyCall <https://github.com/JuliaPy/PyCall.jl>`__.
-- `Interfacing to various other languages <https://github.com/JuliaInterop>`__.
-- `Julia for Optimization and Learning <https://juliateachingctu.github.io/Julia-for-Optimization-and-Learning/stable/>`__.
-- `Julia for Pythonistas <https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_for_Pythonistas.ipynb#scrollTo=YwM2lGhmjIAA>`__.
+- `Interfacing with C and Fortran <https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/>`_.
+- `Interfacing with Python via PyCall <https://github.com/JuliaPy/PyCall.jl>`_.
+- `Interfacing to various other languages <https://github.com/JuliaInterop>`_.
+- `Julia for Optimization and Learning <https://juliateachingctu.github.io/Julia-for-Optimization-and-Learning/stable/>`_.
+- `Julia for Pythonistas <https://colab.research.google.com/github/ageron/julia_notebooks/blob/master/Julia_for_Pythonistas.ipynb#scrollTo=YwM2lGhmjIAA>`_.
 
 
 .. keypoints::
