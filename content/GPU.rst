@@ -372,7 +372,7 @@ Vendor libraries
 Support for using GPU vendor libraries from Julia is currently only supported on 
 NVIDIA and AMD GPUs. CUDA and ROCm libraries contain precompiled kernels for common 
 operations like matrix multiplication (`cuBLAS`/`rocBLAS`), fast Fourier transforms 
-(`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocAlution`), as well as primitives 
+(`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocSOLVER`), as well as primitives 
 useful for the implementation of deep neural networks (`cuDNN`/`MIOpen`). These kernels are wrapped
 in their respective vendor libraries and can be used with the corresponding ``GPUArray``:
 
@@ -415,14 +415,15 @@ in their respective vendor libraries and can be used with the corresponding ``GP
          A * A
 
          # use rocAlution for QR factorization
-         qr(A)
+         using AMDGPU.rocSOLVER
+         rocSOLVER.qr(A)
 
          # solve equation A*X == B
          A \ B
 
          # use rocFFT for FFT
          using AMDGPU.rocFFT
-         fft(A)
+         rocFFT.fft(A)
 
 
 
