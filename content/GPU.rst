@@ -691,7 +691,10 @@ GPU we are using:
 
    .. group-tab:: AMD
 
-      AMDGPU.HIP.properties(0)
+      .. code-block:: julia
+         
+         AMDGPU.HIP.properties(0)
+
    .. group-tab:: Intel
 
       .. code-block:: julia
