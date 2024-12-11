@@ -861,6 +861,11 @@ supported, and then launch the compiled kernel:
       WRITEME
 
 
+.. callout:: KernelAbstractions.jl
+
+   If using the `KernelAbstractions.jl` package, the optimal thread number is determined automatically!
+
+
 .. callout:: Restrictions in kernel programming
 
    Within kernels, most of the Julia language is supported with the exception of functionality 
@@ -927,7 +932,14 @@ in a GUI, but summary statistics can also be printed in the terminal:
 More information on profiling with NVIDIA tools can be found in the 
 `documentation <https://cuda.juliagpu.org/stable/development/profiling/>`__.
 
-For profiling Julia code running on AMD GPUs one can use rocprof - see the `documentation <https://amdgpu.juliagpu.org/stable/profiling/>`__.
+For profiling Julia code running on AMD GPUs one can use rocprof(v2) - see the `documentation <https://amdgpu.juliagpu.org/stable/profiling/>`__.
+In particular, given a `profile.jl` script that we want to profile, we can run the following:
+
+.. code-block:: console
+
+   $ ENABLE_JITPROFILING=1 rocprofv2 --plugin perfetto --hip-trace --hsa-trace --kernel-trace -o prof julia ./profile.jl
+
+This will produce a `.pftrace` file that can be copied back to your local workstation and visualised with the [Perfetto UI](https://ui.perfetto.dev/).
 
 Conditional use
 ---------------
