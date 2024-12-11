@@ -1,0 +1,617 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multithreading &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="../_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/tabs.js?v=3030b3cb"></script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Distributed computing" href="../distributed/" />
+    <link rel="prev" title="Writing performant Julia code" href="../performant-code/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Multithreading</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#linear-algebra-threading">Linear algebra threading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#julia-threading">Julia threading</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pitfalls">Pitfalls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exercises">Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Parallel execution with Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Multithreading</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/multithreading.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="multithreading">
+<h1>Multithreading<a class="headerlink" href="#multithreading" title="Link to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>How multithreading works in Julia?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>30 min teaching</p></li>
+<li><p>30 min exercises</p></li>
+</ul>
+</div>
+<section id="linear-algebra-threading">
+<h2>Linear algebra threading<a class="headerlink" href="#linear-algebra-threading" title="Link to this heading"></a></h2>
+<p>OpenBLAS is the default linear algebra backend in Julia.
+Because it is an external library, it manages threading by itself independent of the Julia threads.
+We can manage the thread count for OpenBLAS inside Julia session using the <code class="code docutils literal notranslate"><span class="pre">BLAS.set_num_threads()</span></code> function or by setting an environment variable as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OPENBLAS_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
+</pre></div>
+</div>
+<p>Consider the multiplication of two large arrays and compare the execution time.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">LinearAlgebra</span>
+
+<span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span><span class="w"> </span><span class="mi">2000</span><span class="p">)</span>
+<span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span><span class="w"> </span><span class="mi">2000</span><span class="p">)</span>
+
+<span class="c"># Precompile the matrix multiplication</span>
+<span class="n">A</span><span class="o">*</span><span class="n">B</span>
+
+<span class="c"># Single thread</span>
+<span class="k">begin</span>
+<span class="w">    </span><span class="n">BLAS</span><span class="o">.</span><span class="n">set_num_threads</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@show</span><span class="w"> </span><span class="n">BLAS</span><span class="o">.</span><span class="n">get_num_threads</span><span class="p">()</span>
+<span class="w">    </span><span class="nd">@time</span><span class="w"> </span><span class="n">A</span><span class="o">*</span><span class="n">B</span>
+<span class="k">end</span>
+
+<span class="c"># All threads on the machine</span>
+<span class="k">begin</span>
+<span class="w">    </span><span class="n">BLAS</span><span class="o">.</span><span class="n">set_num_threads</span><span class="p">(</span><span class="n">Sys</span><span class="o">.</span><span class="n">CPU_THREADS</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@show</span><span class="w"> </span><span class="n">BLAS</span><span class="o">.</span><span class="n">get_num_threads</span><span class="p">()</span>
+<span class="w">    </span><span class="nd">@time</span><span class="w"> </span><span class="n">A</span><span class="o">*</span><span class="n">B</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>We should see a difference between using single and all threads.</p>
+</section>
+<section id="julia-threading">
+<h2>Julia threading<a class="headerlink" href="#julia-threading" title="Link to this heading"></a></h2>
+<p>We start by walking through how to use <a class="reference external" href="https://docs.julialang.org/en/v1/manual/multi-threading/">multithreading</a> in Julia.
+We can set the <code class="code docutils literal notranslate"><span class="pre">JULIA_NUM_THREADS</span></code> environment variable such that Julia will start the set thread count.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">JULIA_NUM_THREADS</span><span class="o">=</span><span class="m">4</span>
+</pre></div>
+</div>
+<p>Alternatively, we can also use the <code class="code docutils literal notranslate"><span class="pre">-t/--threads</span></code> option to supply the thread count.
+Using an option will override the value in the environment variable.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Short form</span>
+julia<span class="w"> </span>-t<span class="w"> </span><span class="m">4</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Long form</span>
+julia<span class="w"> </span>--threads<span class="o">=</span><span class="m">4</span>
+</pre></div>
+</div>
+<p>In Julia, we can import the Threads module for easier usage.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">nthreads</span></code> function show us how many threads we have available:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">nthreads</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>There are three main ways of approaching multithreading:</p>
+<ol class="arabic simple">
+<li><p>Using <code class="docutils literal notranslate"><span class="pre">&#64;threads</span></code> to parallelize a for loop to run in multiple threads.</p></li>
+<li><p>Using <code class="docutils literal notranslate"><span class="pre">&#64;spawn</span></code> and <code class="docutils literal notranslate"><span class="pre">&#64;sync</span></code> to spawn tasks in threads and synchronize them at the end of the block.</p></li>
+<li><p>Using <code class="docutils literal notranslate"><span class="pre">&#64;spawn</span></code> and <code class="docutils literal notranslate"><span class="pre">fetch</span></code> to spawn tasks and fetch their return values once they are complete.</p></li>
+</ol>
+<p>Choosing the most suitable method depends on the problem.
+Julia uses dynamic scheduler for multithreading which allows us to do nested multithreading, that is, to nest <code class="docutils literal notranslate"><span class="pre">&#64;spawn</span></code> statements.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">&#64;threads</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">&#64;sync and &#64;spawn</button><button aria-controls="panel-0-0-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-2" name="0-2" role="tab" tabindex="-1">&#64;spawn and fetch</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="c"># Using @threads macro with dynamic scheduling</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zeros</span><span class="p">(</span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">*</span><span class="n">nthreads</span><span class="p">())</span>
+<span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="w">    </span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadid</span><span class="p">()</span>
+<span class="k">end</span>
+<span class="n">println</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">task</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="w">     </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">chunk</span>
+<span class="w">         </span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">threadid</span><span class="p">()</span>
+<span class="w">     </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c"># Using @sync and @spawn macros (also dynamic scheduling)</span>
+<span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zeros</span><span class="p">(</span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">nthreads</span><span class="p">())</span>
+<span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Iterators</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">eachindex</span><span class="p">(</span><span class="n">b</span><span class="p">),</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">÷</span><span class="w"> </span><span class="n">nthreads</span><span class="p">())</span>
+<span class="nd">@sync</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">chunk</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">chunks</span>
+<span class="w">    </span><span class="nd">@spawn</span><span class="w"> </span><span class="n">task</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">println</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-2" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="c"># Using @spawn and fetch</span>
+<span class="n">t</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">threadid</span><span class="p">()</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">2</span><span class="o">*</span><span class="n">nthreads</span><span class="p">()]</span>
+<span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fetch</span><span class="o">.</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></div>
+<p>Let’s see if we can achieve any speed gain when performing a
+costly calculation.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-1-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-1-1-0" name="1-0" role="tab" tabindex="0">Serial</button><button aria-controls="panel-1-1-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-1" name="1-1" role="tab" tabindex="-1">Threaded (&#64;threads)</button><button aria-controls="panel-1-1-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-2" name="1-2" role="tab" tabindex="-1">Threaded (&#64;spawn and &#64;sync)</button></div><div aria-labelledby="tab-1-1-0" class="sphinx-tabs-panel" id="panel-1-1-0" name="1-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">sqrt_array</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">similar</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">B</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-1" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-1" name="1-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">threaded_sqrt_array</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">similar</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">B</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-2" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-2" name="1-2" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">sqrt_array!</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">chunk</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">threaded_sqrt_array</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">B</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">similar</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Iterators</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">),</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">÷</span><span class="w"> </span><span class="n">nthreads</span><span class="p">())</span>
+<span class="w">    </span><span class="nd">@sync</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">chunk</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">chunks</span>
+<span class="w">        </span><span class="nd">@spawn</span><span class="w"> </span><span class="n">sqrt_array!</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">B</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div></div>
+<p>We can now compare the performance:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">)</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">sqrt_array</span><span class="p">(</span><span class="n">A</span><span class="p">);</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">threaded_sqrt_array</span><span class="p">(</span><span class="n">A</span><span class="p">);</span>
+
+<span class="c"># make sure we&#39;re getting the correct value</span>
+<span class="n">sqrt_array</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">≈</span><span class="w"> </span><span class="n">threaded_sqrt_array</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With 4 threads, the speedup could be about a factor of 3.</p>
+<div class="admonition-threading-overhead callout admonition" id="callout-0">
+<p class="admonition-title">Threading overhead</p>
+<p>Julia threading has an overhead of a few microseconds (equivalent to thousands of computations).
+Multithreading becomes efficient for tasks that are larger than the overhead.</p>
+</div>
+</section>
+<section id="pitfalls">
+<h2>Pitfalls<a class="headerlink" href="#pitfalls" title="Link to this heading"></a></h2>
+<p>Just like with multithreading in other languages, one needs to be
+aware of possible <a class="reference external" href="https://en.wikipedia.org/wiki/Race_condition">race conditions</a>,
+i.e. when the order in which threads read from and write to memory
+can change the result of a computation.</p>
+<p>We can illustrate this with an example where we sum up the square
+root of elements of an array. The serial version provides the correct
+value and reference execution time. The “race condition” version illustrates
+how a naive implementation can lead to problems. The “atomic” version shows
+how we can ensure a correct results by using <cite>atomic operations</cite>.
+The “workaround” version shows how we can refactor the code to get both
+correct result and speedup.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-2-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-2-2-0" name="2-0" role="tab" tabindex="0">Serial</button><button aria-controls="panel-2-2-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-2-2-1" name="2-1" role="tab" tabindex="-1">Race condition</button><button aria-controls="panel-2-2-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-2-2-2" name="2-2" role="tab" tabindex="-1">Atomic</button><button aria-controls="panel-2-2-3" aria-selected="false" class="sphinx-tabs-tab" id="tab-2-2-3" name="2-3" role="tab" tabindex="-1">Thread migration</button><button aria-controls="panel-2-2-4" aria-selected="false" class="sphinx-tabs-tab" id="tab-2-2-4" name="2-4" role="tab" tabindex="-1">Workaround</button></div><div aria-labelledby="tab-2-2-0" class="sphinx-tabs-panel" id="panel-2-2-0" name="2-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">sqrt_sum</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-2-2-1" class="sphinx-tabs-panel" hidden="true" id="panel-2-2-1" name="2-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">threaded_sqrt_sum</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+<span class="w">    </span><span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-2-2-2" class="sphinx-tabs-panel" hidden="true" id="panel-2-2-2" name="2-2" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">threaded_sqrt_sum_atomic</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Atomic</span><span class="p">{</span><span class="kt">eltype</span><span class="p">(</span><span class="kt">A</span><span class="p">)}(</span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">)))</span>
+<span class="w">    </span><span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">atomic_add!</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span><span class="p">[]</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-2-2-3" class="sphinx-tabs-panel" hidden="true" id="panel-2-2-3" name="2-3" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">threaded_sqrt_sum_migration</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">partial</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zeros</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">),</span><span class="w"> </span><span class="n">nthreads</span><span class="p">())</span>
+<span class="w">    </span><span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="c"># We should not use threadid() for indexing</span>
+<span class="w">        </span><span class="c"># Threads can migrate during execution.</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">partial</span><span class="p">[</span><span class="n">threadid</span><span class="p">()]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">partial</span><span class="p">)</span>
+<span class="w">        </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">partial</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-2-2-4" class="sphinx-tabs-panel" hidden="true" id="panel-2-2-4" name="2-4" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">sqrt_sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">chunk</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">threaded_sqrt_sum_workaround</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Iterators</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">),</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">÷</span><span class="w"> </span><span class="n">nthreads</span><span class="p">())</span>
+<span class="w">    </span><span class="n">tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">map</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="n">chunk</span>
+<span class="w">        </span><span class="nd">@spawn</span><span class="w"> </span><span class="n">sqrt_sum</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mapreduce</span><span class="p">(</span><span class="n">fetch</span><span class="p">,</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">tasks</span><span class="p">;</span><span class="w"> </span><span class="n">init</span><span class="o">=</span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">)))</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div></div>
+<p>We will observe that:</p>
+<ul class="simple">
+<li><p>The serial version is slow but correct.</p></li>
+<li><p>The race condition version is both slow and wrong.</p></li>
+<li><p>The atomic version is correct but extremely slow.</p></li>
+<li><p>The migration version is incorrect because tasks can migrate between Julia threads during execution, thus <code class="docutils literal notranslate"><span class="pre">threadid()</span></code> is not constant.</p></li>
+<li><p>The workaround is fast and correct, but required refactoring.</p></li>
+</ul>
+<p>Bonus questions:</p>
+<ul class="simple">
+<li><p>What does <code class="xref py py-meth docutils literal notranslate"><span class="pre">eltype()</span></code> do?</p></li>
+<li><p>What does <code class="xref py py-meth docutils literal notranslate"><span class="pre">eachindex()</span></code> do?</p></li>
+</ul>
+<p>Threading with <code class="docutils literal notranslate"><span class="pre">Threads.&#64;threads</span></code> is quite straightforward,
+but one needs to be careful not to introduce race conditions
+and sometimes that requires code refactorization. Using atomic operations
+adds significant overhead and thus only makes sense if each iteration
+of the loop takes significant time to compute.</p>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<div class="admonition-multithreading-the-laplace-function exercise important admonition" id="exercise-0">
+<p class="admonition-title">Multithreading the Laplace function</p>
+<p>Consider the double for loop in the <code class="xref py py-meth docutils literal notranslate"><span class="pre">lap2d!()</span></code> function:</p>
+<p>Can it safely be threaded, i.e. is there any risk of race
+conditions?</p>
+<div class="admonition-is-it-thread-safe solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Is it thread-safe?</p>
+<p>Yes, this function is thread-safe since each iteration of the loop accesses a different memory location.</p>
+</div>
+<ul>
+<li><p>Insert the <code class="docutils literal notranslate"><span class="pre">Threads.&#64;threads</span></code> macro in the right location -
+note that <code class="docutils literal notranslate"><span class="pre">&#64;threads</span></code> currently only works on outermost loops!</p></li>
+<li><p>Measure its effects with <code class="docutils literal notranslate"><span class="pre">&#64;benchmark</span></code>.
+Since it’s cumbersome to change the “Julia: Num Threads” option
+in VSCode and relaunch the Julia REPL over and over, create a script instead
+which imports <cite>BenchmarkTools</cite> and prints benchmark results:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">bench_results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@benchmark</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="n">minimum</span><span class="p">(</span><span class="n">bench_results</span><span class="o">.</span><span class="n">times</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p>Now run with different number of threads from a terminal using
+<code class="docutils literal notranslate"><span class="pre">julia</span> <span class="pre">-t</span> <span class="pre">&lt;N&gt;</span> <span class="pre">laplace.jl</span></code> and observe the scaling.</p></li>
+<li><p>Try increasing the problem size (e.g. <code class="docutils literal notranslate"><span class="pre">M=N=8192</span></code>). Does it scale better?</p></li>
+</ul>
+<div class="admonition-solution solution important dropdown admonition" id="solution-1">
+<p class="admonition-title">Solution</p>
+<p>Multithreaded version:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="w">    </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">unew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="w">        </span><span class="k">end</span><span class="w"> </span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Benchmarking:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">setup</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span><span class="w"> </span><span class="n">M</span><span class="o">=</span><span class="mi">4096</span><span class="p">)</span>
+<span class="w">    </span><span class="n">u</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="p">)</span>
+<span class="w">    </span><span class="c"># set boundary conditions</span>
+<span class="w">    </span><span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="k">end</span><span class="p">,</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="k">end</span><span class="p">]</span><span class="w"> </span><span class="o">.=</span><span class="w"> </span><span class="mf">10.0</span>
+<span class="w">    </span><span class="n">unew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span>
+<span class="k">end</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+
+<span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setup</span><span class="p">()</span>
+<span class="n">bench_results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@benchmark</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="o">$</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="o">$</span><span class="n">unew</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;time = </span><span class="si">$</span><span class="p">(</span><span class="n">minimum</span><span class="p">(</span><span class="n">bench_results</span><span class="o">.</span><span class="n">times</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="o">^</span><span class="mi">6</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span><span class="w"> </span>laplace.jl
+<span class="gp"># </span><span class="nb">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">7</span>.440875
+
+<span class="gp">$ </span>julia<span class="w"> </span>-t<span class="w"> </span><span class="m">2</span><span class="w"> </span>laplace.jl
+<span class="gp"># </span><span class="nb">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span>.559292
+
+<span class="gp">$ </span>julia<span class="w"> </span>-t<span class="w"> </span><span class="m">4</span><span class="w"> </span>laplace.jl
+<span class="gp"># </span><span class="nb">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span>.802625
+</pre></div>
+</div>
+<p>Increasing the problem size will not improve the parallel efficiency as it does not
+increase the computational cost in the loop.</p>
+</div>
+</div>
+<div class="admonition-multithread-the-computation-of exercise important admonition" id="exercise-1">
+<p class="admonition-title">Multithread the computation of π</p>
+<figure class="align-right">
+<a class="reference internal image-reference" href="../_images/pi_with_darts.png"><img alt="../_images/pi_with_darts.png" src="../_images/pi_with_darts.png" style="width: 168.00000000000003px; height: 126.00000000000001px;" />
+</a>
+</figure>
+<p>Consider the following function which estimates π by “throwing darts”,
+i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking
+if they fall within the unit circle.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100_000_000</span>
+<span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span><span class="w">  </span><span class="c"># 3.14147572...</span>
+</pre></div>
+</div>
+<p>Can this function be safely threaded, i.e. is there any risk of race
+conditions?</p>
+<div class="admonition-is-it-thread-safe solution important dropdown admonition" id="solution-2">
+<p class="admonition-title">Is it thread-safe?</p>
+<p>No, this function is not thread-safe! The algorithm needs to be rewritten.</p>
+</div>
+<ul class="simple">
+<li><p>Define a new function <code class="xref py py-meth docutils literal notranslate"><span class="pre">threaded_estimate_pi()</span></code> where you implement the necessary changes
+to multithread the loop.</p></li>
+<li><p>Run some benchmarks to explore the parallel efficiency.</p></li>
+</ul>
+<div class="admonition-hint solution important dropdown admonition" id="solution-3">
+<p class="admonition-title">Hint</p>
+<p>You need to make sure that the different threads are not incrementing the same memory address.
+You should split the input size evenly for available threads, then use <code class="docutils literal notranslate"><span class="pre">&#64;spawn</span></code> to compute hits in each thread and finally <code class="docutils literal notranslate"><span class="pre">fetch</span></code> the return values, and preceed as in the serial example.</p>
+</div>
+<div class="admonition-solution solution important dropdown admonition" id="solution-4">
+<p class="admonition-title">Solution</p>
+<p>Here is a threaded version:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Random</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">Threads</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">partial_hits</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero</span><span class="p">(</span><span class="kt">Int</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">),</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">hits</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">partition</span><span class="p">(</span><span class="n">v</span><span class="o">::</span><span class="kt">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">divrem</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vcat</span><span class="p">(</span><span class="n">fill</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="o">-</span><span class="n">r</span><span class="p">),</span><span class="w"> </span><span class="n">fill</span><span class="p">(</span><span class="n">d</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">))</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">c</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">threaded_estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nthreads</span><span class="p">()</span>
+<span class="w">    </span><span class="n">rngs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">seed</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">n</span><span class="p">]</span>
+<span class="w">    </span><span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">partition</span><span class="p">(</span><span class="n">num_points</span><span class="p">,</span><span class="w"> </span><span class="n">n</span><span class="p">)</span>
+<span class="w">    </span><span class="n">tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">map</span><span class="p">(</span><span class="n">zip</span><span class="p">(</span><span class="n">rngs</span><span class="p">,</span><span class="w"> </span><span class="n">chunks</span><span class="p">))</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@spawn</span><span class="w"> </span><span class="n">partial_hits</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">chunk</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mapreduce</span><span class="p">(</span><span class="n">fetch</span><span class="p">,</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">tasks</span><span class="p">;</span><span class="w"> </span><span class="n">init</span><span class="o">=</span><span class="n">zero</span><span class="p">(</span><span class="kt">Int</span><span class="p">))</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>To benchmark it:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+
+<span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100_000_000</span>
+<span class="c"># make sure we get an accurate estimate:</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;pi = </span><span class="si">$</span><span class="p">(</span><span class="n">threaded_estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">))</span><span class="s">&quot;</span><span class="p">)</span>
+
+<span class="n">bench_results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@benchmark</span><span class="w"> </span><span class="n">threaded_estimate_pi</span><span class="p">(</span><span class="o">$</span><span class="n">num_points</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;time = </span><span class="si">$</span><span class="p">(</span><span class="n">minimum</span><span class="p">(</span><span class="n">bench_results</span><span class="o">.</span><span class="n">times</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="o">^</span><span class="mi">6</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Results:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span><span class="w"> </span>threaded_estimate_pi.jl
+<span class="gp"># </span><span class="nv">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span>.14147464
+<span class="gp"># </span><span class="nb">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">496</span>.935583
+
+<span class="gp">$ </span>julia<span class="w"> </span>-t<span class="w"> </span><span class="m">2</span><span class="w"> </span>threaded_estimate_pi.jl
+<span class="gp"># </span><span class="nv">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span>.1417046
+<span class="gp"># </span><span class="nb">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">255</span>.328
+
+<span class="gp">$ </span>julia<span class="w"> </span>-t<span class="w"> </span><span class="m">4</span><span class="w"> </span>threaded_estimate_pi.jl
+<span class="gp"># </span><span class="nv">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span>.14172796
+<span class="gp"># </span><span class="nb">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">132</span>.892833
+</pre></div>
+</div>
+<p>Parallel scaling seems decent, but comparing to the unthreaded version reveals the overhead
+from creating and managing threads:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>estimate_pi.jl
+<span class="gp"># </span><span class="nv">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">3</span>.14147392
+<span class="gp"># </span><span class="nb">time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">228</span>.434583
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../performant-code/" class="btn btn-neutral float-left" title="Writing performant Julia code" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../distributed/" class="btn btn-neutral float-right" title="Distributed computing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

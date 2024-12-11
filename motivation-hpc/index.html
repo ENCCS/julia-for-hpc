@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motivation &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="../_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Writing performant Julia code" href="../performant-code/" />
+    <link rel="prev" title="Setup" href="../setup/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Motivation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hpc">HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-julia">Why Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parallel-programming-in-julia">Parallel programming in Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Parallel execution with Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Motivation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/motivation-hpc.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="motivation">
+<h1>Motivation<a class="headerlink" href="#motivation" title="Link to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>What is high-performance computing?</p></li>
+<li><p>Why is Julia suitable for high-performance computing?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>20 min teaching</p></li>
+</ul>
+</div>
+<section id="hpc">
+<h2>HPC<a class="headerlink" href="#hpc" title="Link to this heading"></a></h2>
+<p>High-performance computing (HPC) uses large computing resources to solve computationally demanding or data-intensive problems.
+Such problems often arise in scientific simulation and modeling, data analysis, and machine learning.
+Most HPC systems are computer clusters, a computer network with many colocated computers connected via a high-speed network.
+Contemporary HPC clusters derive the computational capacity from parallel processing on Central Processing Units (CPUs) for general tasks and accelerators, such as Graphics Processing Units (GPUs), for specialized tasks.
+We consider a programming language a high-performance language if it can efficiently use the features of HPC clusters.</p>
+</section>
+<section id="why-julia">
+<h2>Why Julia<a class="headerlink" href="#why-julia" title="Link to this heading"></a></h2>
+<p>Traditional languages for programming HPC computers are C, C++, and Fortran.
+Their constructs map efficiently to machine instructions, which is necessary for creating programs that use hardware efficiently.
+They are statically compiled and require manual memory management.
+Their main drawbacks are that they can be slow, tedious, and error-prone to write, limiting productivity and making fast experimentation difficult.
+Furthermore, depending on the software engineering practices, the software written in traditional languages can be challenging to build and understand, and porting software from one cluster to another can be complicated.
+On the other hand, dynamic, interpreted languages such as Python and R cannot produce efficient machine code.
+Therefore, they act as an interface to programs written in the traditional compiled languages in HPC systems.</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/language_comparisons.png"><img alt="../_images/language_comparisons.png" src="../_images/language_comparisons.png" style="width: 519.4px; height: 401.09999999999997px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Adapted from <a class="reference external" href="https://juliadatascience.io">Julia Data Science</a>, published under CC BY-NC-SA 4.0.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Julia is an open-source software with a permissive MIT license that offers a modern alternative to scientific and high-performance computing.
+Julia is <a class="reference external" href="https://enccs.github.io/julia-intro/motivation/">fast, composable and practical</a> with natural syntax for scientific computing and a memory-managed runtime.
+NERSC has demonstrated that Julia can run at large scale at petaflop speeds, a feat previously possible only by C, C++, and Fortran.
+Running Julia at scale is possible because Julia can generate efficient machine code for multiple architectures via the LLVM compiler and has parallel computing capabilities, including SIMD, multithreading, multiprocessing, and packages for using MPI and various GPUs.
+The performance of Julia is comparable to other parallel programming frameworks.
+Furthermore, Julia can directly interface with shared C and Fortran libraries with the same overhead as calling them natively.
+There are also packages for interfacing with other languages, such as Python, R, and C++.
+We can use Julia to call external programs directly, which means we can use it as an efficient, robust, parallelizable glue language instead of shell scripting.</p>
+</section>
+<section id="parallel-programming-in-julia">
+<h2>Parallel programming in Julia<a class="headerlink" href="#parallel-programming-in-julia" title="Link to this heading"></a></h2>
+<p><strong>Asynchronous tasks (aka coroutines)</strong> provides the ability to suspend and resume  computations for I/O, event handling and similar patterns.
+Asynchronous tasks are not specific to HPC and therefore we do not cover them in the lessons.</p>
+<p><strong>Multithreading</strong> provides the ability to schedule tasks simultaneously on more than one CPU core with shared memory.
+Julia implements threading in the <code class="docutils literal notranslate"><span class="pre">Base.Threads</span></code> library.</p>
+<p><strong>Distributed computing</strong> refers to running multiple Julia processes with separate memory spaces on the same or multiple computers.
+Julia implements constructs for distributed computing in the standard library <code class="docutils literal notranslate"><span class="pre">Distributed</span></code>.
+Extensions to Distributed and other forms of distributed computing such as MPI are available from extenal packages.</p>
+<p><strong>GPU computing</strong> ports computation to a graphical processing unit (GPU) via either high-level or low-level programming.
+Julia has external packages for GPU computing.</p>
+<p>This lesson will cover aspects of multithreading, distributed computing and GPU computing with Julia on HPC clusters.</p>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arxiv.org/abs/2211.02740">Bridging HPC Communities through the Julia Programming Language</a>.</p></li>
+<li><p><a class="reference external" href="https://www.hpcwire.com/off-the-wire/julia-joins-petaflop-club/">Julia Joins Petaflop Club</a>.</p></li>
+<li><p><a class="reference external" href="https://proceedings.juliacon.org/papers/10.21105/jcon.00068">MPI.jl: Julia bindings for the Message Passing Interface</a>.</p></li>
+<li><p><a class="reference external" href="https://arxiv.org/abs/1604.03410">High-level GPU programming in Julia</a>.</p></li>
+<li><p><a class="reference external" href="https://ieeexplore.ieee.org/abstract/document/9652798">Comparing Julia to Performance Portable Parallel Programming Models for HPC</a>.</p></li>
+<li><p><a class="reference external" href="https://www.nature.com/articles/d41586-019-02310-3">Julia: come for the syntax, stay for the speed</a>.</p></li>
+<li><p><a class="reference external" href="https://juliadatascience.io">Julia Data Science</a>.</p></li>
+<li><p>Lin, Wei-Chen, and Simon McIntosh-Smith. <a class="reference external" href="https://ieeexplore.ieee.org/abstract/document/9652798">Comparing Julia to Performance Portable Parallel Programming Models for HPC.</a>, 2021 International Workshop on Performance Modeling, Benchmarking and Simulation of High Performance Computer Systems (PMBS). IEEE, 2021.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../setup/" class="btn btn-neutral float-left" title="Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../performant-code/" class="btn btn-neutral float-right" title="Writing performant Julia code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
