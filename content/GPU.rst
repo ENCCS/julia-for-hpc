@@ -691,8 +691,7 @@ GPU we are using:
 
    .. group-tab:: AMD
 
-      Not known
-
+      AMDGPU.HIP.properties(0)
    .. group-tab:: Intel
 
       .. code-block:: julia
@@ -753,15 +752,13 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
          C = similar(A);
          
          groupsize = 256
-         # smallest integer larger than or equal to length(A)/threads
-         gridsize = cld(length(A), nthreads) * groupsize
-         # NOTE: after v0.5.5, gridsize should instead be:  
-         #gridsize = cld(length(A), nthreads) 
+         
+         gridsize = cld(length(A), groupsize) 
 
          # run using 256 threads
          @roc groupsize=groupsize gridsize=gridsize vadd!(C, A, B)
 
-         @assert all(Array(C) .== 5.0)
+         all(Array(C) .== 5.0)
 
       .. warning::
 
@@ -781,7 +778,7 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
    
-         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         A, B = oneArray(ones(2^9)*2), oneArray(ones(2^9)*3);
          C = similar(A);
          
          nthreads = 256
@@ -804,7 +801,7 @@ where we also take advantage of the :meth:`blockDim` and :meth:`blockIdx` functi
              return
          end
       
-         A, B = ROCArray(ones(2^9)*2), ROCArray(ones(2^9)*3);
+         A, B = MtlArray(ones(2^9)*2), MtlArray(ones(2^9)*3);
          C = similar(A);
          
          nthreads = 256
