@@ -868,8 +868,8 @@ Using KernelAbstractions.jl
 
 
 The package `KernelAbstractions.jl <https://juliagpu.github.io/KernelAbstractions.jl/stable/>`__ allows to write 
-vendor-agnostic kernels that can also fallback to CPU. This package makes use of the `@kernel` macro on functions to be 
-offloaded to GPU. The `vadd!` example would look like the following:
+vendor-agnostic kernels that can also fallback to CPU. This package makes use of the ``@kernel`` macro on functions to be 
+offloaded to GPU. The ``vadd!`` example would look like the following:
 
 .. code-block:: julia
 
@@ -886,9 +886,9 @@ offloaded to GPU. The `vadd!` example would look like the following:
        kernel!(C,A,B, ndrange = size(C))
    end
 
-The `@index` macro is used to abstract away the size of the workgroup/block. This kernel is then compiled on CPU or GPU
-depending on the vectors that we pass to it. The `get_backend()` method returns the device where the array is instantiated
-(CPU, nVidia GPU, AMD, Intel, Metal...) and is used to get the specialised `kernel!()` for that backend. This function can then 
+The ``@index`` macro is used to abstract away the size of the workgroup/block. This kernel is then compiled on CPU or GPU
+depending on the vectors that we pass to it. The ``get_backend()`` method returns the device where the array is instantiated
+(CPU, nVidia GPU, AMD, Intel, Metal...) and is used to get the specialised ``kernel!()`` for that backend. This function can then 
 seamlessly be called on a GPU array or a CPU array:
 
 .. code-block:: julia
@@ -910,7 +910,7 @@ seamlessly be called on a GPU array or a CPU array:
 
 .. callout:: KernelAbstractions.jl
 
-   If using the `KernelAbstractions.jl` package, the optimal thread number is determined automatically!
+   If using the ``KernelAbstractions.jl`` package, the optimal thread number is determined automatically!
 
 
 .. callout:: Restrictions in kernel programming
