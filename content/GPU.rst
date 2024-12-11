@@ -939,7 +939,7 @@ In particular, given a `profile.jl` script that we want to profile, we can run t
 
    $ ENABLE_JITPROFILING=1 rocprofv2 --plugin perfetto --hip-trace --hsa-trace --kernel-trace -o prof julia ./profile.jl
 
-This will produce a `.pftrace` file that can be copied back to your local workstation and visualised with the [Perfetto UI](https://ui.perfetto.dev/).
+This will produce a `.pftrace` file that can be copied back to your local workstation and visualised with the `Perfetto UI <https://ui.perfetto.dev/>`__.
 
 Conditional use
 ---------------
