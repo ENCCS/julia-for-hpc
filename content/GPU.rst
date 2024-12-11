@@ -370,7 +370,7 @@ Vendor libraries
 ^^^^^^^^^^^^^^^^
 
 Support for using GPU vendor libraries from Julia is currently only supported on 
-NVIDIA and AMD GPUs. CUDA and ROCm libraries contain precompiled kernels for common 
+NVIDIA and AMD GPUs, with experimental efforts on Intel oneAPI. CUDA and ROCm libraries contain precompiled kernels for common 
 operations like matrix multiplication (`cuBLAS`/`rocBLAS`), fast Fourier transforms 
 (`cuFFT`/`rocFFT`), linear solvers (`cuSOLVER`/`rocSOLVER`), as well as primitives 
 useful for the implementation of deep neural networks (`cuDNN`/`MIOpen`). These kernels are wrapped
