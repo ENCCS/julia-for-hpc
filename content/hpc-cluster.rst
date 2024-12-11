@@ -135,10 +135,10 @@ The cluster specific preferences are required only to use system installed MPI a
    .. code-block:: julia
 
       using Pkg
-      Pkg.add("MPI.jl")
-      Pkg.add("AMDGPU.jl")
-      Pkg.add("ClusterManagers.jl")
-      Pkg.add("Dagger.jl")
+      Pkg.add("MPI")
+      Pkg.add("AMDGPU")
+      Pkg.add("ClusterManagers")
+      Pkg.add("Dagger")
       Pkg.precompile()
 
 
