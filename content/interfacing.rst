@@ -114,7 +114,7 @@ We can also create a wrapper function for convenient access to the function as f
        ccall((:mean, "./mean.so"), Cdouble, (Ptr{Clong}, Clong), arr, n)
    end
 
-   function mean(arr::Vector{Integer})
+   function mean(arr::Vector{Int64})
        mean(convert(Vector{Clong}, arr), convert(Clong, length(arr)))
    end
 
@@ -136,9 +136,9 @@ Below we provide an example for interfacing Julia with Fortran.
 
 .. code-block:: fortran
 
-   # fortran_julia.f90
+   ! julia_fortran.f90
 
-   module fortran_julia
+   module julia_fortran
       implicit none
       public
       contains
@@ -176,19 +176,23 @@ Below we provide an example for interfacing Julia with Fortran.
          return
       end subroutine add_array
 
-   end module fortran_julia
+   end module julia_fortran
 
-Then we compile the code :code:`fortran_julia.f90` into a shared object named as :code:`fortran_julia.so`.
+Then we compile the code :code:`julia_fortran.f90` into a shared object named as :code:`julia_fortran.so`.
 
 .. code-block:: bash
 
-   gfortran fortran_julia.f90 -O3 -shared -fPIC -o fortran_julia.so
+   gfortran julia_fortran.f90 -O3 -shared -fPIC -o julia_fortran.so
+   
+   # if you use Mac OS and come to an error `ld: library not found for -lSystem`
+   # you can use the command below for compilation
+   # gfortran julia_fortran.f90 -O3 -shared -fPIC -o julia_fortran.so -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 
 Next we can call the shared object from Julia using the :code:`ccall` function:
 
 .. code-block:: julia
 
-   ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
+   ccall((:__julia_fortran_MOD_add, "julia_fortran.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
    # 4.6
 
 In addition, the :code:`add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convention.
@@ -196,7 +200,7 @@ In addition, the :code:`add` function in the Fortran module can be further wrapp
 .. code-block:: julia
 
     function add(a::Float64, b::Float64)
-        ccall((:__fortran_julia_MOD_add, "fortran_julia.so"), Float64, (Ref{Float64}, Ref{Float64}), a, b)
+        ccall((:__julia_fortran_MOD_add, "julia_fortran.so"), Float64, (Ref{Float64}, Ref{Float64}), a, b)
     end
     # add (generic function with 1 method)
 
@@ -214,7 +218,7 @@ Here is another Fortran wrapper example.
     function addsub(a::Float64, b::Float64)
         x = Ref{Float64}()
         y = Ref{Float64}()
-        ccall((:__fortran_julia_MOD_addsub, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Float64}), x, y, a, b)
+        ccall((:__julia_fortran_MOD_addsub, "julia_fortran.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Float64}), x, y, a, b)
         x[], y[]
     end
     # addsub (generic function with 1 method)
@@ -236,7 +240,7 @@ Here is another example to concatenate two strings via calling a Fortran subrout
 
     function concatenate(a::String, b::String)
         x = Vector{UInt8}(undef, sizeof(a) + sizeof(b))
-        ccall((:__fortran_julia_MOD_concatenate, "fortran_julia.so"), Nothing, (Ref{UInt8}, Ref{UInt8}, Ptr{UInt8}, UInt, UInt, UInt), x, Vector{UInt8}(a), b, sizeof(x), sizeof(a), sizeof(b))
+        ccall((:__julia_fortran_MOD_concatenate, "julia_fortran.so"), Nothing, (Ref{UInt8}, Ref{UInt8}, Ptr{UInt8}, UInt, UInt, UInt), x, Vector{UInt8}(a), b, sizeof(x), sizeof(a), sizeof(b))
         String(x)
     end
     # concatenate (generic function with 1 method)
@@ -251,7 +255,7 @@ Finally, we have the sample to passing to and fetching an output array from the 
 
     function add_array(a::Array{Float64,1}, b::Array{Float64,1})
         x = Array{Float64,1}(undef, length(a))
-        ccall((:__fortran_julia_MOD_add_array, "fortran_julia.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{UInt32}), x, a, b, length(x))
+        ccall((:__julia_fortran_MOD_add_array, "julia_fortran.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{UInt32}), x, a, b, length(x))
         x
     end
     # add_array (generic function with 1 method)
@@ -264,7 +268,7 @@ Finally, we have the sample to passing to and fetching an output array from the 
     #  7.0
 
 
-The :code:`fortran_julia.f90` file and a Jupyter notebook file (:code:`fortran_julia.ipynb`) containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`_.
+The :code:`julia_fortran.f90` file and a Jupyter notebook file (:code:`julia_fortran.ipynb`) containing the above examples for interfacing Julia with Fortran are provided in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code>`_.
 
 
 
