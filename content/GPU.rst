@@ -863,6 +863,9 @@ supported, and then launch the compiled kernel:
 
       WRITEME
 
+Using KernelAbstractions.jl
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 The package `KernelAbstractions.jl <https://juliagpu.github.io/KernelAbstractions.jl/stable/>`__ allows to write 
 vendor-agnostic kernels that can also fallback to CPU. This package makes use of the `@kernel` macro on functions to be 
