@@ -71,10 +71,9 @@ A collection of shared objects is usually referred to as a library.
 
    $ gcc -Wall -fpic -shared -o mean.so mean.c
 
-When calling C functions, the name of the function and the library it lives in are passed as a tuple in the first argument,
-followed by the return type of the function and the types of the function arguments, and finally the argument themselves.
 
-Now, we can call the shared object from Julia using the :code:`ccall` function as follows:
+Now, we can call the shared object from Julia using the :code:`ccall` function.
+When calling C functions, the name of the function and the library it lives in are passed as a tuple in the first argument, followed by the return type of the function and the types of the function arguments, and finally the argument themselves.
 
 .. code-block:: julia
 
@@ -105,7 +104,6 @@ We can also create a wrapper function for convenient access to the function as f
    end
 
 The ``mean.c`` file, the shared library ``main.so`` after compilation of the C code, and a Jupyter notebook document ``julia-c.ipynb`` containing the above examples for interfacing Julia with C are provided at the ``/content/code/interfacing`` directory in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code/interfacing>`_.
-
 
 
 Interfacing Julia with Fortran
