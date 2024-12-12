@@ -118,7 +118,7 @@ We can also create a wrapper function for convenient access to the function as f
        mean(convert(Vector{Clong}, arr), convert(Clong, length(arr)))
    end
 
-The ``mean.c`` file, the shared library ``main.so`` after compilation of the C code, and a Jupyter notebook document ``julia-c.ipynb`` containing the above examples for interfacing Julia with C are provided at the ``/content/code/interfacing`` directory in the github repository in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code/interfacing>`_.
+The ``mean.c`` file, the shared library ``main.so`` after compilation of the C code, and a Jupyter notebook document ``julia-c.ipynb`` containing the above examples for interfacing Julia with C are provided at the ``/content/code/interfacing`` directory in the `github repository <https://github.com/ENCCS/julia-for-hpc/tree/main/content/code/interfacing>`_.
 
 
 
@@ -230,7 +230,7 @@ Here is another Fortran wrapper example.
 
 The Fortran subroutine can pass the calculation results to the caller via modifying the values of input parameters.
 In this example, x and y are the output results to the caller.
-Therefore two pointers should be defined using ``Ref{Float64}()``` and then passed to the Fortran subroutine.
+Therefore two pointers should be defined using ``Ref{Float64}()`` and then passed to the Fortran subroutine.
 After calling the Fortran subroutine, we will use ``x[]`` and ``y[]`` to extract the results from the addresses the pre-defined pointers pointing to.
 The rest of the this process is similar as calling the Fortran function.
 
@@ -396,7 +396,7 @@ Before installing ``PyJulia``, be sure that the ``PyCall`` module is installed i
    If you have multiple Julia versions, you can specify the one to use in Python by passing julia="/path/to/julia/binary/executable" (e.g., julia = "/home/myUser/lib/julia-1.1.0/bin/julia") to the ``julia.install()`` function.
 
 Now you can now access to Julia in multiple ways. For example, you can define all your functions in a Julia script and “include” it.
-Herein we have a Julia script named as ``julia_for_python.jl``, which contains the following Julia code:
+Herein we have a Julia script named as ``python_call_julia.jl``, which contains the following Julia code:
 
 .. code-block:: julia
 
@@ -419,7 +419,7 @@ You can access these defined functions in Python with:
 
    >>> jl = julia.Julia(compiled_modules=False)
 
-   >>> jl.include("julia_for_python.jl")
+   >>> jl.include("python_call_julia.jl")
    <PyCall.jlwrap getNElement>
 
    >>> jl.helloWorld()
@@ -431,12 +431,18 @@ You can access these defined functions in Python with:
    >>> jl.getNElement(1)
    0
 
+   # if you get a warning like "FutureWarning: Accessing `Julia().<name>` to obtain Julia objects is deprecated. 
+   # Use `from julia import Main; Main.<name>` or `jl = Julia(); jl.eval('<name>')`.", then you should
+   # use the command below to get the result
+   >>> from julia import Main; Main.getNElement(1)
+   0
+
 
 You can otherwise embed Julia code directly into Python using the Julia ``eval()`` function
 
 .. code-block:: python
 
-   jl.eval("""
+   >>> jl.eval("""
    function func_prod(is, js)
       prod = 0
       for i in 1:is
