@@ -344,12 +344,7 @@ Note that the py-strings are not part of the Julia itself: they are defined by t
     # 1
 
 
-It is noted that:
-
-- you don’t need to convert complex data like arrays, and the results are automatically converted to Julia types
-- in the last line of the example that PyCall doesn’t attempt index conversion (Python arrays are zero-based while Julia arrays are one-based).
-Calling the Python ``getNElement()`` function with `1` being the argument will retrieve what in Python is the first element of the array.
-
+It is noted that you don’t need to convert complex data like arrays, and the results are automatically converted to Julia types.
 
 It is very easy to mix Julia and Python code. So if you like a developed module in Python, you can directly use it in Julia.
 
@@ -511,4 +506,4 @@ See also
 
    - Julia have significant interfacing with *compiled* and *interpreted* languages to leverage the strengths of both languages.
    - Interfacing Julia with C and Fortran is accomplished by the ``ccall`` function.
-   - Interactions between Julia and Python are achived via the ``PyCall`` package for calling Python from Julia and through the ``PyJulia`` package for calling Julia from Python.
+   - Interactions between Julia and Python are achieved via the ``PyCall`` package for calling Python from Julia and through the ``PyJulia`` package for calling Julia from Python.
