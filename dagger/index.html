@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parallel execution with Dagger &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="../_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Julia on HPC cluster" href="../hpc-cluster/" />
+    <link rel="prev" title="Distributed computing" href="../distributed/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parallel execution with Dagger</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#task-graphs">Task Graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dagger">Dagger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exercises">Exercises</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Parallel execution with Dagger</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/dagger.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="parallel-execution-with-dagger">
+<h1>Parallel execution with Dagger<a class="headerlink" href="#parallel-execution-with-dagger" title="Link to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>What is a task graph, and how it relates to parallel execution?</p></li>
+<li><p>How to use Dagger.jl to define and execute tasks in a task graph?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>30 min teaching</p></li>
+<li><p>30 min exercises</p></li>
+</ul>
+</div>
+<section id="task-graphs">
+<h2>Task Graphs<a class="headerlink" href="#task-graphs" title="Link to this heading"></a></h2>
+<p>We can use a <cite>Directed Acyclic Graph</cite> (DAG) to model dependencies between computational tasks.
+In the graph, the vertices are tasks, and the directed edges are dependencies between tasks.
+Dependencies arise when the output of one task is an input to another task.
+Task graphs are commonly used to represent scientific workflows.</p>
+<figure class="align-center" id="id1">
+<img alt="../_images/dag.png" src="../_images/dag.png" />
+<figcaption>
+<p><span class="caption-text">An example of a directed acyclic graph with two paths.
+We can see that the vertices 2 and 3 are independent because there is no path between them.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Formally, a <strong>task graph</strong> is a directed acyclic graph consisting of a set of vertices called <strong>tasks</strong> and a set of directed edges that represent <strong>dependencies</strong> between tasks.
+We say that one task <strong>depends</strong> on another task if there is a path from the first task to the second task.
+Otherwise, the tasks are <strong>independent</strong>.
+We can compute independent tasks in <strong>parallel</strong>.</p>
+<p>We also focus on task graphs that are <strong>dynamically generated</strong> such that a task can create new tasks and dependencies based on the inputs it receives.
+In these cases, the complete task graph is not known prior to computing it.</p>
+<p>Some frameworks, such as <cite>Dask</cite> for Python and <cite>Dagger.jl</cite> for Julia, can express task graphs and automatically execute independent tasks in parallel.
+Furthermore, they may support features such as out-of-core execution to process data larger than the memory and checkpointing for saving intermediate results to disk.
+We focus on defining task graphs and parallel execution.</p>
+</section>
+<section id="dagger">
+<h2>Dagger<a class="headerlink" href="#dagger" title="Link to this heading"></a></h2>
+<p>Let’s start Julia with two threads using the command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>--threads<span class="o">=</span><span class="m">2</span>
+</pre></div>
+</div>
+<p><cite>Dagger.jl</cite> can dynamically execute tasks on a task graph to execute independent tasks in parallel with available threads and distributed workers.
+We can install Dagger with the package manager:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Pkg</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;Dagger&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, we can add distributed workers and import Dagger as follows:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+
+<span class="c"># We add one worker with two threads before loading Dagger</span>
+<span class="n">addprocs</span><span class="p">(</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">exeflags</span><span class="o">=</span><span class="s">&quot;--threads=2&quot;</span><span class="p">)</span>
+
+<span class="c"># Let&#39;s load Dagger on all workers</span>
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">Dagger</span>
+</pre></div>
+</div>
+<p>Dagger automatically creates Dagger processors, which it uses to execute tasks.
+We can query the available processors as follows:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Context</span><span class="p">()</span>
+
+<span class="c"># Dagger CPU (OS) processes (Dagger.OSProc)</span>
+<span class="n">ctx</span><span class="o">.</span><span class="n">procs</span>
+
+<span class="c"># Dagger Thread processes on each CPU process (Dagger.ThreadProc)</span>
+<span class="n">Dagger</span><span class="o">.</span><span class="n">get_processors</span><span class="o">.</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">procs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, we want to define and execute a task graph using Dagger.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># Add task function to all workers</span>
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">task</span><span class="p">()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">Distributed</span><span class="o">.</span><span class="n">myid</span><span class="p">(),</span><span class="w"> </span><span class="n">Threads</span><span class="o">.</span><span class="n">threadid</span><span class="p">())</span>
+<span class="k">end</span>
+
+<span class="c"># Let&#39;s define a simple task graph consisting of 10 independent tasks</span>
+<span class="n">tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">task</span><span class="p">()</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">10</span><span class="p">]</span>
+
+<span class="c"># Fetch the results</span>
+<span class="n">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fetch</span><span class="o">.</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;(Worker ID, Thread ID)&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Main process&quot;</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="n">task</span><span class="p">())</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Dagger tasks&quot;</span><span class="p">)</span>
+<span class="n">foreach</span><span class="p">(</span><span class="n">println</span><span class="p">,</span><span class="w"> </span><span class="n">sort</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We can see that Dagger used thread one on worker one for scheduling tasks and the other Dagger processors to execute the tasks.</p>
+<p>We can also specify more complex, dynamic task graphs since Dagger uses a dynamic scheduler and allows nesting tasks.
+Here is an example of a dynamic task graph:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@everywhere</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">Random</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">task_nested</span><span class="p">(</span><span class="n">a</span><span class="o">::</span><span class="kt">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">[</span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">b</span><span class="o">+</span><span class="n">i</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">one</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">:</span><span class="n">a</span><span class="p">]</span>
+<span class="k">end</span>
+
+<span class="c"># Use determistic random number generators</span>
+<span class="n">rngs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">seed</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">3</span><span class="p">]</span>
+
+<span class="c"># Define and execute a task graph</span>
+<span class="c"># We use fetch inside @spawn so it does not block</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">rngs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="mi">4</span><span class="o">:</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">rngs</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">task_nested</span><span class="p">(</span><span class="n">fetch</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="n">fetch</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+<span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">rngs</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">mapreduce</span><span class="p">(</span><span class="n">fetch</span><span class="p">,</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">fetch</span><span class="p">(</span><span class="n">c</span><span class="p">))</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">fetch</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+<span class="c"># Fetch the final result</span>
+<span class="n">fetch</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Link to this heading"></a></h2>
+<div class="admonition-parallelize-serial-code-using-dagger exercise important admonition" id="exercise-0">
+<p class="admonition-title">Parallelize serial code using Dagger</p>
+<p>Parallelize the following serial code using Dagger.
+The, execute the script with Julia process using two threads, and add one Distributed worker with two threads.
+Compare the results and execution time between the serial and parallel versions.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Random</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">:</span><span class="n">x</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">:</span><span class="n">x</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">h</span><span class="p">(</span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">map</span><span class="p">(</span><span class="n">one</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">:</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="n">i</span>
+<span class="w">        </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="n">y</span><span class="o">+</span><span class="n">i</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">task_graph</span><span class="p">()</span>
+<span class="w">    </span><span class="c"># Use determistic random number generators</span>
+<span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">    </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reduce</span><span class="p">(</span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">d</span>
+<span class="k">end</span>
+
+<span class="n">println</span><span class="p">(</span><span class="n">task_graph</span><span class="p">())</span>
+<span class="nd">@time</span><span class="w"> </span><span class="n">task_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition-hints solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Hints</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># HINT: import Distributed and add workers</span>
+<span class="c"># HINT: import Dagger and Random on all workers (@everywhere)</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">Random</span>
+
+<span class="c"># HINT: define the function f, g, and h for all workers</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">:</span><span class="n">x</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">:</span><span class="n">x</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">h</span><span class="p">(</span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">map</span><span class="p">(</span><span class="n">one</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">:</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="n">i</span>
+<span class="w">        </span><span class="c"># HINT: Remember that we can also nest tasks with Dagger (Dagger.@spawn)</span>
+<span class="w">        </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="n">y</span><span class="o">+</span><span class="n">i</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">task_graph</span><span class="p">()</span>
+<span class="w">    </span><span class="c"># Use determistic random number generators</span>
+<span class="w">    </span><span class="c"># HINT: parallelize the tasks using dagger (Dagger.@spawn, fetch)</span>
+<span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">h</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">    </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reduce</span><span class="p">(</span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">d</span>
+<span class="k">end</span>
+
+<span class="n">println</span><span class="p">(</span><span class="n">task_graph</span><span class="p">())</span>
+<span class="nd">@time</span><span class="w"> </span><span class="n">task_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition-solution solution important dropdown admonition" id="solution-1">
+<p class="admonition-title">Solution</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>julia<span class="w"> </span>--threads<span class="o">=</span><span class="m">2</span><span class="w"> </span>dagger.jl
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">dagger.jl</span></code></p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+<span class="n">addprocs</span><span class="p">(</span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="n">exeflags</span><span class="o">=</span><span class="s">&quot;--threads=2&quot;</span><span class="p">)</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">Dagger</span><span class="p">,</span><span class="w"> </span><span class="n">Random</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">:</span><span class="n">x</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">    </span><span class="n">rand</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="o">:</span><span class="n">x</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">h</span><span class="p">(</span><span class="n">x</span><span class="o">::</span><span class="kt">Integer</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="o">::</span><span class="kt">Integer</span><span class="p">)</span>
+<span class="w">    </span><span class="n">map</span><span class="p">(</span><span class="n">one</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">:</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="n">i</span>
+<span class="w">        </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="k">begin</span>
+<span class="w">            </span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">            </span><span class="n">y</span><span class="o">+</span><span class="n">i</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">task_graph</span><span class="p">()</span>
+<span class="w">    </span><span class="c"># Use determistic random number generators</span>
+<span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">f</span><span class="p">(</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">g</span><span class="p">(</span><span class="n">MersenneTwister</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">h</span><span class="p">(</span><span class="n">fetch</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="w"> </span><span class="n">fetch</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+<span class="w">    </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dagger</span><span class="o">.</span><span class="nd">@spawn</span><span class="w"> </span><span class="n">mapreduce</span><span class="p">(</span><span class="n">fetch</span><span class="p">,</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">fetch</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">fetch</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">println</span><span class="p">(</span><span class="n">task_graph</span><span class="p">())</span>
+<span class="nd">@time</span><span class="w"> </span><span class="n">task_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../distributed/" class="btn btn-neutral float-left" title="Distributed computing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../hpc-cluster/" class="btn btn-neutral float-right" title="Julia on HPC cluster" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

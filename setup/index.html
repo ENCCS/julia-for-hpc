@@ -1,0 +1,500 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setup &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="../_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script src="../_static/tabs.js?v=3030b3cb"></script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Motivation" href="../motivation-hpc/" />
+    <link rel="prev" title="Julia for high-performance scientific computing" href="../" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setup</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installing-julia">Installing Julia</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-julia-installer">1. Using the Julia installer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-juliaup">2. Using Juliaup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checking-your-installation">3. Checking your installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installing-other-packages-optional">4. Installing other packages (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-visual-studio-code">Installing Visual Studio Code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installing-the-vscode-julia-extension">Installing the VSCode Julia extension</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-packages">Installing packages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-mpi">Configuring MPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-hpc-systems">Using HPC systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-jupyterlab-and-a-julia-kernel-optional">Installing JupyterLab and a Julia kernel (Optional)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#add-julia-to-jupyterlab">Add Julia to JupyterLab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-julia-notebook">Create a Julia notebook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Parallel execution with Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Setup</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/setup.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="setup">
+<h1>Setup<a class="headerlink" href="#setup" title="Link to this heading"></a></h1>
+<p>Please follow the instructions on this page to install both <strong>Julia</strong> and <strong>VS Code</strong> with the Julia
+plugin on your machine.</p>
+<section id="installing-julia">
+<h2>Installing Julia<a class="headerlink" href="#installing-julia" title="Link to this heading"></a></h2>
+<p>There are two ways to install Julia:</p>
+<ol class="arabic simple">
+<li><p>Downloading an <a class="reference external" href="https://julialang.org/downloads/#current_stable_release">installer</a>
+for your operating system for the latest stable Julia version.</p></li>
+<li><p>Using <a class="reference external" href="https://github.com/JuliaLang/juliaup">Juliaup</a>, the Julia version manager.</p></li>
+</ol>
+<p>Option 2 is (as of October 2022) the recommended installation method on Windows, and while
+<cite>juliaup</cite> is marked as a pre-release on MacOS and Linux it already works smoothly there too.</p>
+<p>The benefit of <cite>juliaup</cite> is that it allows users to install specific Julia versions, it alerts
+users when new Julia versions are released and it provides a convenient Julia release channel
+abstraction.</p>
+<p>Both installation methods are documented here. If you are on Windows we recommend using
+<cite>juliaup</cite>. If you are on MacOS or Linux, choose the installation method you feel most
+comfortable with.</p>
+<section id="using-the-julia-installer">
+<h3>1. Using the Julia installer<a class="headerlink" href="#using-the-julia-installer" title="Link to this heading"></a></h3>
+<p>First download the latest stable release of Julia for your operating system
+<a class="reference external" href="https://julialang.org/downloads/#current_stable_release">from the julialang.org website</a>.</p>
+<figure class="align-center">
+<img alt="../_images/installers.png" src="../_images/installers.png" />
+</figure>
+<p>Follow the instructions to complete the installation.</p>
+<p>Platform-specific instructions can be found at
+<a class="reference external" href="https://julialang.org/downloads/platform/">https://julialang.org/downloads/platform/</a>. It is convenient to be able
+to run Julia from the command line, so follow the instructions for
+“adding Julia to PATH”.
+For Windows users who do not already have a terminal installed,
+we recommend to install the
+<a class="reference external" href="https://www.microsoft.com/sv-se/p/windows-terminal/9n0dx20hk701?rtc=1&amp;activetab=pivot:overviewtab">Windows Terminal from the Microsoft Store</a>.</p>
+</section>
+<section id="using-juliaup">
+<h3>2. Using Juliaup<a class="headerlink" href="#using-juliaup" title="Link to this heading"></a></h3>
+<p>Full instructions can be found at <a class="reference external" href="https://github.com/JuliaLang/juliaup">HERE</a>.</p>
+<p>In short:</p>
+<ul>
+<li><p>On Windows you can install Julia and Juliaup either through the
+<a class="reference external" href="https://www.microsoft.com/store/apps/9NJNWW8PVKMN">Windows store</a> or on a command line
+by executing <code class="docutils literal notranslate"><span class="pre">winget</span> <span class="pre">install</span> <span class="pre">julia</span> <span class="pre">-s</span> <span class="pre">msstore</span></code>.</p></li>
+<li><p>On MacOS or Linux, type <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-fsSL</span> <span class="pre">https://install.julialang.org</span> <span class="pre">|</span> <span class="pre">sh</span></code> on a command line
+and follow the instructions.</p>
+<blockquote>
+<div><blockquote>
+<div><ul class="simple">
+<li><p>If your home directory is not the optimal location for installing Julia, answer “no” to the question “Do you want to install with these default configuration choices?” and enter the appropriate directory path.</p></li>
+<li><p>After the installation your shell configuration file(s) will be updated (e.g. <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code>).</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p>Source this file to update your PATH variable: <code class="docutils literal notranslate"><span class="pre">.</span> <span class="pre">$HOME/.bashrc</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>If you want or need to install Julia yourself on an HPC system, keep the following points in mind:</p>
+<ul class="simple">
+<li><p>Install Julia on the cluster’s high-performance parallel file system as this will
+improve performance of large parallel Julia jobs.</p></li>
+<li><p>Installation of Julia packages can take up significant disk space and include a large number
+of files - make sure to use a file system with sufficiently high quotas for both disk space
+and number of files.</p></li>
+<li><p>When in doubt, ask the support team of the cluster for guidance!</p></li>
+</ul>
+</section>
+<section id="checking-your-installation">
+<h3>3. Checking your installation<a class="headerlink" href="#checking-your-installation" title="Link to this heading"></a></h3>
+<p>Regardless of how you installed Julia, please ensure that you can open the Julia REPL by
+typing <code class="docutils literal notranslate"><span class="pre">julia</span></code> on the command line in a terminal, or by clicking the Julia
+icon on your Desktop or Applications folder. You should
+see something like in the image below (nevermind the version number).</p>
+<figure class="align-center">
+<img alt="../_images/repl.png" src="../_images/repl.png" />
+</figure>
+<p>To exit the REPL again, hit <code class="docutils literal notranslate"><span class="pre">CTRL-d</span></code> or type <code class="docutils literal notranslate"><span class="pre">exit()</span></code>.</p>
+</section>
+<section id="installing-other-packages-optional">
+<h3>4. Installing other packages (optional)<a class="headerlink" href="#installing-other-packages-optional" title="Link to this heading"></a></h3>
+<p>On HPC systems it is often recommended to install own programs and packages in a directory different
+from the home directory (<code class="docutils literal notranslate"><span class="pre">$HOME</span></code>). The <code class="docutils literal notranslate"><span class="pre">JULIA_DEPOT_PATH</span></code> variable controls where Julia’s
+package manager (as well as Julia’s code loading mechanisms) looks for package registries,
+installed packages, named environments, repo clones, cached compiled package images, configuration files,
+and the default location of the REPL’s history file.</p>
+<p>Since the available file systems can differ significantly between HPC centers,
+it is hard to make a general statement about where the Julia depot folder should be placed.</p>
+<p>Generally speaking, the file system hosting the Julia depot should have</p>
+<ul class="simple">
+<li><p>Good parallel I/O</p></li>
+<li><p>No tight quotas on disk space or number of files</p></li>
+<li><p>Read and write access by the user</p></li>
+<li><p>No mechanism for the automatic deletion of unused files (or the depot should be excluded as an exception)</p></li>
+</ul>
+<p>On some systems, it resides in the user’s home directory. On other systems, it is put on a parallel
+scratch file system.</p>
+<p>To prepend the <code class="docutils literal notranslate"><span class="pre">JULIA_DEPOT_PATH</span></code> variable with a new directory, type
+<code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">JULIA_DEPOT_PATH=&quot;/path_to_directory/v$(VERSION.major).$(VERSION.minor):$JULIA_DEPOT_PATH</span></code>
+(put this in the shell configuration file, e.g. <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code> or <code class="docutils literal notranslate"><span class="pre">.bash_profile</span></code>).</p>
+</section>
+</section>
+<section id="installing-visual-studio-code">
+<h2>Installing Visual Studio Code<a class="headerlink" href="#installing-visual-studio-code" title="Link to this heading"></a></h2>
+<p>First install VSCode according to the official documentation:
+<a class="reference external" href="https://code.visualstudio.com/Download">https://code.visualstudio.com/Download</a></p>
+<section id="installing-the-vscode-julia-extension">
+<h3>Installing the VSCode Julia extension<a class="headerlink" href="#installing-the-vscode-julia-extension" title="Link to this heading"></a></h3>
+<p>After starting VSCode,
+click the Extensions button on the left-side menu, type <cite>Julia</cite> and
+click <cite>Install</cite> to install the Julia extension.</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/vscode_extensionbutton.png"><img alt="../_images/vscode_extensionbutton.png" src="../_images/vscode_extensionbutton.png" style="width: 316.0px; height: 240.0px;" />
+</a>
+</figure>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/vscode_juliaextension.png"><img alt="../_images/vscode_juliaextension.png" src="../_images/vscode_juliaextension.png" style="width: 253.0px; height: 138.0px;" />
+</a>
+</figure>
+<p>You now need to configure the Julia extension and set the path
+to the Julia executable. Click the cogwheel button next to the Julia
+extension:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/vscode_extensionconfig.png"><img alt="../_images/vscode_extensionconfig.png" src="../_images/vscode_extensionconfig.png" style="width: 245.0px; height: 138.0px;" />
+</a>
+</figure>
+<p>Then find the “Julia: Executable Path” field:</p>
+<figure class="align-center">
+<a class="reference internal image-reference" href="../_images/vscode_execpath.png"><img alt="../_images/vscode_execpath.png" src="../_images/vscode_execpath.png" style="width: 534.0px; height: 102.0px;" />
+</a>
+</figure>
+<p>In this field enter the path to the Julia executable that you have installed.</p>
+<p>If you are curious, scroll through the other possible configuration settings!</p>
+</section>
+</section>
+<section id="installing-packages">
+<h2>Installing packages<a class="headerlink" href="#installing-packages" title="Link to this heading"></a></h2>
+<p>A number of Julia packages is used in this lesson. These can be installed on-the-fly
+during a workshop, but you can also follow the instructions below to install all packages
+in your global Julia environment.</p>
+<p>Copy-paste the following text into a file called Project.toml, which
+you can for example place under a new directory <cite>julia</cite> in your home directory:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Julia-for-HPC&quot;</span>
+
+<span class="k">[deps]</span>
+<span class="n">BenchmarkTools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf&quot;</span>
+<span class="n">Dagger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;d58978e5-989f-55fb-8d15-ea34adc7bf54&quot;</span>
+<span class="n">Distributed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;8ba89e20-285c-5b6f-9357-94700520ee1b&quot;</span>
+<span class="n">LinearAlgebra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;37e2e46d-f89d-539d-b4ee-838fcccc9c8e&quot;</span>
+<span class="n">MPI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;da04e1cc-30fd-572f-bb4f-1f8673147195&quot;</span>
+<span class="n">MPIPreferences</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;3da0fdf6-3ccc-4f1b-acd9-58baa6c99267&quot;</span>
+<span class="n">Plots</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;91a5bcdd-55d7-5caf-9e0b-520d859cae80&quot;</span>
+<span class="n">Profile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;9abbd945-dff8-562f-b5e8-e1ebf5ef1b79&quot;</span>
+<span class="n">PyCall</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;438e738f-606a-5dbb-bf0a-cddfbfd45ab0&quot;</span>
+<span class="n">SharedArrays</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1a1011a3-84de-559e-8e89-a11a2f7dc383&quot;</span>
+<span class="n">StaticArrays</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;90137ffa-7385-5640-81b9-e52037218182&quot;</span>
+</pre></div>
+</div>
+<p>Then open a Julia REPL and specify the location of the Project.toml file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>--project<span class="o">=</span>/path/to/Project.toml
+</pre></div>
+</div>
+<p>Then copy-paste the following code into your Julia session:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Pkg</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">instantiate</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It could take a couple of minutes to download and install the packages.
+After it completes you should be able to list all installed packages:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
+
+<span class="c"># Status `~/julia/Project.toml`</span>
+<span class="c">#   [6e4b80f9] BenchmarkTools v1.3.1</span>
+<span class="c">#   [da04e1cc] MPI v0.20.3</span>
+<span class="c">#   [3da0fdf6] MPIPreferences v0.1.6</span>
+<span class="c">#   [91a5bcdd] Plots v1.35.6</span>
+<span class="c">#   [90137ffa] StaticArrays v1.5.9</span>
+<span class="c">#   [8ba89e20] Distributed</span>
+<span class="c">#   [37e2e46d] LinearAlgebra</span>
+<span class="c">#   [9abbd945] Profile</span>
+<span class="c">#   [1a1011a3] SharedArrays</span>
+</pre></div>
+</div>
+<section id="configuring-mpi">
+<h3>Configuring MPI<a class="headerlink" href="#configuring-mpi" title="Link to this heading"></a></h3>
+<p>Using MPI in Julia requires an MPI library. On an HPC system it is best to use a preinstalled
+MPI library, but on personal computers it’s best to let the MPI.jl package install its own
+library and wrapper for the <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code> command. Do this by:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">install_mpiexecjl</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This installs a <code class="docutils literal notranslate"><span class="pre">mpiexecjl</span></code> under <code class="docutils literal notranslate"><span class="pre">~/.julia/bin</span></code>, which should be added to your
+<code class="docutils literal notranslate"><span class="pre">PATH</span></code> variable.</p>
+</section>
+</section>
+<section id="using-hpc-systems">
+<h2>Using HPC systems<a class="headerlink" href="#using-hpc-systems" title="Link to this heading"></a></h2>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">LUMI</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">Meluxina</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><p>We can load the Julia environment on LUMI as follows:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+<span class="gp">$ </span>module<span class="w"> </span>load<span class="w"> </span>julia
+</pre></div>
+</div>
+<p>Let’s start an interactive Julia session on the login node using multiple threads:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>--threads<span class="w"> </span><span class="m">8</span>
+</pre></div>
+</div>
+<p>Next, we install and precompile packages for distributed, MPI and GPU computing:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="n">Pkg</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;MPI&quot;</span><span class="p">)</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;AMDGPU&quot;</span><span class="p">)</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;ClusterManagers&quot;</span><span class="p">)</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;Dagger&quot;</span><span class="p">)</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">precompile</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To start a new bash session on a reserved interactive <strong>CPU node</strong> for <strong>multithreaded</strong> or <strong>distributed</strong> jobs:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>srun<span class="w"> </span>--account<span class="o">=</span>project_465001310<span class="w"> </span>--partition<span class="o">=</span>small<span class="w"> </span>--nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span>--ntasks-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span>--cpus-per-task<span class="o">=</span><span class="m">8</span><span class="w"> </span>--mem-per-cpu<span class="o">=</span><span class="m">1000</span><span class="w"> </span>--time<span class="o">=</span><span class="m">00</span>:15:00<span class="w"> </span>--pty<span class="w"> </span>bash
+</pre></div>
+</div>
+<p>To run <strong>MPI</strong> jobs on a <strong>CPU node</strong>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>srun<span class="w"> </span>--account<span class="o">=</span>project_465001310<span class="w"> </span>--partition<span class="o">=</span>small<span class="w"> </span>--nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span>--ntasks-per-node<span class="o">=</span><span class="m">8</span><span class="w"> </span>--cpus-per-task<span class="o">=</span><span class="m">1</span><span class="w"> </span>--mem-per-cpu<span class="o">=</span><span class="m">1000</span><span class="w"> </span>--time<span class="o">=</span><span class="m">00</span>:15:00<span class="w"> </span>--pty<span class="w"> </span>bash
+</pre></div>
+</div>
+<p>To run instead on a <strong>GPU node</strong>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>srun<span class="w"> </span>--account<span class="o">=</span>project_465001310<span class="w"> </span>--partition<span class="o">=</span>small-g<span class="w"> </span>--nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span>--ntasks-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span>--cpus-per-task<span class="o">=</span><span class="m">16</span><span class="w"> </span>--gpus-per-node<span class="o">=</span><span class="m">1</span><span class="w"> </span>--mem-per-cpu<span class="o">=</span><span class="m">1750</span><span class="w"> </span>--time<span class="o">=</span><span class="m">00</span>:15:00<span class="w"> </span>--pty<span class="w">  </span>bash
+</pre></div>
+</div>
+<p>To run a batch job to run an MPI job, create a job script similar to the following:</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-1-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-1-1-0" name="1-0" role="tab" tabindex="0">CPU - multithreaded or distributed jobs</button><button aria-controls="panel-1-1-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-1" name="1-1" role="tab" tabindex="-1">CPU - MPI jobs</button><button aria-controls="panel-1-1-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-2" name="1-2" role="tab" tabindex="-1">GPU</button></div><div aria-labelledby="tab-1-1-0" class="sphinx-tabs-panel" id="panel-1-1-0" name="1-0" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash -l</span>
+<span class="c1">#SBATCH --account project_465001310</span>
+<span class="c1">#SBATCH --time 00:15:00</span>
+<span class="c1">#SBATCH --partition small</span>
+<span class="c1">#SBATCH --nodes 1</span>
+<span class="c1">#SBATCH --ntasks-per-node=1</span>
+<span class="c1">#SBATCH --cpus-per-task=8</span>
+
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+module<span class="w"> </span>load<span class="w"> </span>julia
+julia<span class="w"> </span>script.jl
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-1" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-1" name="1-1" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash -l</span>
+<span class="c1">#SBATCH --account project_465001310</span>
+<span class="c1">#SBATCH --time 00:15:00</span>
+<span class="c1">#SBATCH --partition small</span>
+<span class="c1">#SBATCH --nodes 1</span>
+<span class="c1">#SBATCH --ntasks-per-node=8</span>
+
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+module<span class="w"> </span>load<span class="w"> </span>julia
+module<span class="w"> </span>load<span class="w"> </span>julia-mpi
+srun<span class="w"> </span>julia<span class="w"> </span>script.jl
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-2" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-2" name="1-2" role="tabpanel" tabindex="0"><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash -l</span>
+<span class="c1">#SBATCH --account project_465001310</span>
+<span class="c1">#SBATCH --ttime 00:15:00</span>
+<span class="c1">#SBATCH --partition small-g</span>
+<span class="c1">#SBATCH --nodes 1</span>
+<span class="c1">#SBATCH --ntasks-per-node=8</span>
+<span class="c1">#SBATCH --cpus-per-task=16</span>
+<span class="c1">#SBATCH --gpus-per-node=1</span>
+
+module<span class="w"> </span>use<span class="w"> </span>/appl/local/csc/modulefiles
+module<span class="w"> </span>load<span class="w"> </span>julia
+module<span class="w"> </span>load<span class="w"> </span>julia-amdgpu
+julia<span class="w"> </span>--project<span class="w"> </span>script.jl
+</pre></div>
+</div>
+</div></div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><p>To reserve an interactive node (replace project (-A), QOS (-q) and reservation (–res)
+as needed):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>salloc<span class="w"> </span>-A<span class="w"> </span>p200051<span class="w"> </span>-t<span class="w"> </span><span class="m">0</span>:10:0<span class="w"> </span>-p<span class="w"> </span>cpu<span class="w">  </span>-n<span class="w"> </span><span class="m">1</span><span class="w">  </span>-q<span class="w"> </span>dev<span class="w"> </span>--res<span class="w"> </span>cpudev
+</pre></div>
+</div>
+<p>To run a batch job to run an MPI job, create a job script similar to the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash -l</span>
+<span class="c1">#SBATCH -A p200051</span>
+<span class="c1">#SBATCH -t 00:10:00</span>
+<span class="c1">#SBATCH -q test</span>
+<span class="c1">#SBATCH -p cpu</span>
+<span class="c1">#SBATCH -N 1</span>
+<span class="c1">#SBATCH --ntasks-per-node=8</span>
+
+module<span class="w"> </span>load<span class="w"> </span>OpenMPI
+module<span class="w"> </span>load<span class="w"> </span>Julia
+
+<span class="nv">n</span><span class="o">=</span><span class="nv">$SLURM_NTASKS</span>
+srun<span class="w"> </span>-n<span class="w"> </span><span class="nv">$n</span><span class="w"> </span>julia<span class="w"> </span>mpi_program.jl
+</pre></div>
+</div>
+</div></div>
+</section>
+<section id="installing-jupyterlab-and-a-julia-kernel-optional">
+<h2>Installing JupyterLab and a Julia kernel (Optional)<a class="headerlink" href="#installing-jupyterlab-and-a-julia-kernel-optional" title="Link to this heading"></a></h2>
+<p>JupyterLab can most easily be installed through the full
+Anaconda distribution of Python packages or the minimal
+Miniconda distribution.</p>
+<p>To install Anaconda, visit
+<a class="reference external" href="https://www.anaconda.com/products/individual">https://www.anaconda.com/products/individual</a> , download an installer
+for your operating system and follow the instructions. JupyterLab and
+an IPython kernel are included in the distribution.</p>
+<p>To install Miniconda, visit
+<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a> , download an installer
+for your operating system and follow the instructions.  After
+activating a <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment in your terminal, you can install
+JupyterLab with the command <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">jupyterlab</span></code>.</p>
+<section id="add-julia-to-jupyterlab">
+<h3>Add Julia to JupyterLab<a class="headerlink" href="#add-julia-to-jupyterlab" title="Link to this heading"></a></h3>
+<p>To be able to use a Julia kernel in a Jupyter notebook you need to
+install the <code class="docutils literal notranslate"><span class="pre">IJulia</span></code> Julia package. Open the Julia REPL and type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">using</span> <span class="n">Pkg</span>
+<span class="n">Pkg</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;IJulia&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="create-a-julia-notebook">
+<h3>Create a Julia notebook<a class="headerlink" href="#create-a-julia-notebook" title="Link to this heading"></a></h3>
+<p>Now you should be able to open up a JupyterLab session by typing
+<code class="docutils literal notranslate"><span class="pre">jupyter-lab</span></code> in a terminal, and create a Julia notebook by clicking
+on Julia in the JupyterLab Launcher or by selecting File &gt; New &gt; Notebook
+and selecting a Julia kernel in the drop-down menu that appears.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../" class="btn btn-neutral float-left" title="Julia for high-performance scientific computing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../motivation-hpc/" class="btn btn-neutral float-right" title="Motivation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

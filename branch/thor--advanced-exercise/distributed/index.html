@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distributed computing &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx_lesson.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/overrides.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script src="../_static/tabs.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Dagger" href="../dagger/" />
+    <link rel="prev" title="Multithreading" href="../multithreading/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Distributed computing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Distributed computing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sharedarrays">SharedArrays</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#distributedarrays">DistributedArrays</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exercises">Exercises</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cluster/">Running on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C and Fortran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Distributed computing</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/distributed.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="distributed-computing">
+<h1>Distributed computing<a class="headerlink" href="#distributed-computing" title="Permalink to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>How is multiprocessing used?</p></li>
+<li><p>What are SharedArrays?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>20 min teaching</p></li>
+<li><p>20 min exercises</p></li>
+</ul>
+</div>
+<section id="id1">
+<h2>Distributed computing<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>Julia’s main implementation of message passing for distributed-memory systems is contained in
+the <code class="docutils literal notranslate"><span class="pre">Distributed</span></code> module. Its approach is different from other frameworks like MPI in
+that communication is generally “one-sided”, meaning that the programmer needs to explicitly
+manage only one process in a two-process operation.</p>
+<p>Julia can be started with a given number of <cite>p local</cite> workers using the <code class="docutils literal notranslate"><span class="pre">-p</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>julia<span class="w"> </span>-p<span class="w"> </span><span class="m">4</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Distributed</span></code> module is automatically loaded if the <code class="docutils literal notranslate"><span class="pre">-p</span></code> flag is used.
+But we can also dynamically add processes in a running Julia session:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+
+<span class="n">println</span><span class="p">(</span><span class="n">nprocs</span><span class="p">())</span>
+<span class="n">addprocs</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w">         </span><span class="c"># add 4 workers</span>
+<span class="n">println</span><span class="p">(</span><span class="n">nprocs</span><span class="p">())</span><span class="w">   </span><span class="c"># total number of processes</span>
+<span class="n">println</span><span class="p">(</span><span class="n">nworkers</span><span class="p">())</span><span class="w"> </span><span class="c"># only worker processes</span>
+<span class="n">rmprocs</span><span class="p">(</span><span class="n">workers</span><span class="p">())</span><span class="w">  </span><span class="c"># remove worker processes</span>
+</pre></div>
+</div>
+<p>Note what happens here: there is one <cite>master</cite> process which can create
+additional <cite>worker</cite> processes, and as we shall see, it can also distribute work to these
+workers.</p>
+<p>For running on a cluster, we instead need to provide the <code class="docutils literal notranslate"><span class="pre">--machine-file</span></code> option
+and the name of a file containing a list of machines that are accessible via
+password-less <code class="docutils literal notranslate"><span class="pre">ssh</span></code>. Support for running on clusters with various schedulers
+(including SLURM) can be found in the
+<a class="reference external" href="https://github.com/JuliaParallel/ClusterManagers.jl">ClusterManagers.jl</a>
+package.</p>
+<p>Each process has a unique identifier accessible via the <code class="docutils literal notranslate"><span class="pre">myid()</span></code> function (<cite>master</cite>
+has <code class="docutils literal notranslate"><span class="pre">myid()</span> <span class="pre">=</span> <span class="pre">1</span></code>). The <code class="docutils literal notranslate"><span class="pre">&#64;spawn</span></code> and <code class="docutils literal notranslate"><span class="pre">&#64;spawnat</span></code> macros can be used to transfer
+work to a process, and then return the resulting <code class="docutils literal notranslate"><span class="pre">Future</span></code> to the <cite>master</cite> process
+using the <code class="docutils literal notranslate"><span class="pre">fetch</span></code> function (<code class="docutils literal notranslate"><span class="pre">&#64;spawn</span></code> selects the process automatically while
+<code class="docutils literal notranslate"><span class="pre">&#64;spawnat</span></code> lets you choose:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># execute myid() and rand() on process 2</span>
+<span class="n">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@spawnat</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">(</span><span class="n">myid</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">())</span>
+<span class="c"># fetch the result</span>
+<span class="n">fetch</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>One use case could be to manually distribute expensive function calls
+between processes,
+but there are higher-level and simpler constructs than <code class="docutils literal notranslate"><span class="pre">&#64;spawn</span></code> / <code class="docutils literal notranslate"><span class="pre">&#64;spawnat</span></code>:</p>
+<ul class="simple">
+<li><p>the <code class="docutils literal notranslate"><span class="pre">&#64;distributed</span></code> macro for <code class="docutils literal notranslate"><span class="pre">for</span></code> loops. Can be used with a
+reduction operator to gather work performed by the independent tasks.</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">pmap</span></code> function which maps an array or range to a given function.</p></li>
+</ul>
+<p>To illustrate the difference between these approaches we revisit the
+<code class="docutils literal notranslate"><span class="pre">sum_sqrt</span></code> function from the <a class="reference internal" href="../multithreading/"><span class="doc">Multithreading</span></a> episode. To use <code class="docutils literal notranslate"><span class="pre">pmap</span></code> we need to modify our
+function to accept a range so we will use this modified version.
+Note that to make any function available to all processes it needs to
+be decorated with the <code class="docutils literal notranslate"><span class="pre">&#64;everywhere</span></code> macro:</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">Distributed version</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">Serial version</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">sqrt_sum_range</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">)</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">r</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">sqrt_sum</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zero</span><span class="p">(</span><span class="n">eltype</span><span class="p">(</span><span class="n">A</span><span class="p">))</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">s</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div></div>
+<p>Let us look at and discuss example implementations using each of these
+techniques:</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-1-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-1-1-0" name="1-0" role="tab" tabindex="0">&#64;distributed (+)</button><button aria-controls="panel-1-1-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-1" name="1-1" role="tab" tabindex="-1">pmap</button><button aria-controls="panel-1-1-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-2" name="1-2" role="tab" tabindex="-1">&#64;spawnat</button></div><div aria-labelledby="tab-1-1-0" class="sphinx-tabs-panel" id="panel-1-1-0" name="1-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">100_000</span><span class="p">)</span>
+<span class="n">batch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Int</span><span class="p">(</span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+
+<span class="nd">@distributed</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">[(</span><span class="mi">1</span><span class="o">:</span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="o">.+</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="n">batch</span><span class="o">:</span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="w">    </span><span class="n">sqrt_sum_range</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-1" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-1" name="1-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">100_000</span><span class="p">)</span>
+<span class="n">batch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Int</span><span class="p">(</span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+
+<span class="n">sum</span><span class="p">(</span><span class="n">pmap</span><span class="p">(</span><span class="n">r</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">sqrt_sum_range</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">),</span><span class="w"> </span><span class="p">[(</span><span class="mi">1</span><span class="o">:</span><span class="n">batch</span><span class="p">)</span><span class="w"> </span><span class="o">.+</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="n">batch</span><span class="o">:</span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-2" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-2" name="1-2" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">futures</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Array</span><span class="p">{</span><span class="kt">Future</span><span class="p">}(</span><span class="nb">undef</span><span class="p">,</span><span class="w"> </span><span class="n">nworkers</span><span class="p">())</span>
+<span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">100_000</span><span class="p">)</span>
+<span class="n">batch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Int</span><span class="p">(</span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+
+<span class="nd">@time</span><span class="w"> </span><span class="k">begin</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">enumerate</span><span class="p">(</span><span class="n">workers</span><span class="p">())</span>
+<span class="w">        </span><span class="n">batch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">floor</span><span class="p">(</span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">nworkers</span><span class="p">())</span>
+<span class="w">        </span><span class="n">remainder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">length</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">nworkers</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">remainder</span>
+<span class="w">            </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">batch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">            </span><span class="n">stop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">batch</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="w">            </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">batch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">remainder</span>
+<span class="w">            </span><span class="n">stop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">batch</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">        </span><span class="n">futures</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@spawnat</span><span class="w"> </span><span class="n">myid</span><span class="p">()</span><span class="w"> </span><span class="n">sqrt_sum_range</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">start</span><span class="o">:</span><span class="n">stop</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="p">(</span><span class="n">fetch</span><span class="o">.</span><span class="p">(</span><span class="n">futures</span><span class="p">))</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div></div>
+<p>The <code class="docutils literal notranslate"><span class="pre">&#64;spawnat</span></code> version looks cumbersome for this case particular case as the algorithm
+required the explicit partitioning of the array which is common in MPI, for instance.
+The <code class="docutils literal notranslate"><span class="pre">&#64;distributed</span> <span class="pre">(+)</span></code> parallel for loop and the <code class="docutils literal notranslate"><span class="pre">pmap</span></code> mapping are much simpler,
+but which one is preferable for a given use case?</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;distributed</span></code> is appropriate for reductions. It does not load-balance and
+simply divides the work evenly between processes. It is best in cases where
+each loop iteration is cheap.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pmap</span></code> can handle reductions as well as other algorithms. It performs load-balancing
+and since dynamic scheduling introduces some overhead it’s best to use <code class="docutils literal notranslate"><span class="pre">pmap</span></code>
+for computationally heavy tasks.</p></li>
+<li><p>In the case of <code class="docutils literal notranslate"><span class="pre">&#64;spawnat</span></code>, because the <cite>futures</cite> are not immediately using CPU
+resources, it opens the possibility of using asynchronous and uneven workloads.</p></li>
+</ul>
+<div class="admonition-multiprocessing-overhead callout admonition" id="callout-0">
+<p class="admonition-title">Multiprocessing overhead</p>
+<p>Just like with multithreading, multiprocessing with <code class="docutils literal notranslate"><span class="pre">Distributed</span></code> comes with an overhead
+because of sending messages and moving data between processes.</p>
+<p>The simple example with the <code class="xref py py-meth docutils literal notranslate"><span class="pre">sqrt_sum()</span></code> function will not benefit from parallelisation.
+But if you add a <code class="xref py py-meth docutils literal notranslate"><span class="pre">sleep(0.001)()</span></code> inside the loop, to emulate an expensive calculation,
+and reduce array size to e.g. <code class="docutils literal notranslate"><span class="pre">rand(1000)</span></code> you should observe near-linear scaling. Try it!</p>
+</div>
+<p>Finally, it should be emphasized that a common use case of <code class="docutils literal notranslate"><span class="pre">pmap</span></code> involves heavy
+computations inside functions defined in imported packages.
+For example, computing the singular value decomposition of many matrices:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@everywhere</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">LinearAlgebra</span>
+<span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">10</span><span class="p">]</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">map</span><span class="p">(</span><span class="n">LinearAlgebra</span><span class="o">.</span><span class="n">svd</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">pmap</span><span class="p">(</span><span class="n">LinearAlgebra</span><span class="o">.</span><span class="n">svd</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span>
+</pre></div>
+</div>
+<section id="sharedarrays">
+<h3>SharedArrays<a class="headerlink" href="#sharedarrays" title="Permalink to this heading"></a></h3>
+<p>Shared arrays, supplied by the <code class="docutils literal notranslate"><span class="pre">SharedArrays</span></code> module in base Julia, are
+arrays that are shared across multiple processes on the same machine. They
+can be used to distribute operations on an array across processes.</p>
+<p>Let us revisit the <code class="docutils literal notranslate"><span class="pre">sqrt_array</span></code> function and modify it to mutate the
+argument passed to it, and also add a method to it for
+SharedArrays which has the required <code class="docutils literal notranslate"><span class="pre">&#64;distributed</span></code> and <code class="docutils literal notranslate"><span class="pre">&#64;sync</span></code> macros
+(<code class="docutils literal notranslate"><span class="pre">&#64;sync</span></code> is needed to wait for all processes to finish):</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-2-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-2-2-0" name="2-0" role="tab" tabindex="0">Serial</button><button aria-controls="panel-2-2-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-2-2-1" name="2-1" role="tab" tabindex="-1">SharedArray</button></div><div aria-labelledby="tab-2-2-0" class="sphinx-tabs-panel" id="panel-2-2-0" name="2-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">sqrt_array!</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-2-2-1" class="sphinx-tabs-panel" hidden="true" id="panel-2-2-1" name="2-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">sqrt_array!</span><span class="p">(</span><span class="n">A</span><span class="o">::</span><span class="kt">SharedArray</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@sync</span><span class="w"> </span><span class="nd">@distributed</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">eachindex</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div></div>
+<p>Remember that Julia always selects the most specialized method for
+dispatch based on the argument type. We can now time these two methods
+using <code class="docutils literal notranslate"><span class="pre">&#64;time</span></code> instead of <code class="docutils literal notranslate"><span class="pre">&#64;btime</span></code>, this time:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="mi">100_000_000</span><span class="p">);</span>
+<span class="nd">@time</span><span class="w"> </span><span class="n">sqrt_array!</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+<span class="n">SA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SharedArray</span><span class="p">(</span><span class="n">A</span><span class="p">);</span>
+<span class="nd">@time</span><span class="w"> </span><span class="n">sqrt_array!</span><span class="p">(</span><span class="n">SA</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-bonus-questions exercise important admonition" id="exercise-0">
+<p class="admonition-title">Bonus questions</p>
+<ul class="simple">
+<li><p>Should the <code class="docutils literal notranslate"><span class="pre">&#64;time</span></code> expression be called more than once?</p></li>
+<li><p>How can we check which method is being dispatched for <code class="docutils literal notranslate"><span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">SA</span></code>?</p></li>
+</ul>
+<blockquote>
+<div><div class="admonition-solution solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Solution</p>
+<p>It is recommended to use <code class="docutils literal notranslate"><span class="pre">&#64;time</span></code> several times to obtain better statistics
+and undermine the overhead of the initial run.</p>
+<p>One can check the method being displayed with the <code class="docutils literal notranslate"><span class="pre">&#64;which</span></code> macro.</p>
+</div>
+</div></blockquote>
+</div>
+<p>We should keep in mind however that every change to a SharedArray causes message
+passing to keep them in sync between processes, and this can affect performance.</p>
+</section>
+<section id="distributedarrays">
+<h3>DistributedArrays<a class="headerlink" href="#distributedarrays" title="Permalink to this heading"></a></h3>
+<p>Another way to approach parallelization over multiple machines is through <a class="reference external" href="https://github.com/JuliaParallel/DistributedArrays.jl">DArray`s
+from the `DistributedArrays.jl</a> package,
+which implements a <em>Global Array</em> interface. A <cite>DArray</cite> is distributed across a
+set of workers. Each worker can read and write from its local portion of the
+array and each worker has read-only access to the portions of the array held
+by other workers.</p>
+<p>Currently, distributed arrays do not have much functionality
+and they requires significant book-keeping of array indices.</p>
+</section>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Permalink to this heading"></a></h2>
+<div class="admonition-using-sharedarrays-with-the-laplace-function exercise important admonition" id="exercise-1">
+<p class="admonition-title">Using SharedArrays with the Laplace function</p>
+<p>Look again at the double for loop in the <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> function
+and think about how you could use SharedArrays.</p>
+<ul class="simple">
+<li><p>Create a new script where you import <code class="docutils literal notranslate"><span class="pre">Distributed</span></code>, <code class="docutils literal notranslate"><span class="pre">SharedArrays</span></code> and
+<code class="docutils literal notranslate"><span class="pre">BenchmarkTools</span></code> and define the <code class="docutils literal notranslate"><span class="pre">lap2d!</span></code> function.</p></li>
+<li><p>Benchmark the original version:</p></li>
+</ul>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setup</span><span class="p">()</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Now create a new method for this function which accepts SharedArrays.</p></li>
+<li><p>Add worker processes with <code class="docutils literal notranslate"><span class="pre">addprocs</span></code> and benchmark your new method
+when passing in SharedArrays. Is there any performance gain?</p></li>
+<li><p>The overhead in managing the workers will probably far outweigh the
+parallelization benefit because the computation in the inner loop is
+very simple and fast.</p></li>
+<li><p>Try adding <code class="docutils literal notranslate"><span class="pre">sleep(0.001)</span></code> to the <strong>outermost</strong> loop to simulate the effect
+of a more demanding calculation, and rerun the benchmarking. Can you see a
+speedup now?</p></li>
+<li><p>Remember that you can remove worker processes with <code class="docutils literal notranslate"><span class="pre">rmprocs(workers())</span></code>.</p></li>
+</ul>
+<div class="admonition-solution solution important dropdown admonition" id="solution-1">
+<p class="admonition-title">Solution</p>
+<div class="highlight-Julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SharedArrays</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="w">    </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">unew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="o">::</span><span class="kt">SharedArray</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="o">::</span><span class="kt">SharedArray</span><span class="p">)</span>
+<span class="w">    </span><span class="n">M</span><span class="p">,</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="w">    </span><span class="nd">@sync</span><span class="w"> </span><span class="nd">@distributed</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">unew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">setup</span><span class="p">()</span>
+<span class="n">u_s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SharedArray</span><span class="p">(</span><span class="n">u</span><span class="p">);</span>
+<span class="n">unew_s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SharedArray</span><span class="p">(</span><span class="n">unew</span><span class="p">);</span>
+
+<span class="c"># test for correctness:</span>
+<span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="n">lap2d!</span><span class="p">(</span><span class="n">u_s</span><span class="p">,</span><span class="w"> </span><span class="n">unew_s</span><span class="p">)</span>
+<span class="c"># element-wise comparison, should give &quot;true&quot;</span>
+<span class="n">all</span><span class="p">(</span><span class="n">u</span><span class="w"> </span><span class="o">.≈</span><span class="w"> </span><span class="n">u_s</span><span class="p">)</span>
+
+<span class="c"># benchmark</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="w"> </span><span class="n">unew</span><span class="p">)</span>
+<span class="c">#   WRITEME</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="n">lap2d!</span><span class="p">(</span><span class="n">u_s</span><span class="p">,</span><span class="w"> </span><span class="n">unew_s</span><span class="p">)</span>
+<span class="c">#   WRITEME</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="admonition-distribute-the-computation-of exercise important admonition" id="exercise-2">
+<p class="admonition-title">Distribute the computation of π</p>
+<figure class="align-right">
+<a class="reference internal image-reference" href="../_images/pi_with_darts.png"><img alt="../_images/pi_with_darts.png" src="../_images/pi_with_darts.png" style="width: 168.00000000000003px; height: 126.00000000000001px;" /></a>
+</figure>
+<p>Consider again the <code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate_pi()</span></code> function:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100_000_000</span>
+<span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span><span class="w">  </span><span class="c"># 3.14147572...</span>
+</pre></div>
+</div>
+<p>Now try to parallelise this function using both a parallel mapping with <code class="xref py py-meth docutils literal notranslate"><span class="pre">pmap()</span></code>
+and an <code class="docutils literal notranslate"><span class="pre">&#64;everywhere</span> <span class="pre">(+)</span></code> construct. Write your code in a script which you can call with
+<code class="docutils literal notranslate"><span class="pre">julia</span> <span class="pre">-p</span> <span class="pre">N</span> <span class="pre">estimate_pi.jl</span></code>.</p>
+<ul>
+<li><p>First decorate the function with <code class="docutils literal notranslate"><span class="pre">&#64;everywhere</span></code>.</p></li>
+<li><p>Call it in serial with <code class="docutils literal notranslate"><span class="pre">p1</span> <span class="pre">=</span> <span class="pre">estimate_pi(num_points)</span></code>.</p></li>
+<li><p>Use a list comprehension to split up <code class="docutils literal notranslate"><span class="pre">num_points</span></code> into evenly sized chunks in a Vector.
+Hint:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">num_jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span>
+<span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">____</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">____</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">____</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p>For parallel mapping, use <code class="docutils literal notranslate"><span class="pre">p2</span> <span class="pre">=</span> <span class="pre">mean(pmap(___,</span> <span class="pre">___))</span></code> to get the mean from a parallel mapping.</p></li>
+<li><p>For a distributed for loop, use something like:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">p3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@distributed</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">____</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">____</span>
+<span class="w">   </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">____</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">p3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p3</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_jobs</span>
+</pre></div>
+</div>
+</li>
+<li><p>Print <code class="docutils literal notranslate"><span class="pre">p1</span></code>, <code class="docutils literal notranslate"><span class="pre">p2</span></code> and <code class="docutils literal notranslate"><span class="pre">p3</span></code> to make sure that your code is working well.</p></li>
+<li><p>Now do some benchmarking. You’ll need to remove the assignments to use <code class="docutils literal notranslate"><span class="pre">&#64;btime</span></code>
+(e.g. replace <code class="docutils literal notranslate"><span class="pre">p1</span> <span class="pre">=</span> <span class="pre">estimate_pi(num_points))</span></code> with <code class="docutils literal notranslate"><span class="pre">&#64;btime</span> <span class="pre">estimate_pi(num_points))</span></code>.
+To benchmark the for loop, you can encapsulate the loop in a <code class="docutils literal notranslate"><span class="pre">&#64;btime</span> <span class="pre">begin</span></code> - <code class="docutils literal notranslate"><span class="pre">end</span></code> block.</p></li>
+<li><p>Run your script with different number of processes and observe the parallel efficiency.</p></li>
+<li><p>Do you see a difference in parallel efficiency from changing the number of jobs?</p></li>
+</ul>
+<div class="admonition-solution solution important dropdown admonition" id="solution-2">
+<p class="admonition-title">Solution</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+
+<span class="nd">@everywhere</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Set number of points and split into chunks:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100_000_000</span>
+<span class="n">num_jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span>
+<span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_points</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_jobs</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_jobs</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Call <code class="xref py py-meth docutils literal notranslate"><span class="pre">estimate_pi()</span></code> in serial, with <code class="xref py py-meth docutils literal notranslate"><span class="pre">pmap()</span></code> and <code class="docutils literal notranslate"><span class="pre">&#64;distributed</span> <span class="pre">(+)</span></code>:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">p1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="n">p2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mean</span><span class="p">(</span><span class="n">pmap</span><span class="p">(</span><span class="n">estimate_pi</span><span class="p">,</span><span class="w"> </span><span class="n">chunks</span><span class="p">))</span>
+<span class="n">p3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nd">@distributed</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">chunks</span>
+<span class="w">   </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">p3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p3</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_jobs</span>
+
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;</span><span class="si">$p1</span><span class="s"> </span><span class="si">$p2</span><span class="s"> </span><span class="si">$p3</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Benchmark with <code class="docutils literal notranslate"><span class="pre">&#64;btime</span></code>:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="n">mean</span><span class="p">(</span><span class="n">pmap</span><span class="p">(</span><span class="n">estimate_pi</span><span class="p">,</span><span class="w"> </span><span class="n">chunks</span><span class="p">))</span>
+
+<span class="nd">@btime</span><span class="w"> </span><span class="k">begin</span>
+<span class="w">    </span><span class="nd">@distributed</span><span class="w"> </span><span class="p">(</span><span class="o">+</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">chunks</span>
+<span class="w">        </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Finally run from a terminal:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>-p<span class="w"> </span><span class="m">4</span><span class="w"> </span>estimate_pi.jl
+
+<span class="gp">#  </span><span class="m">227</span>.873<span class="w"> </span>ms<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>allocation:<span class="w"> </span><span class="m">16</span><span class="w"> </span>bytes<span class="o">)</span>
+<span class="gp">#  </span><span class="m">63</span>.707<span class="w"> </span>ms<span class="w"> </span><span class="o">(</span><span class="m">4602</span><span class="w"> </span>allocations:<span class="w"> </span><span class="m">163</span>.09<span class="w"> </span>KiB<span class="o">)</span>
+<span class="gp">#  </span><span class="m">59</span>.410<span class="w"> </span>ms<span class="w"> </span><span class="o">(</span><span class="m">259</span><span class="w"> </span>allocations:<span class="w"> </span><span class="m">15</span>.12<span class="w"> </span>KiB<span class="o">)</span>
+</pre></div>
+</div>
+<p>Increasing number of jobs (<code class="docutils literal notranslate"><span class="pre">num_jobs</span> <span class="pre">=</span> <span class="pre">1000</span></code>) reduces efficiency for the parallel mapping
+because increased communication overhead:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>-p<span class="w"> </span><span class="m">4</span><span class="w"> </span>estimate_pi.jl
+
+<span class="gp">#  </span><span class="m">228</span>.595<span class="w"> </span>ms<span class="w"> </span><span class="o">(</span><span class="m">1</span><span class="w"> </span>allocation:<span class="w"> </span><span class="m">16</span><span class="w"> </span>bytes<span class="o">)</span>
+<span class="gp">#  </span><span class="m">86</span>.811<span class="w"> </span>ms<span class="w"> </span><span class="o">(</span><span class="m">45462</span><span class="w"> </span>allocations:<span class="w"> </span><span class="m">1</span>.57<span class="w"> </span>MiB<span class="o">)</span>
+<span class="gp">#  </span><span class="m">59</span>.480<span class="w"> </span>ms<span class="w"> </span><span class="o">(</span><span class="m">270</span><span class="w"> </span>allocations:<span class="w"> </span><span class="m">43</span>.61<span class="w"> </span>KiB<span class="o">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>The <a class="reference external" href="https://github.com/JuliaParallel">Julia Parallel</a> organization collects
+packages developed for parallel computing in Julia.</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaParallel/MPI.jl">MPI.jl</a></p></li>
+<li><p><a class="reference external" href="https://docs.julialang.org/en/v1/manual/distributed-computing/">Distributed computing in Julia docs</a></p></li>
+<li><p><a class="reference external" href="https://docs.julialang.org/en/v1/stdlib/Distributed/">Distributed API</a></p></li>
+<li><p>Valentin Churavy, <a class="reference external" href="https://slides.com/valentinchuravy/julia-parallelism">Levels of Parallelism</a></p></li>
+</ul>
+<div class="admonition-keypoints keypoints admonition" id="keypoints-0">
+<p class="admonition-title">Keypoints</p>
+<ul class="simple">
+<li><p>One should choose a distributed mechanism that fits with the
+time and memory parameters of your problem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&#64;distributed</span></code> is good for reductions and fast inner loops with limited
+data transfer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pmap</span></code> is good for expensive inner loops that return a value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SharedArrays</span></code> can be an easier drop-in replacement for threading-like
+behaviors on a single machine.</p></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../multithreading/" class="btn btn-neutral float-left" title="Multithreading" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../dagger/" class="btn btn-neutral float-right" title="Dagger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

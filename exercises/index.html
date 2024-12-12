@@ -1,0 +1,871 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced exercises &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="../_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../_static/tabs.js?v=3030b3cb"></script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Instructor’s guide" href="../guide/" />
+    <link rel="prev" title="Summary and outlook" href="../conclusions/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Parallel execution with Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced exercises</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-use-case-heat-flow-in-two-dimensional-area">Example use case: heat flow in two-dimensional area</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#technique-stencil-computation">Technique: stencil computation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Advanced exercises</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/exercises.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="advanced-exercises">
+<h1>Advanced exercises<a class="headerlink" href="#advanced-exercises" title="Link to this heading"></a></h1>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>0 min teaching</p></li>
+<li><p>30 min exercises</p></li>
+</ul>
+</div>
+<section id="example-use-case-heat-flow-in-two-dimensional-area">
+<h2>Example use case: heat flow in two-dimensional area<a class="headerlink" href="#example-use-case-heat-flow-in-two-dimensional-area" title="Link to this heading"></a></h2>
+<p>Heat flows in objects according to local temperature differences, as if seeking local equilibrium. The following example defines a rectangular area with two always-warm sides (temperature 70 and 85), two cold sides (temperature 20 and 5) and a cold disk at the center. Because of heat diffusion, temperature of neighboring patches of the area is bound to equalize, changing the overall distribution:</p>
+<figure class="align-center" id="id1">
+<img alt="../_images/heat_montage.png" src="../_images/heat_montage.png" />
+<figcaption>
+<p><span class="caption-text">Over time, the temperature distribution progresses from the initial state toward an end state where upper triangle is warm and lower is cold. The average temperature tends to (70 + 85 + 20 + 5) / 4 = 45.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<section id="technique-stencil-computation">
+<h3>Technique: stencil computation<a class="headerlink" href="#technique-stencil-computation" title="Link to this heading"></a></h3>
+<p>Heat transfer in the system above is governed by the partial differential equation(s) describing local variation of the temperature field in time and space. That is, the rate of change of the temperature field <span class="math notranslate nohighlight">\(u(x, y, t)\)</span> over two spatial dimensions <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> and time <span class="math notranslate nohighlight">\(t\)</span> (with rate coefficient <span class="math notranslate nohighlight">\(\alpha\)</span>) can be modelled via the equation</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial u}{\partial t} = \alpha \left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial x^2}\right)\]</div>
+<p>The standard way to numerically solve differential equations is to <em>discretize</em> them, i. e. to consider only a set/ grid of specific area points at specific moments in time. That way, partial derivatives <span class="math notranslate nohighlight">\({\partial u}\)</span> are converted into differences between adjacent grid points <span class="math notranslate nohighlight">\(u^{m}(i,j)\)</span>, with <span class="math notranslate nohighlight">\(m, i, j\)</span> denoting time and spatial grid points, respectively. Temperature change in time at a certain point can now be computed from the values of neighboring points at earlier time; the same expression, called <em>stencil</em>, is applied to every point on the grid.</p>
+<figure class="align-center" id="id2">
+<img alt="../_images/stencil.svg" src="../_images/stencil.svg" />
+<figcaption>
+<p><span class="caption-text">This simplified model uses an 8x8 grid of data in light blue in state
+<span class="math notranslate nohighlight">\(m\)</span>, each location of which has to be updated based on the
+indicated 5-point stencil in yellow to move to the next time point
+<span class="math notranslate nohighlight">\(m+1\)</span>.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The following series of exercises uses this stencil example implemented in Julia.
+The source files listed below represent a simplification of this <a class="reference external" href="https://github.com/ENCCS/HeatEquation.jl">HeatEquation package</a>, which in turn is inspired by <a class="reference external" href="https://github.com/cschpc/heat-equation">this educational repository containing C/C++/Fortran versions with different parallelization strategies</a> (credits to CSC Finland) (you can also find the source files in the content/code/stencil/ directory of this repository).</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">main.jl</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">core.jl</button><button aria-controls="panel-0-0-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-2" name="0-2" role="tab" tabindex="-1">heat.jl</button><button aria-controls="panel-0-0-3" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-3" name="0-3" role="tab" tabindex="-1">Project.toml</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c">#using Plots</span>
+<span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+
+<span class="n">include</span><span class="p">(</span><span class="s">&quot;heat.jl&quot;</span><span class="p">)</span>
+<span class="n">include</span><span class="p">(</span><span class="s">&quot;core.jl&quot;</span><span class="p">)</span>
+
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    visualize(curr::Field, filename=:none)</span>
+
+<span class="s">Create a heatmap of a temperature field. Optionally write png file. </span>
+<span class="s">&quot;&quot;&quot;</span><span class="w">    </span>
+<span class="k">function</span><span class="w"> </span><span class="n">visualize</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">filename</span><span class="o">=</span><span class="ss">:none</span><span class="p">)</span>
+<span class="w">    </span><span class="n">background_color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">:white</span>
+<span class="w">    </span><span class="n">plot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heatmap</span><span class="p">(</span>
+<span class="w">        </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="w">        </span><span class="n">colorbar_title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Temperature (C)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">background_color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">background_color</span>
+<span class="w">    </span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">filename</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="ss">:none</span>
+<span class="w">        </span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">display</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">,</span><span class="w"> </span><span class="mi">2048</span>
+<span class="n">nsteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span>
+
+<span class="c"># initialize current and previous states to the same state</span>
+<span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initialize</span><span class="p">(</span><span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">nrows</span><span class="p">)</span>
+
+<span class="c"># visualize initial field, requires Plots.jl</span>
+<span class="c">#visualize(curr, &quot;initial.png&quot;)</span>
+
+<span class="c"># simulate temperature evolution for nsteps</span>
+<span class="n">simulate!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">)</span>
+
+<span class="c"># visualize final field, requires Plots.jl</span>
+<span class="c">#visualize(curr, &quot;final.png&quot;)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">ProgressMeter</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    evolve!(curr::Field, prev::Field, a, dt)</span>
+
+<span class="s">Calculate a new temperature field curr based on the previous </span>
+<span class="s">field prev. a is the diffusion constant and dt is the largest </span>
+<span class="s">stable time step.    </span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span><span class="w"> </span><span class="n">evolve!</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">curr</span><span class="o">.</span><span class="n">ny</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">curr</span><span class="o">.</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">            </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end</span><span class="w"> </span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    swap_fields!(curr::Field, prev::Field)</span>
+
+<span class="s">Swap the data of two fields curr and prev.    </span>
+<span class="s">&quot;&quot;&quot;</span><span class="w">    </span>
+<span class="k">function</span><span class="w"> </span><span class="n">swap_fields!</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">::</span><span class="kt">Field</span><span class="p">)</span>
+<span class="w">    </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span>
+<span class="w">    </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span>
+<span class="w">    </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot; </span>
+<span class="s">    average_temperature(f::Field)</span>
+
+<span class="s">Calculate average temperature of a temperature field.        </span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">average_temperature</span><span class="p">(</span><span class="n">f</span><span class="o">::</span><span class="kt">Field</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="n">f</span><span class="o">.</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">f</span><span class="o">.</span><span class="n">ny</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">nx</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">f</span><span class="o">.</span><span class="n">ny</span><span class="p">)</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    simulate!(current, previous, nsteps)</span>
+
+<span class="s">Run the heat equation solver on fields curr and prev for nsteps.</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span><span class="w"> </span><span class="n">simulate!</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Initial average temperature: </span><span class="si">$</span><span class="p">(</span><span class="n">average_temperature</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="s">&quot;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c"># Diffusion constant</span>
+<span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="w">    </span><span class="c"># Largest stable time step</span>
+<span class="w">    </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="c"># display a nice progress bar</span>
+<span class="w">    </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Progress</span><span class="p">(</span><span class="n">nsteps</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">nsteps</span>
+<span class="w">        </span><span class="c"># calculate new state based on previous state</span>
+<span class="w">        </span><span class="n">evolve!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+
+<span class="w">        </span><span class="c"># swap current and previous fields</span>
+<span class="w">        </span><span class="n">swap_fields!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">)</span>
+
+<span class="w">        </span><span class="c"># increment the progress bar</span>
+<span class="w">        </span><span class="n">next!</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span><span class="w"> </span>
+
+<span class="w">    </span><span class="c"># print final average temperature</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Final average temperature: </span><span class="si">$</span><span class="p">(</span><span class="n">average_temperature</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-2" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c"># Fixed grid spacing</span>
+<span class="k">const</span><span class="w"> </span><span class="n">DX</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span>
+<span class="k">const</span><span class="w"> </span><span class="n">DY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span>
+<span class="c"># Default temperatures</span>
+<span class="k">const</span><span class="w"> </span><span class="n">T_DISC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.0</span>
+<span class="k">const</span><span class="w"> </span><span class="n">T_AREA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">65.0</span>
+<span class="k">const</span><span class="w"> </span><span class="n">T_UPPER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">85.0</span>
+<span class="k">const</span><span class="w"> </span><span class="n">T_LOWER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.0</span>
+<span class="k">const</span><span class="w"> </span><span class="n">T_LEFT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20.0</span>
+<span class="k">const</span><span class="w"> </span><span class="n">T_RIGHT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">70.0</span>
+<span class="c"># Default problem size</span>
+<span class="k">const</span><span class="w"> </span><span class="n">ROWS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2000</span>
+<span class="k">const</span><span class="w"> </span><span class="n">COLS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2000</span>
+<span class="k">const</span><span class="w"> </span><span class="n">NSTEPS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span>
+
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    Field(nx::Int64, ny::Int64, dx::Float64, dy::Float64, data::Matrix{Float64})</span>
+
+<span class="s">Temperature field type. nx and ny are the dimensions of the field. </span>
+<span class="s">The array data contains also ghost layers, so it will have dimensions </span>
+<span class="s">[nx+2, ny+2]</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">mutable</span><span class="w"> </span><span class="k">struct</span> <span class="kt">Field</span><span class="p">{</span><span class="kt">T</span><span class="o">&lt;:</span><span class="kt">AbstractArray</span><span class="p">}</span>
+<span class="w">    </span><span class="n">nx</span><span class="o">::</span><span class="kt">Int64</span>
+<span class="w">    </span><span class="n">ny</span><span class="o">::</span><span class="kt">Int64</span>
+<span class="w">    </span><span class="c"># Size of the grid cells</span>
+<span class="w">    </span><span class="n">dx</span><span class="o">::</span><span class="kt">Float64</span>
+<span class="w">    </span><span class="n">dy</span><span class="o">::</span><span class="kt">Float64</span>
+<span class="w">    </span><span class="c"># The temperature values in the 2D grid</span>
+<span class="w">    </span><span class="n">data</span><span class="o">::</span><span class="kt">T</span>
+<span class="k">end</span>
+
+<span class="c"># outer constructor with default cell sizes and initialized data</span>
+<span class="n">Field</span><span class="p">(</span><span class="n">nx</span><span class="o">::</span><span class="kt">Int64</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="o">::</span><span class="kt">Int64</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Field</span><span class="p">{</span><span class="kt">typeof</span><span class="p">(</span><span class="kt">data</span><span class="p">)}(</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span><span class="w"> </span><span class="mf">0.01</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
+
+<span class="c"># extend deepcopy to new type</span>
+<span class="n">Base</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">f</span><span class="o">::</span><span class="kt">Field</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="o">.</span><span class="n">ny</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">deepcopy</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    initialize(rows::Int, cols::Int, arraytype = Matrix)</span>
+
+<span class="s">Initialize two temperature field with (nrows, ncols) number of </span>
+<span class="s">rows and columns. If the arraytype is something else than Matrix,</span>
+<span class="s">create data on the CPU first to avoid scalar indexing errors.</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span><span class="w"> </span><span class="n">initialize</span><span class="p">(</span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="n">ncols</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="n">arraytype</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Matrix</span><span class="p">)</span>
+<span class="w">    </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">zeros</span><span class="p">(</span><span class="n">nrows</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">ncols</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="c"># generate a field with boundary conditions</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">arraytype</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kt">Matrix</span>
+<span class="w">        </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span><span class="w"> </span><span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
+<span class="w">        </span><span class="n">generate_field!</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+<span class="w">        </span><span class="n">newdata</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">arraytype</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="w">        </span><span class="n">previous</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span><span class="w"> </span><span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">newdata</span><span class="p">)</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">previous</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span><span class="w"> </span><span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
+<span class="w">        </span><span class="n">generate_field!</span><span class="p">(</span><span class="n">previous</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Base</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">previous</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">previous</span><span class="p">,</span><span class="w"> </span><span class="n">current</span>
+<span class="k">end</span>
+
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    generate_field!(field0::Field)</span>
+
+<span class="s">Generate a temperature field.  Pattern is disc with a radius</span>
+<span class="s">of nx / 6 in the center of the grid. Boundary conditions are </span>
+<span class="s">(different) constant temperatures outside the grid.</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span><span class="w"> </span><span class="n">generate_field!</span><span class="p">(</span><span class="n">field</span><span class="o">::</span><span class="kt">Field</span><span class="p">)</span>
+<span class="w">    </span><span class="c"># Square of the disk radius</span>
+<span class="w">    </span><span class="n">radius2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">nx</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">6.0</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">field</span><span class="o">.</span><span class="n">ny</span><span class="o">+</span><span class="mi">2</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">field</span><span class="o">.</span><span class="n">nx</span><span class="o">+</span><span class="mi">2</span>
+<span class="w">            </span><span class="n">ds2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">field</span><span class="o">.</span><span class="n">nx</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">j</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">field</span><span class="o">.</span><span class="n">ny</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">ds2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">radius2</span><span class="w"> </span>
+<span class="w">                </span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">T_DISC</span>
+<span class="w">            </span><span class="k">else</span>
+<span class="w">                </span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">T_AREA</span>
+<span class="w">            </span><span class="k">end</span>
+<span class="w">        </span><span class="k">end</span><span class="w"> </span>
+<span class="w">    </span><span class="k">end</span><span class="w"> </span>
+
+<span class="w">    </span><span class="c"># Boundary conditions</span>
+<span class="w">    </span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">.=</span><span class="w"> </span><span class="n">T_LEFT</span>
+<span class="w">    </span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="n">field</span><span class="o">.</span><span class="n">ny</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">.=</span><span class="w"> </span><span class="n">T_RIGHT</span>
+<span class="w">    </span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">.=</span><span class="w"> </span><span class="n">T_UPPER</span>
+<span class="w">    </span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">nx</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="o">:</span><span class="p">]</span><span class="w"> </span><span class="o">.=</span><span class="w"> </span><span class="n">T_LOWER</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-3" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-3" name="0-3" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">deps</span><span class="p">]</span>
+<span class="n">BenchmarkTools</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf&quot;</span>
+<span class="c">#Plots = &quot;91a5bcdd-55d7-5caf-9e0b-520d859cae80&quot;</span>
+<span class="n">ProgressMeter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;92933f4c-e287-5a05-a399-4b506db050ca&quot;</span>
+</pre></div>
+</div>
+</div></div>
+<div class="admonition-run-the-code exercise important admonition" id="exercise-0">
+<p class="admonition-title">Run the code</p>
+<ul class="simple">
+<li><p>Copy the source files from the code box above.</p></li>
+<li><p>Activate the environment found in the Project.toml file.</p></li>
+<li><p>Run the main.jl code and (optionally) visualise the result by uncommenting the relevant line.</p></li>
+<li><p>Study the code for a while to understand how it works.</p></li>
+</ul>
+</div>
+<div class="admonition-optimise-and-benchmark exercise important admonition" id="exercise-1">
+<p class="admonition-title">Optimise and benchmark</p>
+<ul class="simple">
+<li><p>Benchmark the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve!()</span></code> function in the Julia REPL.</p></li>
+<li><p>Add the <code class="docutils literal notranslate"><span class="pre">&#64;inbounds</span></code> macro to the innermost loop.</p></li>
+<li><p>Benchmark again and estimate the performance gain.</p></li>
+</ul>
+<div class="admonition-solution solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Solution</p>
+<ul>
+<li><p>Add the <code class="docutils literal notranslate"><span class="pre">&#64;btime</span></code> macro and execute in VSCode:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@btime</span><span class="w"> </span><span class="n">simulate!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="admonition-multithread exercise important admonition" id="exercise-2">
+<p class="admonition-title">Multithread</p>
+<ul class="simple">
+<li><p>Multithread the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve!()</span></code> function</p></li>
+<li><p>Benchmark again with different number of threads. It will be most convenient to
+run these benchmarks from the command line where you can set the number of threads: <cite>julia -t &lt;nthreads&gt;</cite>.</p></li>
+<li><p>How does it scale?</p></li>
+</ul>
+<div class="admonition-solution solution important dropdown admonition" id="solution-1">
+<p class="admonition-title">Solution</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">evolve!</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="n">Threads</span><span class="o">.</span><span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">curr</span><span class="o">.</span><span class="n">ny</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">curr</span><span class="o">.</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>Running benchmarking from terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>julia<span class="w"> </span>--project<span class="w"> </span>-t<span class="w"> </span><span class="m">1</span><span class="w"> </span>main.jl
+<span class="c1">#   1.088 s (4032 allocations: 64.35 MiB)</span>
+$<span class="w"> </span>julia<span class="w"> </span>--project<span class="w"> </span>-t<span class="w"> </span><span class="m">2</span><span class="w"> </span>main.jl
+<span class="c1">#   612.132 ms (7009 allocations: 64.62 MiB)</span>
+$<span class="w"> </span>julia<span class="w"> </span>--project<span class="w"> </span>-t<span class="w"> </span><span class="m">4</span><span class="w"> </span>main.jl
+<span class="c1">#   474.350 ms (13294 allocations: 65.19 MiB)</span>
+</pre></div>
+</div>
+<p>The scaling isn’t very good because the loops in <code class="docutils literal notranslate"><span class="pre">evolve!</span></code> are rather cheap.</p>
+</div>
+</div>
+<div class="admonition-adapt-the-stencil-problem-for-gpu-porting exercise important admonition" id="exercise-3">
+<p class="admonition-title">Adapt the stencil problem for GPU porting</p>
+<p>In order to prepare for porting the stencil problem to run on a GPU, it’s wise to modify the code slightly. One approach is to change the <code class="docutils literal notranslate"><span class="pre">evolve!</span></code> function to accept arrays instead of <code class="docutils literal notranslate"><span class="pre">Field</span></code> types. For now, we define a new version of this function called <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve2()</span></code>:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">evolve2!</span><span class="p">(</span><span class="n">currdata</span><span class="o">::</span><span class="kt">AbstractArray</span><span class="p">,</span><span class="w"> </span><span class="n">prevdata</span><span class="o">::</span><span class="kt">AbstractArray</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">currdata</span><span class="p">)</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">ny</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">currdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>In the <code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate!()</span></code> function, update how you call the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve2!()</span></code> function.</p></li>
+<li><p>Take a moment to study the <code class="xref py py-meth docutils literal notranslate"><span class="pre">initialize()</span></code> function. Why is the <cite>if arraytype != Matrix</cite> statement there?</p></li>
+</ul>
+<div class="admonition-solution solution important dropdown admonition" id="solution-2">
+<p class="admonition-title">Solution</p>
+<p>In the <code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate!()</span></code> function you need to change from:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">evolve!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">evolve2!</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The purpose of the if-else block in <code class="xref py py-meth docutils literal notranslate"><span class="pre">initialize()</span></code> is to handle situations where you want the data arrays in the Field composite types to be something else than regular Matrix types. This will be needed when we port to GPU, and also when using SharedArrays.</p>
+</div>
+</div>
+<div class="admonition-using-sharedarrays-with-stencil-problem exercise important admonition" id="exercise-4">
+<p class="admonition-title">Using SharedArrays with stencil problem</p>
+<p>Look again at the double for-loop in the modified <code class="docutils literal notranslate"><span class="pre">evolve!</span></code> function
+and think about how you could use SharedArrays. Start from the <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve2!()</span></code> function defined above, and try to implement a version that accepts <cite>SharedArray</cite> arrays.</p>
+<div class="admonition-hints solution important dropdown admonition" id="solution-3">
+<p class="admonition-title">Hints</p>
+<ul class="simple">
+<li><p>In your <cite>main</cite> script, import also <code class="docutils literal notranslate"><span class="pre">Distributed</span></code> and <code class="docutils literal notranslate"><span class="pre">SharedArrays</span></code>.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">core.jl</span></code>, create another method for the <code class="docutils literal notranslate"><span class="pre">evolve2!</span></code> function with the following signature: <code class="docutils literal notranslate"><span class="pre">evolve2!(currdata::SharedArray,</span> <span class="pre">prevdata::SharedArray,</span> <span class="pre">dx,</span> <span class="pre">dy,</span> <span class="pre">a,</span> <span class="pre">dt)</span></code></p></li>
+<li><p>The only change you have to make to the SharedArray method of <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve2!()</span></code> is to add <code class="docutils literal notranslate"><span class="pre">&#64;sync</span> <span class="pre">&#64;distributed</span></code> in front of the first loop!</p></li>
+</ul>
+</div>
+<div class="admonition-solution-and-benchmarking solution important dropdown admonition" id="solution-4">
+<p class="admonition-title">Solution and benchmarking</p>
+<p>This is how the SharedArray method should look:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">evolve2!</span><span class="p">(</span><span class="n">currdata</span><span class="o">::</span><span class="kt">SharedArray</span><span class="p">,</span><span class="w"> </span><span class="n">prevdata</span><span class="o">::</span><span class="kt">SharedArray</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">currdata</span><span class="p">)</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="nd">@sync</span><span class="w"> </span><span class="nd">@distributed</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">ny</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">currdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>and this is how you would set up the simulation in the <cite>main</cite> file:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+<span class="k">using</span><span class="w"> </span><span class="n">Distributed</span>
+<span class="k">using</span><span class="w"> </span><span class="n">SharedArrays</span>
+<span class="n">include</span><span class="p">(</span><span class="s">&quot;heat.jl&quot;</span><span class="p">)</span>
+<span class="n">include</span><span class="p">(</span><span class="s">&quot;core.jl&quot;</span><span class="p">)</span>
+<span class="c"># ... definition of visualize()</span>
+<span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">,</span><span class="w"> </span><span class="mi">2048</span>
+<span class="n">nsteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span>
+<span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initialize</span><span class="p">(</span><span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">nrows</span><span class="p">,</span><span class="w"> </span><span class="n">SharedArray</span><span class="p">)</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">simulate!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To run the script with multiple processes:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>-p<span class="w"> </span><span class="m">4</span><span class="w"> </span>--project<span class="w"> </span>main.jl
+</pre></div>
+</div>
+<p>NOTE: Your benchmark results will turn out to be underwhelming - the SharedArray version will most likely run slower! See explanation below.</p>
+</div>
+<div class="admonition-notes-on-performance solution important dropdown admonition" id="solution-5">
+<p class="admonition-title">Notes on performance</p>
+<ul>
+<li><p>The overhead in managing the workers will probably far outweigh the
+parallelisation benefit because the computation in the inner loop is
+very simple and extremely fast.</p></li>
+<li><p>To see the benefit you can obtain for more computationally demanding calculations, you can try to introduce a more expensive mathematical operation to the inner loop, e.g. by taking the arctangent of some values:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">atan</span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">atan</span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">atan</span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span>
+<span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">atan</span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">atan</span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">atan</span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<blockquote>
+<div><p>This should clearly demonstrate the performance benefit of parallelisation via SharedArrays:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>julia<span class="w"> </span>-p<span class="w"> </span><span class="m">1</span><span class="w"> </span>--project<span class="w"> </span>main.jl
+<span class="gp">#    </span><span class="m">1</span>.840<span class="w"> </span>s<span class="w"> </span><span class="o">(</span><span class="m">442</span><span class="w"> </span>allocations:<span class="w"> </span><span class="m">64</span>.03<span class="w"> </span>MiB<span class="o">)</span>
+<span class="gp">$ </span>julia<span class="w"> </span>-p<span class="w"> </span><span class="m">4</span><span class="w"> </span>--project<span class="w"> </span>main.jl
+<span class="gp">#    </span><span class="m">513</span>.529<span class="w"> </span>ms<span class="w"> </span><span class="o">(</span><span class="m">8315</span><span class="w"> </span>allocations:<span class="w"> </span><span class="m">64</span>.39<span class="w"> </span>MiB<span class="o">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="admonition-exercise-julia-port-to-gpus exercise important admonition" id="exercise-5">
+<p class="admonition-title">Exercise: Julia port to GPUs</p>
+<p>Carefully inspect all Julia source files and consider the following questions:</p>
+<ol class="arabic simple">
+<li><p>Which functions should be ported to run on GPU?</p></li>
+<li><p>Try to start sketching GPU-ported versions of the key functions.</p></li>
+<li><p>When you have a version running on a GPU (your own or the solution provided below), try benchmarking it by adding <code class="docutils literal notranslate"><span class="pre">&#64;btime</span></code> in front of <code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate!()</span></code> in <code class="docutils literal notranslate"><span class="pre">main.jl</span></code>. Benchmark also the CPU version, and compare.</p></li>
+</ol>
+<p>Further considerations:</p>
+<ol class="arabic simple">
+<li><p>The kernel function needs to end with <code class="docutils literal notranslate"><span class="pre">return</span></code> or <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">nothing</span></code>.</p></li>
+<li><p>The arrays are two-dimensional, so you will need both the <code class="docutils literal notranslate"><span class="pre">.x</span></code> and <code class="docutils literal notranslate"><span class="pre">.y</span></code>
+parts of <code class="docutils literal notranslate"><span class="pre">threadIdx()</span></code>, <code class="docutils literal notranslate"><span class="pre">blockDim()</span></code> and <code class="docutils literal notranslate"><span class="pre">blockIdx()</span></code>.</p>
+<ul class="simple">
+<li><p>Does it matter how you match the <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> dimensions of the
+threads and blocks to the dimensions of the data (i.e. rows and columns)?</p></li>
+</ul>
+</li>
+<li><p>You also need to specify tuples
+for the number of threads and blocks in the <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> dimensions,
+e.g. <code class="docutils literal notranslate"><span class="pre">threads</span> <span class="pre">=</span> <span class="pre">(32,</span> <span class="pre">32)</span></code> and similarly for <code class="docutils literal notranslate"><span class="pre">blocks</span></code> (using <code class="docutils literal notranslate"><span class="pre">cld</span></code>).</p>
+<ul class="simple">
+<li><p>Note the hardware limitations: the product of x and y threads cannot
+exceed it.</p></li>
+</ul>
+</li>
+<li><p>For debugging, you can print from inside a kernel using <code class="docutils literal notranslate"><span class="pre">&#64;cuprintln</span></code>
+(e.g. to print thread numbers). It will only print during the first
+execution - redefine the function again to print again.
+If you get warnings or errors relating to types, you can use the code
+introspection macro <code class="docutils literal notranslate"><span class="pre">&#64;device_code_warntype</span></code> to see the types inferred
+by the compiler.</p></li>
+<li><p>Check correctness of your results! To test that <code class="docutils literal notranslate"><span class="pre">evolve!</span></code> and <code class="docutils literal notranslate"><span class="pre">evolve_gpu!</span></code>
+give (approximately) the same results, for example:</p></li>
+</ol>
+<div class="admonition-hints solution important dropdown admonition" id="solution-6">
+<p class="admonition-title">Hints</p>
+<ul class="simple">
+<li><p>create a new function <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve_gpu!()</span></code> which contains the GPU kernelized version of <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve!()</span></code></p></li>
+<li><p>in the loop over timesteps in <code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate!()</span></code>, you will need a conditional like <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">typeof(curr.data)</span> <span class="pre">&lt;:</span> <span class="pre">ROCArray</span></code> to call your GPU-ported function</p></li>
+<li><p>you cannot pass the struct <code class="docutils literal notranslate"><span class="pre">Field</span></code> to the kernel. You will instead need to directly pass the array <code class="docutils literal notranslate"><span class="pre">Field.data</span></code>. This also necessitates passing in other variables like <code class="docutils literal notranslate"><span class="pre">curr.dx^2</span></code>, etc.</p></li>
+</ul>
+</div>
+<div class="admonition-more-hints solution important dropdown admonition" id="solution-7">
+<p class="admonition-title">More hints</p>
+<ul class="simple">
+<li><p>since the data is two-dimensional, you’ll need <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">=</span> <span class="pre">(blockIdx().x</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">*</span> <span class="pre">blockDim().x</span> <span class="pre">+</span> <span class="pre">threadIdx().x</span></code> and <code class="docutils literal notranslate"><span class="pre">j</span> <span class="pre">=</span> <span class="pre">(blockIdx().y</span> <span class="pre">-</span> <span class="pre">1)</span> <span class="pre">*</span> <span class="pre">blockDim().y</span> <span class="pre">+</span> <span class="pre">threadIdx().y</span></code></p></li>
+<li><p>to not overindex the 2D array, you can use a conditional like <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">i</span> <span class="pre">&gt;</span> <span class="pre">1</span> <span class="pre">&amp;&amp;</span> <span class="pre">j</span> <span class="pre">&gt;</span> <span class="pre">1</span> <span class="pre">&amp;&amp;</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">nx+2</span> <span class="pre">&amp;&amp;</span> <span class="pre">j</span> <span class="pre">&lt;</span> <span class="pre">ny+2</span></code></p></li>
+<li><p>when calling the kernel, you can set the number of threads and blocks like <code class="docutils literal notranslate"><span class="pre">xthreads</span> <span class="pre">=</span> <span class="pre">ythreads</span> <span class="pre">=</span> <span class="pre">16</span></code> and <code class="docutils literal notranslate"><span class="pre">xblocks,</span> <span class="pre">yblocks</span> <span class="pre">=</span> <span class="pre">cld(curr.nx,</span> <span class="pre">xthreads),</span> <span class="pre">cld(curr.ny,</span> <span class="pre">ythreads)</span></code>, and then call it with, e.g., <code class="docutils literal notranslate"><span class="pre">&#64;roc</span> <span class="pre">threads=(xthreads,</span> <span class="pre">ythreads)</span> <span class="pre">blocks</span> <span class="pre">=</span> <span class="pre">(xblocks,</span> <span class="pre">yblocks)</span> <span class="pre">evolve_rocm!(curr.data,</span> <span class="pre">prev.data,</span> <span class="pre">curr.dx^2,</span> <span class="pre">curr.dy^2,</span> <span class="pre">nx,</span> <span class="pre">ny,</span> <span class="pre">a,</span> <span class="pre">dt)</span></code>.</p></li>
+</ul>
+</div>
+<div class="admonition-solution solution important dropdown admonition" id="solution-8">
+<p class="admonition-title">Solution</p>
+<ol class="arabic simple">
+<li><p>The <code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve!()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">simulate!()</span></code> functions need to be ported. The <code class="docutils literal notranslate"><span class="pre">main.jl</span></code> file also needs to be updated to work with GPU arrays.</p></li>
+<li><p>“Scalar indexing” is where you iterate over a GPU array, which would be excruciatingly slow and is indeed only allowed in interactive REPL sessions. Without the if-statements in the <code class="xref py py-meth docutils literal notranslate"><span class="pre">initialize!()</span></code> function, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">generate_field!()</span></code> method would be doing disallowed scalar indexing if you were running on a GPU.</p></li>
+<li><p>The GPU-ported version is found below. Try it out on both CPU and GPU and observe the speedup. Play around with array size to see if the speedup is affected. You can also play around with the <code class="docutils literal notranslate"><span class="pre">xthreads</span></code> and <code class="docutils literal notranslate"><span class="pre">ythreads</span></code> variables to see if it changes anything.</p></li>
+</ol>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-1-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-1-1-0" name="1-0" role="tab" tabindex="0">main_gpu.jl</button><button aria-controls="panel-1-1-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-1" name="1-1" role="tab" tabindex="-1">core_gpu.jl</button></div><div aria-labelledby="tab-1-1-0" class="sphinx-tabs-panel" id="panel-1-1-0" name="1-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="c">#using Plots</span>
+<span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+<span class="k">using</span><span class="w"> </span><span class="n">AMDGPU</span>
+
+<span class="n">include</span><span class="p">(</span><span class="s">&quot;heat.jl&quot;</span><span class="p">)</span>
+<span class="n">include</span><span class="p">(</span><span class="s">&quot;core_gpu.jl&quot;</span><span class="p">)</span>
+
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    visualize(curr::Field, filename=:none)</span>
+
+<span class="s">Create a heatmap of a temperature field. Optionally write png file. </span>
+<span class="s">&quot;&quot;&quot;</span><span class="w">    </span>
+<span class="k">function</span><span class="w"> </span><span class="n">visualize</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">filename</span><span class="o">=</span><span class="ss">:none</span><span class="p">)</span>
+<span class="w">    </span><span class="n">background_color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">:white</span>
+<span class="w">    </span><span class="n">plot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">heatmap</span><span class="p">(</span>
+<span class="w">        </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="w">        </span><span class="n">colorbar_title</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Temperature (C)&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">background_color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">background_color</span>
+<span class="w">    </span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">filename</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="ss">:none</span>
+<span class="w">        </span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">display</span><span class="p">(</span><span class="n">plot</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">nrows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">,</span><span class="w"> </span><span class="mi">2048</span>
+<span class="n">nsteps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span>
+
+<span class="c"># initialize data on CPU</span>
+<span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initialize</span><span class="p">(</span><span class="n">ncols</span><span class="p">,</span><span class="w"> </span><span class="n">nrows</span><span class="p">,</span><span class="w"> </span><span class="n">ROCArray</span><span class="p">)</span>
+<span class="c"># initialize data on CPU</span>
+<span class="c">#curr, prev = initialize(ncols, nrows)</span>
+
+<span class="c"># visualize initial field, requires Plots.jl</span>
+<span class="c">#visualize(curr, &quot;initial.png&quot;)</span>
+
+<span class="c"># simulate temperature evolution for nsteps</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">simulate!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">)</span>
+
+<span class="c"># visualize final field, requires Plots.jl</span>
+<span class="c">#visualize(curr, &quot;final.png&quot;)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-1" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-1" name="1-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">ProgressMeter</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    evolve!(curr::Field, prev::Field, a, dt)</span>
+
+<span class="s">Calculate a new temperature field curr based on the previous </span>
+<span class="s">field prev. a is the diffusion constant and dt is the largest </span>
+<span class="s">stable time step.    </span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span><span class="w"> </span><span class="n">evolve!</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="n">Threads</span><span class="o">.</span><span class="nd">@threads</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">curr</span><span class="o">.</span><span class="n">ny</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">curr</span><span class="o">.</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span>
+<span class="w">            </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end</span><span class="w"> </span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="k">function</span><span class="w"> </span><span class="n">evolve_cuda!</span><span class="p">(</span><span class="n">currdata</span><span class="p">,</span><span class="w"> </span><span class="n">prevdata</span><span class="p">,</span><span class="w"> </span><span class="n">dx2</span><span class="p">,</span><span class="w"> </span><span class="n">dy2</span><span class="p">,</span><span class="w"> </span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">blockIdx</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">blockDim</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">threadIdx</span><span class="p">()</span><span class="o">.</span><span class="n">x</span>
+<span class="w">    </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">blockIdx</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">blockDim</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">threadIdx</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nx</span><span class="o">+</span><span class="mi">2</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ny</span><span class="o">+</span><span class="mi">2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dx2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dy2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">currdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">evolve_rocm!</span><span class="p">(</span><span class="n">currdata</span><span class="p">,</span><span class="w"> </span><span class="n">prevdata</span><span class="p">,</span><span class="w"> </span><span class="n">dx2</span><span class="p">,</span><span class="w"> </span><span class="n">dy2</span><span class="p">,</span><span class="w"> </span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">workgroupIdx</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">workgroupDim</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">workitemIdx</span><span class="p">()</span><span class="o">.</span><span class="n">x</span>
+<span class="w">    </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">workgroupIdx</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">workgroupDim</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">workitemIdx</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nx</span><span class="o">+</span><span class="mi">2</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ny</span><span class="o">+</span><span class="mi">2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dx2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dy2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">currdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span>
+<span class="k">end</span>
+
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    swap_fields!(curr::Field, prev::Field)</span>
+
+<span class="s">Swap the data of two fields curr and prev.    </span>
+<span class="s">&quot;&quot;&quot;</span><span class="w">    </span>
+<span class="k">function</span><span class="w"> </span><span class="n">swap_fields!</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">::</span><span class="kt">Field</span><span class="p">)</span>
+<span class="w">    </span><span class="n">tmp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span>
+<span class="w">    </span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span>
+<span class="w">    </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tmp</span>
+<span class="k">end</span>
+
+<span class="s">&quot;&quot;&quot; </span>
+<span class="s">    average_temperature(f::Field)</span>
+
+<span class="s">Calculate average temperature of a temperature field.        </span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">average_temperature</span><span class="p">(</span><span class="n">f</span><span class="o">::</span><span class="kt">Field</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sum</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="o">:</span><span class="n">f</span><span class="o">.</span><span class="n">nx</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="n">f</span><span class="o">.</span><span class="n">ny</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">nx</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">f</span><span class="o">.</span><span class="n">ny</span><span class="p">)</span>
+
+<span class="s">&quot;&quot;&quot;</span>
+<span class="s">    simulate!(current, previous, nsteps)</span>
+
+<span class="s">Run the heat equation solver on fields curr and prev for nsteps.</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="k">function</span><span class="w"> </span><span class="n">simulate!</span><span class="p">(</span><span class="n">curr</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">::</span><span class="kt">Field</span><span class="p">,</span><span class="w"> </span><span class="n">nsteps</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Initial average temperature: </span><span class="si">$</span><span class="p">(</span><span class="n">average_temperature</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="s">&quot;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c"># Diffusion constant</span>
+<span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="w">    </span><span class="c"># Largest stable time step</span>
+<span class="w">    </span><span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="c"># display a nice progress bar</span>
+<span class="w">    </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Progress</span><span class="p">(</span><span class="n">nsteps</span><span class="p">)</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">nsteps</span>
+<span class="w">        </span><span class="c"># calculate new state based on previous state</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">typeof</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;:</span><span class="w"> </span><span class="kt">ROCArray</span>
+<span class="w">            </span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="mi">2</span><span class="w">   </span>
+<span class="w">            </span><span class="n">xthreads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ythreads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span>
+<span class="w">            </span><span class="n">xblocks</span><span class="p">,</span><span class="w"> </span><span class="n">yblocks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cld</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">xthreads</span><span class="p">),</span><span class="w"> </span><span class="n">cld</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">ny</span><span class="p">,</span><span class="w"> </span><span class="n">ythreads</span><span class="p">)</span>
+<span class="w">            </span><span class="nd">@roc</span><span class="w"> </span><span class="n">threads</span><span class="o">=</span><span class="p">(</span><span class="n">xthreads</span><span class="p">,</span><span class="w"> </span><span class="n">ythreads</span><span class="p">)</span><span class="w"> </span><span class="n">blocks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">xblocks</span><span class="p">,</span><span class="w"> </span><span class="n">yblocks</span><span class="p">)</span><span class="w"> </span><span class="n">evolve_rocm!</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">curr</span><span class="o">.</span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="w">            </span><span class="n">evolve!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">        </span><span class="k">end</span>
+
+<span class="w">        </span><span class="c"># swap current and previous fields</span>
+<span class="w">        </span><span class="n">swap_fields!</span><span class="p">(</span><span class="n">curr</span><span class="p">,</span><span class="w"> </span><span class="n">prev</span><span class="p">)</span>
+
+<span class="w">        </span><span class="c"># increment the progress bar</span>
+<span class="w">        </span><span class="n">next!</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span><span class="w"> </span>
+
+<span class="w">    </span><span class="c"># print final average temperature</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Final average temperature: </span><span class="si">$</span><span class="p">(</span><span class="n">average_temperature</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div></div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">dx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="n">nx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ny</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10000</span>
+<span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">A1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">);</span>
+<span class="n">A2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">);</span>
+<span class="n">A1_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CuArray</span><span class="p">(</span><span class="n">A1</span><span class="p">)</span>
+<span class="n">A2_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CuArray</span><span class="p">(</span><span class="n">A2</span><span class="p">)</span>
+
+<span class="n">evolve!</span><span class="p">(</span><span class="n">A1</span><span class="p">,</span><span class="w"> </span><span class="n">A2</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+
+<span class="n">evolve_gpu!</span><span class="p">(</span><span class="n">A1_d</span><span class="p">,</span><span class="w"> </span><span class="n">A2_d</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+
+<span class="n">all</span><span class="p">(</span><span class="n">A1</span><span class="w"> </span><span class="o">.≈</span><span class="w"> </span><span class="kt">Array</span><span class="p">(</span><span class="n">A1_d</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<ol class="arabic simple">
+<li><p>Perform some benchmarking of the <code class="docutils literal notranslate"><span class="pre">evolve!</span></code> and <code class="docutils literal notranslate"><span class="pre">evolve_gpu!</span></code>
+functions for arrays of various sizes and with different choices
+of <code class="docutils literal notranslate"><span class="pre">nthreads</span></code>. You will need to prefix the
+kernel execution with the <code class="docutils literal notranslate"><span class="pre">CUDA.&#64;sync</span></code> macro
+to let the CPU wait for the GPU kernel to finish (otherwise you
+would be measuring the time it takes to only launch the kernel):</p></li>
+<li><p>Compare your Julia code with the
+<a class="reference external" href="https://github.com/cschpc/heat-equation/blob/main/cuda/core_cuda.cu">corresponding CUDA version</a>
+to enjoy the (relative) simplicity of Julia!</p></li>
+</ol>
+<div class="admonition-solution solution important dropdown admonition" id="solution-9">
+<p class="admonition-title">Solution</p>
+<p>This is one possible GPU kernel version of <code class="docutils literal notranslate"><span class="pre">evolve!</span></code>:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">evolve_gpu!</span><span class="p">(</span><span class="n">currdata</span><span class="p">,</span><span class="w"> </span><span class="n">prevdata</span><span class="p">,</span><span class="w"> </span><span class="n">dx2</span><span class="p">,</span><span class="w"> </span><span class="n">dy2</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="w">    </span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">currdata</span><span class="p">)</span><span class="w"> </span><span class="o">.-</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="c"># which index (i or j) you assign to x and y matters enormously!</span>
+<span class="w">    </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">blockIdx</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">blockDim</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">threadIdx</span><span class="p">()</span><span class="o">.</span><span class="n">x</span>
+<span class="w">    </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">blockIdx</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">blockDim</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">threadIdx</span><span class="p">()</span><span class="o">.</span><span class="n">y</span>
+<span class="w">    </span><span class="c">#@cuprintln(&quot;threads $i $j&quot;) #only for debugging!</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">nx</span><span class="o">+</span><span class="mi">2</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">ny</span><span class="o">+</span><span class="mi">2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">xderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dx2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">yderiv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dy2</span>
+<span class="w">        </span><span class="nd">@inbounds</span><span class="w"> </span><span class="n">currdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prevdata</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dt</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">xderiv</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">yderiv</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">nothing</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<p>To test it:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">dx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span>
+<span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="n">nx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ny</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1000</span>
+<span class="n">dt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">M1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">);</span>
+<span class="n">M2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">ny</span><span class="p">);</span>
+
+<span class="c"># copy to GPU and convert to Float32</span>
+<span class="n">M1_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CuArray</span><span class="p">(</span><span class="n">cu</span><span class="p">(</span><span class="n">M1</span><span class="p">))</span>
+<span class="n">M2_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CuArray</span><span class="p">(</span><span class="n">cu</span><span class="p">(</span><span class="n">M2</span><span class="p">))</span>
+
+<span class="c"># set number of threads and blocks</span>
+<span class="n">nthreads</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">16</span>
+<span class="n">numblocks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cld</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span><span class="w"> </span><span class="n">nthreads</span><span class="p">)</span>
+
+<span class="c"># call cpu and gpu versions</span>
+<span class="n">evolve!</span><span class="p">(</span><span class="n">M1</span><span class="p">,</span><span class="w"> </span><span class="n">M2</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="nd">@cuda</span><span class="w"> </span><span class="n">threads</span><span class="o">=</span><span class="p">(</span><span class="n">nthreads</span><span class="p">,</span><span class="w"> </span><span class="n">nthreads</span><span class="p">)</span><span class="w"> </span><span class="n">blocks</span><span class="o">=</span><span class="p">(</span><span class="n">numblocks</span><span class="p">,</span><span class="w"> </span><span class="n">numblocks</span><span class="p">)</span><span class="w"> </span><span class="n">evolve_gpu!</span><span class="p">(</span><span class="n">M1_d</span><span class="p">,</span><span class="w"> </span><span class="n">M2_d</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+
+<span class="c"># element-wise comparison</span>
+<span class="n">all</span><span class="p">(</span><span class="n">M1</span><span class="w"> </span><span class="o">.≈</span><span class="w"> </span><span class="kt">Array</span><span class="p">(</span><span class="n">M1_d</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>To benchmark:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">BenchmarkTools</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">evolve!</span><span class="p">(</span><span class="n">M1</span><span class="p">,</span><span class="w"> </span><span class="n">M2</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+<span class="nd">@btime</span><span class="w"> </span><span class="n">CUDA</span><span class="o">.</span><span class="nd">@sync</span><span class="w"> </span><span class="nd">@cuda</span><span class="w"> </span><span class="n">threads</span><span class="o">=</span><span class="p">(</span><span class="n">nthreads</span><span class="p">,</span><span class="w"> </span><span class="n">nthreads</span><span class="p">)</span><span class="w"> </span><span class="n">blocks</span><span class="o">=</span><span class="p">(</span><span class="n">numblocks</span><span class="p">,</span><span class="w"> </span><span class="n">numblocks</span><span class="p">)</span><span class="w"> </span><span class="n">evolve_gpu!</span><span class="p">(</span><span class="n">M1_d</span><span class="p">,</span><span class="w"> </span><span class="n">M2_d</span><span class="p">,</span><span class="w"> </span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">dy</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="admonition-create-a-package exercise important admonition" id="exercise-6">
+<p class="admonition-title">Create a package</p>
+<p>Take the code for the stencil example and convert it into a Julia package!
+Instructions for creating Julia packages are found in the <a class="reference external" href="https://enccs.github.io/julia-intro/development/">Introduction to Julia</a> lesson.</p>
+<p>Also try to write one or more tests. It can include unit tests, integration tests or an end-to-end test.</p>
+<div class="admonition-solution solution important dropdown admonition" id="solution-10">
+<p class="admonition-title">Solution</p>
+<p>See <a class="reference external" href="https://github.com/ENCCS/HeatEquation.jl">HeatEquation.jl</a>.</p>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../conclusions/" class="btn btn-neutral float-left" title="Summary and outlook" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../guide/" class="btn btn-neutral float-right" title="Instructor’s guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

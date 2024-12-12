@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Message passing &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sphinx_lesson.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/overrides.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/minipres.js"></script>
+        <script src="../_static/tabs.js"></script>
+        <script>let toggleHintShow = 'Click to show';</script>
+        <script>let toggleHintHide = 'Click to hide';</script>
+        <script>let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Running on a cluster" href="../cluster/" />
+    <link rel="prev" title="Dagger" href="../dagger/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Dagger</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Message passing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mpi">MPI</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#point-to-point-and-collective-communication">Point-to-point and collective communication</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#blocking-and-non-blocking-communication">Blocking and non-blocking communication</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exercises">Exercises</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#limitations">Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cluster/">Running on a cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C and Fortran</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../conclusions/">Summary and outlook</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Message passing</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/MPI.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="message-passing">
+<h1>Message passing<a class="headerlink" href="#message-passing" title="Permalink to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>How is MPI different from Distributed.jl?</p></li>
+<li><p>What methods for parallelisation exist in MPI?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>20 min teaching</p></li>
+<li><p>20 min exercises</p></li>
+</ul>
+</div>
+<section id="mpi">
+<h2>MPI<a class="headerlink" href="#mpi" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://github.com/JuliaParallel/MPI.jl">MPI.jl</a> is a Julia interface to
+the Message Passing Interface, which has been the standard workhorse of
+parallel computing for decades. Like <code class="docutils literal notranslate"><span class="pre">Distributed</span></code>, MPI belongs to the
+distributed-memory paradigm.</p>
+<p>The idea behind MPI is that:</p>
+<ul class="simple">
+<li><p>Tasks have a rank and are numbered 0, 1, 2, 3, …</p></li>
+<li><p>Each task manages its own memory</p></li>
+<li><p>Each task can run multiple threads</p></li>
+<li><p>Tasks communicate and share data by sending messages.</p></li>
+<li><p>Many higher-level functions exist to distribute information to other tasks
+and gather information from other tasks.</p></li>
+<li><p>All tasks typically <em>run the entire code</em> and we have to be careful to avoid
+that all tasks do the same thing.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">MPI.jl</span></code> provides Julia bindings for the Message Passing Interface (MPI) standard.
+This is how a hello world MPI program looks like in Python:</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">println</span><span class="p">(</span><span class="s">&quot;Hello from process </span><span class="si">$</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="s"> out of </span><span class="si">$</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Barrier</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MPI.COMM_WORLD</span></code> is the <cite>communicator</cite> - a group of processes that can talk to each other</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Comm_rank</span></code> returns the individual rank (0, 1, 2, …) for each task that calls it</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Comm_size</span></code> returns the total number of ranks.</p></li>
+</ul>
+<p>To run this code with a specific number of processes we use the <code class="docutils literal notranslate"><span class="pre">mpiexecjl</span></code> command which
+can be installed as a wrapper of the MPI command <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code>
+(see <a class="reference internal" href="../setup/"><span class="doc">Setup</span></a>):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mpiexecjl<span class="w"> </span>-np<span class="w"> </span><span class="m">4</span><span class="w"> </span>julia<span class="w"> </span>hello.jl
+
+<span class="gp"># </span>Hello<span class="w"> </span>from<span class="w"> </span>process<span class="w"> </span><span class="m">1</span><span class="w"> </span>out<span class="w"> </span>of<span class="w"> </span><span class="m">4</span>
+<span class="gp"># </span>Hello<span class="w"> </span>from<span class="w"> </span>process<span class="w"> </span><span class="m">0</span><span class="w"> </span>out<span class="w"> </span>of<span class="w"> </span><span class="m">4</span>
+<span class="gp"># </span>Hello<span class="w"> </span>from<span class="w"> </span>process<span class="w"> </span><span class="m">2</span><span class="w"> </span>out<span class="w"> </span>of<span class="w"> </span><span class="m">4</span>
+<span class="gp"># </span>Hello<span class="w"> </span>from<span class="w"> </span>process<span class="w"> </span><span class="m">3</span><span class="w"> </span>out<span class="w"> </span>of<span class="w"> </span><span class="m">4</span>
+</pre></div>
+</div>
+<section id="point-to-point-and-collective-communication">
+<h3>Point-to-point and collective communication<a class="headerlink" href="#point-to-point-and-collective-communication" title="Permalink to this heading"></a></h3>
+<p>The MPI standard contains a <a class="reference external" href="https://juliaparallel.org/MPI.jl/stable/refindex/">lot of functionality</a>,
+but in principle one can get away with only point-to-point communication (<code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.send()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.recv()</span></code>). However, collective communication can sometimes require less effort as you
+will learn in an exercise below.
+In any case, it is good to have a mental model of different communication patterns in MPI.</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../_images/send-recv.png"><img alt="../_images/send-recv.png" src="../_images/send-recv.png" style="width: 525.0px; height: 162.0px;" /></a>
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">send</span></code> and <code class="docutils literal notranslate"><span class="pre">recv</span></code>: blocking point-to-point communication between two ranks.</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-right" id="id2">
+<a class="reference internal image-reference" href="../_images/gather.png"><img alt="../_images/gather.png" src="../_images/gather.png" style="width: 240.0px; height: 198.4px;" /></a>
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">gather</span></code>: all ranks send data to rank <code class="docutils literal notranslate"><span class="pre">root</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/scatter.png"><img alt="../_images/scatter.png" src="../_images/scatter.png" style="width: 240.0px; height: 198.4px;" /></a>
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">scatter</span></code>: data on rank 0 is split into chunks and sent to other ranks</span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-left" id="id4">
+<a class="reference internal image-reference" href="../_images/broadcast.png"><img alt="../_images/broadcast.png" src="../_images/broadcast.png" style="width: 240.0px; height: 198.4px;" /></a>
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">bcast</span></code>: broadcast message to all ranks</span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="../_images/reduction.png"><img alt="../_images/reduction.png" src="../_images/reduction.png" style="width: 309.0px; height: 163.0px;" /></a>
+<figcaption>
+<p><span class="caption-text"><code class="docutils literal notranslate"><span class="pre">reduce</span></code>: ranks send data which are reduced on rank <code class="docutils literal notranslate"><span class="pre">root</span></code></span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition-serialised-vs-buffer-like-objects callout admonition" id="callout-0">
+<p class="admonition-title">Serialised vs buffer-like objects</p>
+<p>Lower-case methods (e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.send()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.recv()</span></code>) are used to communicate generic
+objects between MPI processes. It is also possible to send buffer-like <code class="docutils literal notranslate"><span class="pre">isbits</span></code> objects
+which provides faster communication, but require the memory space to be allocated for the
+receiving buffer prior to communication. These methods start with uppercase letters,
+e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Send()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Recv()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Gather()</span></code> etc.</p>
+</div>
+<div class="admonition-mutating-vs-non-mutating callout admonition" id="callout-1">
+<p class="admonition-title">Mutating vs non-mutating</p>
+<p>For communication operations which receive data, MPI.jl typically
+defines two separate functions:</p>
+<ul class="simple">
+<li><p>One function in which the output buffer is supplied by the user.
+As it mutates this value, it adopts the Julia convention of suffixing
+with <code class="docutils literal notranslate"><span class="pre">!</span></code> (e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Recv!()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Reduce!()</span></code>).</p></li>
+<li><p>One function which allocates the buffer for the output
+(<code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Recv()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Reduce()</span></code>).</p></li>
+</ul>
+</div>
+<section id="examples">
+<h4>Examples<a class="headerlink" href="#examples" title="Permalink to this heading"></a></h4>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">send/recv</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">broadcast</button><button aria-controls="panel-0-0-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-2" name="0-2" role="tab" tabindex="-1">gather</button><button aria-controls="panel-0-0-3" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-3" name="0-3" role="tab" tabindex="-1">scatter</button><button aria-controls="panel-0-0-4" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-4" name="0-4" role="tab" tabindex="-1">reduce</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="c"># All ranks other than 0 should send a message</span>
+<span class="w">    </span><span class="k">local</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Hello World, I&#39;m rank </span><span class="si">$rank</span><span class="s">&quot;</span>
+<span class="w">    </span><span class="n">MPI</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="c"># Rank 0 will receive each message and print them</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">sender</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="p">(</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="w">        </span><span class="n">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="o">=</span><span class="n">sender</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">        </span><span class="n">println</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span><span class="w">   </span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span><span class="w">   </span>
+
+<span class="c"># Rank 0 will broadcast message to all other ranks</span>
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">send_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Hello World from rank 0&quot;</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="n">send_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nothing</span>
+<span class="k">end</span>
+
+<span class="n">receive_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">send_message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;rank </span><span class="si">$rank</span><span class="s"> received message: </span><span class="si">$receive_message</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-2" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># Only upper-case Gather exists so message must be buffer-like of isbitstype</span>
+<span class="n">send_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rank</span><span class="o">^</span><span class="mi">3</span>
+<span class="c"># data from all ranks are gathered on root rank</span>
+<span class="n">receive_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Gather</span><span class="p">(</span><span class="n">send_message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">size</span>
+<span class="w">        </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;Received </span><span class="si">$</span><span class="p">(</span><span class="n">receive_message</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="s"> from rank </span><span class="si">$</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-3" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-3" name="0-3" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># Only upper-case Scatter exists so message must be buffer-like of isbitstype</span>
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">sendbuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">i</span><span class="o">^</span><span class="mi">3</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">size</span><span class="p">]</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="n">sendbuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">nothing</span>
+<span class="k">end</span>
+
+<span class="n">recvbuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span><span class="n">sendbuf</span><span class="p">,</span><span class="w"> </span><span class="kt">Int64</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">print</span><span class="p">(</span><span class="s">&quot;rank </span><span class="si">$rank</span><span class="s"> received message: </span><span class="si">$recvbuf</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-4" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-4" name="0-4" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># Only upper-case Reduce exists so message must be buffer-like of isbitstype</span>
+<span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rank</span>
+<span class="n">recvbuf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Reduce</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="n">recvbuf</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div></div>
+</section>
+<section id="blocking-and-non-blocking-communication">
+<h4>Blocking and non-blocking communication<a class="headerlink" href="#blocking-and-non-blocking-communication" title="Permalink to this heading"></a></h4>
+<p>Point-to-point communication can be <em>blocking</em> or <em>non-blocking</em>:
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Send()</span></code> will only return when the program can safely modify the send buffer and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">MPI.Recv()</span></code> will only return once the data has been received and written to the receive
+buffer.</p>
+<p>Consider the following example of a <strong>deadlock</strong> caused by blocking communication.
+The problem can be circumvented by introducing sequential sends and receives, but
+it’s more conveniently solved by using non-blocking send and receive.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-1-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-1-1-0" name="1-0" role="tab" tabindex="0">Blocking communication deadlock</button><button aria-controls="panel-1-1-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-1" name="1-1" role="tab" tabindex="-1">Workaround with blocking communication</button><button aria-controls="panel-1-1-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-1-1-2" name="1-2" role="tab" tabindex="-1">Non-blocking solution</button></div><div aria-labelledby="tab-1-1-0" class="sphinx-tabs-panel" id="panel-1-1-0" name="1-0" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># Check that there are exactly two ranks</span>
+<span class="k">if</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="s">&quot;This example requires exactly two ranks&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c"># Call the other rank the neighbour</span>
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">neighbour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="n">neighbour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="k">end</span>
+
+<span class="c"># Send a message to the other rank</span>
+<span class="n">send_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">100</span><span class="p">]</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">send_message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c"># Receive the message from the other rank</span>
+<span class="n">recv_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">print</span><span class="p">(</span><span class="s">&quot;Message received by rank </span><span class="si">$rank</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-1" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-1" name="1-1" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># Check that there are exactly two ranks</span>
+<span class="k">if</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;This example requires exactly two ranks&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c"># Call the other rank the neighbour</span>
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">neighbour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="n">neighbour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="k">end</span>
+
+<span class="n">send_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">100</span><span class="p">]</span>
+
+<span class="c"># Send a message to the other rank and then receive</span>
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">MPI</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">send_message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">recv_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="s">&quot;Message received by rank </span><span class="si">$rank</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c"># Receive the message from the other rank and then send</span>
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="n">recv_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="s">&quot;Message received by rank </span><span class="si">$rank</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">MPI</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">send_message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-1-1-2" class="sphinx-tabs-panel" hidden="true" id="panel-1-1-2" name="1-2" role="tabpanel" tabindex="0"><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># Check that there are exactly two ranks</span>
+<span class="k">if</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">    </span><span class="n">print</span><span class="p">(</span><span class="s">&quot;This example requires exactly two ranks&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c"># Call the other rank the neighbour</span>
+<span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">neighbour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="n">neighbour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="k">end</span>
+
+<span class="c"># Send a message to the other rank</span>
+<span class="n">send_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">i</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="mi">100</span><span class="p">]</span>
+<span class="n">recv_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">similar</span><span class="p">(</span><span class="n">send_message</span><span class="p">)</span>
+
+<span class="c"># non-blocking send</span>
+<span class="n">sreq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Isend</span><span class="p">(</span><span class="n">send_message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c"># non-blocking receive into receive buffer</span>
+<span class="n">rreq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Irecv!</span><span class="p">(</span><span class="n">recv_message</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="o">=</span><span class="n">neighbour</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Waitall!</span><span class="p">([</span><span class="n">rreq</span><span class="p">,</span><span class="w"> </span><span class="n">sreq</span><span class="p">])</span>
+
+<span class="n">print</span><span class="p">(</span><span class="s">&quot;Message received by rank </span><span class="si">$rank</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></div>
+</section>
+</section>
+</section>
+<section id="exercises">
+<h2>Exercises<a class="headerlink" href="#exercises" title="Permalink to this heading"></a></h2>
+<div class="admonition-from-blocking-to-non-blocking exercise important admonition" id="exercise-0">
+<p class="admonition-title">From blocking to non-blocking</p>
+<p>Consider the following two examples where data is sent around “in a circle”
+(0-&gt;1, 1-&gt;2, …, N-&gt;0). Will it work as intended?</p>
+<blockquote>
+<div><div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># where to send to</span>
+<span class="n">dst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mod</span><span class="p">(</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+<span class="c"># where to receive from</span>
+<span class="n">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mod</span><span class="p">(</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+
+<span class="c"># unititalised send and receive buffers</span>
+<span class="n">send_mesg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Array</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}(</span><span class="nb">undef</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+<span class="n">recv_mesg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Array</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}(</span><span class="nb">undef</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c"># fill the send array</span>
+<span class="n">fill!</span><span class="p">(</span><span class="n">send_mesg</span><span class="p">,</span><span class="w"> </span><span class="kt">Float64</span><span class="p">(</span><span class="n">rank</span><span class="p">))</span>
+
+<span class="n">print</span><span class="p">(</span><span class="s">&quot;</span><span class="si">$rank</span><span class="s">: Sending   </span><span class="si">$rank</span><span class="s"> -&gt; </span><span class="si">$dst</span><span class="s"> = </span><span class="si">$send_mesg</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Send</span><span class="p">(</span><span class="n">send_mesg</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="n">rank</span><span class="o">+</span><span class="mi">32</span><span class="p">)</span>
+
+<span class="n">print</span><span class="p">(</span><span class="s">&quot;</span><span class="si">$rank</span><span class="s">: Received </span><span class="si">$src</span><span class="s"> -&gt; </span><span class="si">$rank</span><span class="s"> = </span><span class="si">$recv_mesg</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Recv!</span><span class="p">(</span><span class="n">recv_mesg</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="o">=</span><span class="n">src</span><span class="p">,</span><span class="w">  </span><span class="n">tag</span><span class="o">=</span><span class="n">src</span><span class="o">+</span><span class="mi">32</span><span class="p">)</span>
+
+<span class="n">MPI</span><span class="o">.</span><span class="n">Barrier</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Try running this program. Were the arrays received successfully?
+Introduce non-blocking communication to solve the problem.</p>
+<div class="admonition-solution solution important dropdown admonition" id="solution-0">
+<p class="admonition-title">Solution</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="c"># where to send to</span>
+<span class="n">dst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mod</span><span class="p">(</span><span class="n">rank</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+<span class="c"># where to receive from</span>
+<span class="n">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mod</span><span class="p">(</span><span class="n">rank</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+
+<span class="n">send_mesg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Array</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}(</span><span class="nb">undef</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+<span class="n">recv_mesg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">Array</span><span class="p">{</span><span class="kt">Float64</span><span class="p">}(</span><span class="nb">undef</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c"># fill the send array</span>
+<span class="n">fill!</span><span class="p">(</span><span class="n">send_mesg</span><span class="p">,</span><span class="w"> </span><span class="kt">Float64</span><span class="p">(</span><span class="n">rank</span><span class="p">))</span>
+
+<span class="n">print</span><span class="p">(</span><span class="s">&quot;</span><span class="si">$rank</span><span class="s">: Sending   </span><span class="si">$rank</span><span class="s"> -&gt; </span><span class="si">$dst</span><span class="s"> = </span><span class="si">$send_mesg</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="n">sreq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Isend</span><span class="p">(</span><span class="n">send_mesg</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">dest</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span><span class="w"> </span><span class="n">tag</span><span class="o">=</span><span class="n">rank</span><span class="o">+</span><span class="mi">32</span><span class="p">)</span>
+
+<span class="n">rreq</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Irecv!</span><span class="p">(</span><span class="n">recv_mesg</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="o">=</span><span class="n">src</span><span class="p">,</span><span class="w">  </span><span class="n">tag</span><span class="o">=</span><span class="n">src</span><span class="o">+</span><span class="mi">32</span><span class="p">)</span>
+
+<span class="n">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Waitall!</span><span class="p">([</span><span class="n">rreq</span><span class="p">,</span><span class="w"> </span><span class="n">sreq</span><span class="p">])</span>
+
+<span class="n">print</span><span class="p">(</span><span class="s">&quot;</span><span class="si">$rank</span><span class="s">: Received </span><span class="si">$src</span><span class="s"> -&gt; </span><span class="si">$rank</span><span class="s"> = </span><span class="si">$recv_mesg</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="admonition-mpi-parallelise-meth-compute-pi-function exercise important admonition" id="exercise-1">
+<p class="admonition-title">MPI-parallelise <code class="xref py py-meth docutils literal notranslate"><span class="pre">compute_pi()</span></code> function</p>
+<figure class="align-right">
+<a class="reference internal image-reference" href="../_images/pi_with_darts.png"><img alt="../_images/pi_with_darts.png" src="../_images/pi_with_darts.png" style="width: 168.00000000000003px; height: 126.00000000000001px;" /></a>
+</figure>
+<p>Consider again the following function which estimates π by “throwing darts”,
+i.e. randomly sampling (x,y) points in the interval [0.0, 1.0] and checking
+if they fall within the unit circle.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+</pre></div>
+</div>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100_000_000</span>
+<span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span><span class="w">  </span><span class="c"># 3.14147572...</span>
+</pre></div>
+</div>
+<p>There are several ways in which this function could be parallelised with MPI. Below you will
+find two working solutions using collective communication:</p>
+<ul class="simple">
+<li><p>One implements an unnecessarily complicated algorithm, which nonetheless is illustrative for
+more general cases.</p></li>
+<li><p>The other implements a more compact and efficient solution.</p></li>
+</ul>
+<p>Inspect the complicated solution first and answer the questions!</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-2-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-2-2-0" name="2-0" role="tab" tabindex="0">Dividing indices between ranks</button><button aria-controls="panel-2-2-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-2-2-1" name="2-1" role="tab" tabindex="-1">Compact</button></div><div aria-labelledby="tab-2-2-0" class="sphinx-tabs-panel" id="panel-2-2-0" name="2-0" role="tabpanel" tabindex="0"><p>Study the following fully functional MPI code and then answer the questions below. Feel free
+to add print statements to the code and run it with
+<code class="docutils literal notranslate"><span class="pre">mpiexecjl</span> <span class="pre">-np</span> <span class="pre">&lt;N&gt;</span> <span class="pre">julia</span> <span class="pre">estimate_pi.jl</span></code> to understand what’s going on.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">main</span><span class="p">()</span>
+<span class="w">    </span><span class="n">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">()</span>
+<span class="w">    </span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">^</span><span class="mi">9</span>
+<span class="w">    </span><span class="n">num_jobs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="n">chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_points</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_jobs</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_jobs</span><span class="p">]</span>
+<span class="w">    </span>
+<span class="w">    </span><span class="c"># distribute work among MPI tasks</span>
+<span class="w">    </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">div</span><span class="p">(</span><span class="n">num_jobs</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+<span class="w">    </span><span class="n">remainder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">num_jobs</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">size</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">remainder</span>
+<span class="w">        </span><span class="n">first</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">first</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">count</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="n">first</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">remainder</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="n">last</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">first</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="k">end</span>
+
+<span class="w">    </span><span class="c"># each rank computes pi for their vector elements</span>
+<span class="w">    </span><span class="n">estimates</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">first</span><span class="o">:</span><span class="n">last</span>
+<span class="w">        </span><span class="n">push!</span><span class="p">(</span><span class="n">estimates</span><span class="p">,</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">chunks</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+<span class="w">    </span><span class="k">end</span>
+
+<span class="w">    </span><span class="c"># sum up all estimates and average on root tank</span>
+<span class="w">    </span><span class="n">pi_sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Reduce</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">estimates</span><span class="p">),</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;pi = </span><span class="si">$</span><span class="p">(</span><span class="n">pi_sum</span><span class="o">/</span><span class="n">num_jobs</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">()</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;elapsed time = </span><span class="si">$</span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>For <code class="docutils literal notranslate"><span class="pre">num_jobs</span> <span class="pre">=</span> <span class="pre">10</span></code> and <code class="docutils literal notranslate"><span class="pre">size</span> <span class="pre">=</span> <span class="pre">4</span></code>, what would be the values of <code class="docutils literal notranslate"><span class="pre">count</span></code> and <code class="docutils literal notranslate"><span class="pre">remainder</span></code>?</p></li>
+<li><p>What is the purpose of the if-else block starting with <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">rank</span> <span class="pre">&lt;</span> <span class="pre">remainder</span></code>?</p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">num_jobs</span> <span class="pre">=</span> <span class="pre">10</span></code> and <code class="docutils literal notranslate"><span class="pre">size</span> <span class="pre">=</span> <span class="pre">4</span></code>, what would be the values of <code class="docutils literal notranslate"><span class="pre">first</span></code> and
+<code class="docutils literal notranslate"><span class="pre">last</span></code> for each rank?</p></li>
+<li><p>Is load-balancing an issue in this solution? (i.e. how evenly work is split between tasks)</p></li>
+<li><p>Would you expect this MPI solution to perform and scale similarly well to the distributed
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">pmap()</span></code> solution we saw in the <a class="reference internal" href="../distributed/"><span class="doc">Distributed computing</span></a> episode?</p></li>
+<li><p>Can you think of any improvements to the MPI algorithm algorithm employed?</p></li>
+<li><p>Now look at the more compact solution!</p></li>
+</ol>
+<div class="admonition-solution solution important dropdown admonition" id="solution-1">
+<p class="admonition-title">Solution</p>
+<ol class="arabic simple">
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">div()</span></code> performs integer division, and <code class="docutils literal notranslate"><span class="pre">div(10,</span> <span class="pre">4)</span> <span class="pre">=</span> <span class="pre">2</span></code>. The <code class="docutils literal notranslate"><span class="pre">%</span></code> operator
+computes the remainder from integer division and <code class="docutils literal notranslate"><span class="pre">10</span> <span class="pre">%</span> <span class="pre">4</span> <span class="pre">=</span> <span class="pre">2</span></code>.</p></li>
+<li><p>This block splits indices of the chunks vector between ranks. The first <code class="docutils literal notranslate"><span class="pre">remainder</span></code>
+ranks get <code class="docutils literal notranslate"><span class="pre">count</span> <span class="pre">+</span> <span class="pre">1</span></code> tasks each, remaining <code class="docutils literal notranslate"><span class="pre">num_jobs</span> <span class="pre">-</span> <span class="pre">remainder</span></code> ranks get
+<code class="docutils literal notranslate"><span class="pre">count</span></code> tasks each.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{rank</span> <span class="pre">0</span> <span class="pre">:</span> <span class="pre">[1,2,3],</span> <span class="pre">rank</span> <span class="pre">1</span> <span class="pre">:</span> <span class="pre">[4,5,6],</span> <span class="pre">rank</span> <span class="pre">2</span> <span class="pre">:</span> <span class="pre">[7,8],</span> <span class="pre">rank</span> <span class="pre">3</span> <span class="pre">:</span> <span class="pre">[9,10]}</span></code></p></li>
+<li><p>Yes, load balancing is an issue because all ranks do not get equal amount of work.</p></li>
+<li><p>It will depend on the load balancing! With e.g. 2 ranks, both ranks will have equal work and the performance
+will be very close to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">pmap()</span></code> solution with 2 workers. With 4 ranks, the
+load-balancing will be poorer for this MPI solution and it will perform worse than <code class="xref py py-meth docutils literal notranslate"><span class="pre">pmap()</span></code>.</p></li>
+<li><p>Splitting vector (or array) indices between MPI tasks is a common construct and useful
+to know well. In this case, however, it’s overkill. It will be enough to divide
+<code class="docutils literal notranslate"><span class="pre">num_points</span></code> evenly between the ranks.</p></li>
+</ol>
+</div>
+</div><div aria-labelledby="tab-2-2-1" class="sphinx-tabs-panel" hidden="true" id="panel-2-2-1" name="2-1" role="tabpanel" tabindex="0"><p>Study the following fully functional MPI code and then answer the questions below. Feel free
+to add print statements to the code and run it with
+<code class="docutils literal notranslate"><span class="pre">mpiexecjl</span> <span class="pre">-np</span> <span class="pre">&lt;N&gt;</span> <span class="pre">julia</span> <span class="pre">estimate_pi.jl</span></code> to understand what’s going on.</p>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span class="k">using</span><span class="w"> </span><span class="n">MPI</span>
+<span class="n">MPI</span><span class="o">.</span><span class="n">Init</span><span class="p">()</span>
+
+<span class="n">comm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+<span class="n">rank</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+<span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">)</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">num_points</span><span class="p">)</span>
+<span class="w">    </span><span class="n">hits</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="n">num_points</span>
+<span class="w">        </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">(),</span><span class="w"> </span><span class="n">rand</span><span class="p">()</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="o">^</span><span class="mi">2</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">            </span><span class="n">hits</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">        </span><span class="k">end</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">fraction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hits</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">num_points</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fraction</span>
+<span class="k">end</span>
+
+<span class="k">function</span><span class="w"> </span><span class="n">main</span><span class="p">()</span>
+<span class="w">    </span><span class="n">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">()</span>
+<span class="w">    </span><span class="n">num_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="o">^</span><span class="mi">9</span>
+
+<span class="w">    </span><span class="c"># divide work evenly between ranks</span>
+<span class="w">    </span><span class="n">my_points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">floor</span><span class="p">(</span><span class="kt">Int</span><span class="p">,</span><span class="w"> </span><span class="n">num_points</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">size</span><span class="p">)</span>
+<span class="w">    </span><span class="n">remainder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">num_points</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="n">size</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">remainder</span>
+<span class="w">        </span><span class="n">my_points</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">    </span><span class="k">end</span>
+
+<span class="w">    </span><span class="c"># each rank computes pi for their points</span>
+<span class="w">    </span><span class="nb">pi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">estimate_pi</span><span class="p">(</span><span class="n">my_points</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c"># sum up all estimates and average on root tank</span>
+<span class="w">    </span><span class="n">pi_sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MPI</span><span class="o">.</span><span class="n">Reduce</span><span class="p">(</span><span class="nb">pi</span><span class="p">,</span><span class="w"> </span><span class="o">+</span><span class="p">,</span><span class="w"> </span><span class="n">comm</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="w">    </span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">rank</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">        </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;pi = </span><span class="si">$</span><span class="p">(</span><span class="n">pi_sum</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="k">end</span>
+<span class="w">    </span><span class="n">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">()</span>
+<span class="w">    </span><span class="n">println</span><span class="p">(</span><span class="s">&quot;elapsed time = </span><span class="si">$</span><span class="p">(</span><span class="n">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t1</span><span class="p">)</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The algorithm to split work is significantly simpler here with <code class="docutils literal notranslate"><span class="pre">num_points</span></code> divided as
+evenly as possible between the ranks.</p>
+<ol class="arabic simple">
+<li><p>Is load balancing better in this solution? What’s the “worst case” load imbalance?</p></li>
+<li><p>How does the performance of this MPI version compare to the distributed <code class="xref py py-meth docutils literal notranslate"><span class="pre">pmap()</span></code>
+version that we saw in the <a class="reference internal" href="../distributed/"><span class="doc">Distributed computing</span></a> episode?</p></li>
+</ol>
+<div class="admonition-solution solution important dropdown admonition" id="solution-2">
+<p class="admonition-title">Solution</p>
+<ol class="arabic simple">
+<li><p>Load balancing is in general much better in this version. The worst case is a
+difference of one single point between ranks.</p></li>
+<li><p>The performance is statistically equivalent to the <code class="xref py py-meth docutils literal notranslate"><span class="pre">pmap()</span></code> version!</p></li>
+</ol>
+</div>
+</div></div>
+</div>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Permalink to this heading"></a></h2>
+<p>MPI.jl has (as of October 2022) not reached v1.0 so future changes could be backwards incompatible.</p>
+<p>The MPI.jl documentation has a section on <a class="reference external" href="https://juliaparallel.org/MPI.jl/latest/knownissues/">known issues</a>.</p>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://juliaparallel.org/MPI.jl/stable/">MPI.jl documentation</a></p></li>
+<li><p><a class="reference external" href="https://pdc-support.github.io/introduction-to-mpi/">Introductory MPI lesson</a></p></li>
+</ul>
+<div class="admonition-keypoints keypoints admonition" id="keypoints-0">
+<p class="admonition-title">Keypoints</p>
+<ul class="simple">
+<li><p>MPI is a standard work-horse of parallel computing.</p></li>
+<li><p>All communication is handled explicitly - not behind the scenes as in <code class="docutils literal notranslate"><span class="pre">Distributed</span></code>.</p></li>
+<li><p>Programming with MPI requires a different mental model since each parallel rank is executing
+the same program and the programmer needs to distribute the work by hand.</p></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../dagger/" class="btn btn-neutral float-left" title="Dagger" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../cluster/" class="btn btn-neutral float-right" title="Running on a cluster" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

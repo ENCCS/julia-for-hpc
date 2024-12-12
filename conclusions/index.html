@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Summary and outlook &mdash; Julia for High-Performance Scientific Computing</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_lesson.css?v=e9df6548" />
+      <link rel="stylesheet" type="text/css" href="../_static/term_role_formatting.css?v=4194e21c" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/overrides.css" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=187304be"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/minipres.js?v=a0d29692"></script>
+      <script>let toggleHintShow = 'Click to show';</script>
+      <script>let toggleHintHide = 'Click to hide';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+      <script data-domain="enccs.github.io/julia-for-hpc" defer="defer" src="https://plausible.io/js/script.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex/" />
+    <link rel="search" title="Search" href="../search/" />
+    <link rel="next" title="Advanced exercises" href="../exercises/" />
+    <link rel="prev" title="Interfacing to C, Fortran, and Python" href="../interfacing/" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../" class="icon icon-home">
+            Julia for High-Performance Scientific Computing
+              <img src="../_static/ENCCS.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search/" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup/">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">The lesson</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation-hpc/">Motivation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../performant-code/">Writing performant Julia code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multithreading/">Multithreading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../distributed/">Distributed computing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dagger/">Parallel execution with Dagger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hpc-cluster/">Julia on HPC cluster</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MPI/">Message passing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GPU/">GPU programming</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interfacing/">Interfacing to C, Fortran, and Python</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Summary and outlook</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#where-to-go-from-here">Where to go from here</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ecosystem-of-scientific-computing-packages">Ecosystem of scientific computing packages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mathematics">Mathematics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scientific-domains">Scientific domains</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-sciences">Data sciences</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Optional episodes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../exercises/">Advanced exercises</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/">Instructor’s guide</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../">Julia for High-Performance Scientific Computing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Summary and outlook</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/enccs/Julia-for-HPC/blob/master/content/conclusions.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="summary-and-outlook">
+<h1>Summary and outlook<a class="headerlink" href="#summary-and-outlook" title="Link to this heading"></a></h1>
+<div class="admonition-questions questions admonition" id="questions-0">
+<p class="admonition-title">Questions</p>
+<ul class="simple">
+<li><p>What have we learned so far?</p></li>
+<li><p>What libraries are available for scientific computing in Julia?</p></li>
+<li><p>Where should I go from here?</p></li>
+</ul>
+</div>
+<div class="admonition-instructor-note instructor-note admonition" id="instructor-note-0">
+<p class="admonition-title">Instructor note</p>
+<ul class="simple">
+<li><p>10 min teaching</p></li>
+</ul>
+</div>
+<section id="where-to-go-from-here">
+<h2>Where to go from here<a class="headerlink" href="#where-to-go-from-here" title="Link to this heading"></a></h2>
+<p>Additional learning resources can be found at <a class="reference external" href="https://julialang.org/learning/">https://julialang.org/learning/</a>.</p>
+<p>If you want to dig deeper into topics touched upon in this material, please visit:</p>
+<ul class="simple">
+<li><p>The various links under See also sections in the lesson episodes.</p></li>
+<li><p><a class="reference external" href="https://juliagpu.org/">https://juliagpu.org/</a> for everything about Julia GPU programming.</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaParallel">https://github.com/JuliaParallel</a> for parallelization packages.</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaInterop">https://github.com/JuliaInterop</a> for interoperability between Julia and not-Julia</p></li>
+</ul>
+<p>The <a class="reference external" href="https://discourse.julialang.org/">Julia discourse platform</a> is a place to
+search for existing questions and answers and to ask new questions. Core developers
+and experienced Julia programmers are generous with advice and friendly to newcomers.</p>
+<p>There is also an active <a class="reference external" href="https://julialang.org/slack/">Slack workspace/community</a>
+with over 10,000 members. This is a space to have quick and informal correspondence with
+others in the community.</p>
+<p>Interesting blog posts about Julia are posted on the <a class="reference external" href="https://forem.julialang.org/">Julia Forem</a>.</p>
+<p><a class="reference external" href="https://juliacomputing.com/">Julia Computing</a> organises regular free webinars and sends
+out a regular newsletter with the latest news on Julia.</p>
+<p><a class="reference external" href="https://juliacon.org/2022/">JuliaCon</a> is organized annually in July and participation
+is free.</p>
+<p><a class="reference external" href="https://scimlcon.org/2022/">SciMLCon</a> was organized for the first time in 2022
+and is focused on the development and applications of the Julia-based SciML
+(scientific machine learning) tooling. Participation is free.</p>
+<section id="ecosystem-of-scientific-computing-packages">
+<h3>Ecosystem of scientific computing packages<a class="headerlink" href="#ecosystem-of-scientific-computing-packages" title="Link to this heading"></a></h3>
+<p>Julia has a rich and rapidly expanding ecosystem of packages for scientific computing
+in many scientific domains. In many cases developers of individual packages join forces
+to create mutually compatible and supporting packages organized under a common GitHub
+organization. The following list can be of some help in navigating the ecosystem.</p>
+<section id="mathematics">
+<h4>Mathematics<a class="headerlink" href="#mathematics" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/JuliaDiff/">JuliaDiff</a>  – Differentiation tools</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaGeometry">JuliaGeometry</a>   – Computational Geometry</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaGraphs">JuliaGraphs</a>     – Graph Theory and Implementation</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaIntervals">JuliaIntervals</a>  - Rigorous numerics with interval arithmetic &amp; applications</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaMath">JuliaMath</a>       – Mathematics made easy in Julia</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaOpt">JuliaOpt</a>        – Optimization</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaPolyhedra">JuliaPolyhedra</a>  – Polyhedral computation</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaSparse">JuliaSparse</a>     – Sparse matrix solvers</p></li>
+<li><p><a class="reference external" href="https://github.com/jump-dev">JuMP-dev</a>          - Modeling language for mathematical optimization</p></li>
+</ul>
+</section>
+<section id="scientific-domains">
+<h4>Scientific domains<a class="headerlink" href="#scientific-domains" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/BioJulia">BioJulia</a> – Biology</p></li>
+<li><p><a class="reference external" href="https://github.com/EcoJulia">EcoJulia</a>  – Ecology</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaAstro">JuliaAstro</a>  – Astronomy</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaDSP">JuliaDSP</a>  – Digital signal processing</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaQuant">JuliaQuant</a>  – Finance</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaQuantum">JuliaQuantum</a>  – Julia libraries for quantum science and technology</p></li>
+<li><p><a class="reference external" href="https://github.com/QuantumBFS/Yao.jl">QuantumBFS</a>  – Extensible, Efficient Quantum Algorithm Design for Humans</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaPhysics">JuliaPhysics</a>  – Physics</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaDynamics">JuliaDynamics</a>  - Dynamical systems, nonlinear dynamics and chaos.</p></li>
+</ul>
+</section>
+<section id="data-sciences">
+<h4>Data sciences<a class="headerlink" href="#data-sciences" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/SciML">SciML</a>   – Scientific machine learning</p></li>
+<li><p><a class="reference external" href="https://github.com/FluxML/">FluxML</a> - Machine learning stack</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaML">JuliaML</a>  – Machine Learning</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaStats">JuliaStats</a>  – Statistics</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaImages">JuliaImages</a>  – Image Processing</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaText">JuliaText</a>  – Natural Language Processing  (NLP), Computational Linguistics and (textual) Information Retrieval</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaDatabases">JuliaDatabases</a> – Various database drivers for Julia</p></li>
+<li><p><a class="reference external" href="https://github.com/JuliaData">JuliaData</a> – Data manipulation, storage, and I/O in Julia</p></li>
+</ul>
+<div class="admonition-scientific-computing-libraries discussion important admonition" id="discussion-0">
+<p class="admonition-title">Scientific computing libraries</p>
+<ul class="simple">
+<li><p>Which, if any, libraries and packages do you currently use for scientific computing?</p></li>
+<li><p>Do you see something interesting in the list above?</p></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h2>
+<figure class="align-default">
+<img alt="../_images/julia_concept_map.png" src="../_images/julia_concept_map.png" />
+</figure>
+<div class="admonition-take-home-messages discussion important admonition" id="discussion-1">
+<p class="admonition-title">Take home messages</p>
+<ul class="simple">
+<li><p>What did you find most interesting in this lesson?</p></li>
+<li><p>What did you find most useful in this lesson?</p></li>
+<li><p>What would you like to learn more about?</p></li>
+</ul>
+</div>
+<div class="admonition-make-a-concept-map exercise important admonition" id="exercise-0">
+<p class="admonition-title">Make a concept map</p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Concept_map">Concept maps</a>, like the one above, can be
+useful to organise one’s knowledge and help with planning projects.</p>
+<p>Draw a concept map of a project for which you want to use Julia. It can either focus on the
+scientific/engineering aspects or on the software side, or both.
+You can use pen and paper or online tools such as <a class="reference external" href="https://excalidraw.com/">Excalidraw</a>.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../interfacing/" class="btn btn-neutral float-left" title="Interfacing to C, Fortran, and Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../exercises/" class="btn btn-neutral float-right" title="Advanced exercises" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, EuroCC National Competence Center Sweden.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
