@@ -210,7 +210,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
 
 .. demo:: Running CPU batch job on LUMI.
 
-   We can ``batch.sh`` file as follows:
+   We can write ``batch.sh`` file as follows:
 
    .. code-block:: bash
 
@@ -249,7 +249,7 @@ The :code:`sbatch` command launches the batch job, with options that declare the
 
 .. demo:: Running GPU batch job on LUMI.
 
-   We can ``batch.sh`` file as follows:
+   We can write ``batch.sh`` file as follows:
 
    .. code-block:: bash
 
@@ -358,15 +358,13 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    Run the following files in a single node job with two CPU cores and one julia thread per core.
 
-   ``Project.toml``
-
    .. code-block:: toml
+      :caption: ``Project.toml``
 
       # empty Project.toml
 
-   ``script.jl``
-
    .. code-block:: julia
+      :caption: ``script.jl``
 
       using Base.Threads
       a = zeros(Int, 2*nthreads())
@@ -377,9 +375,8 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``batch.sh``
-
       .. code-block:: bash
+         :caption: ``batch.sh``
 
          #!/bin/bash
          #SBATCH --account=project_465001310
@@ -395,25 +392,23 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
          julia --project=. -e 'using Pkg; Pkg.instantiate()'
          julia --project=. script.jl
 
-      .. code-block:: bash
+      .. code-block:: console
 
-         sbatch batch.sh
+         $ sbatch batch.sh
 
 
 .. exercise:: Run single node distributed job on LUMI cluster
 
    Run the following files a single node job with three CPU cores and one julia process per core.
 
-   ``Project.toml``
-
    .. code-block:: toml
+      :caption: ``Project.toml``
 
       [deps]
       Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
-   ``script.jl``
-
    .. code-block:: julia
+      :caption: ``script.jl``
 
       using Distributed
       addprocs(Sys.CPU_THREADS-1; exeflags="--project=.")
@@ -425,9 +420,8 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``batch.sh``
-
       .. code-block:: bash
+         :caption: ``batch.sh``
 
          #!/bin/bash
          #SBATCH --account=project_465001310
@@ -443,75 +437,77 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
          julia --project=. -e 'using Pkg; Pkg.instantiate()'
          julia --project=. script.jl
 
+      .. code-block:: console
+
+         $ sbatch batch.sh
+
+
+.. exercise:: Run multi node distributed job on LUMI cluster
+
+   .. attention::
+
+      Currently ``SlurmManager`` gives errors on LUMI it tries to establish workers on multiple nodes.
+      You may still test the code on single node.
+
+   Run the following files on two node job with 128 tasks per node and one CPU code per task.
+   Add Julia workers using ``SlurmManager`` from the ClusterManager.jl package.
+
+   .. code-block:: toml
+      :caption: ``Project.toml``
+
+      [deps]
+      ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
+      Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+
+   .. code-block:: julia
+      :caption: ``script.jl``
+
+      using Distributed
+      using ClusterManagers
+      proc_num = parse(Int, ENV["SLURM_NTASKS"])
+      addprocs(SlurmManager(proc_num); exeflags="--project=.")
+
+      @everywhere task() = myid()
+      futures = [@spawnat id task() for id in workers()]
+      outputs = fetch.(futures)
+      println(outputs)
+
+   .. solution::
+
       .. code-block:: bash
+         :caption: ``batch.sh``
 
-         sbatch batch.sh
+         #!/bin/bash
+         #SBATCH --account=project_465001310
+         #SBATCH --partition=standard
+         #SBATCH --time=00:15:00
+         #SBATCH --nodes=2
+         #SBATCH --ntasks-per-node=128
+         #SBATCH --cpus-per-task=1
+         #SBATCH --mem-per-cpu=0
 
+         module use /appl/local/csc/modulefiles
+         module load julia
+         julia --project=. -e 'using Pkg; Pkg.instantiate()'
+         julia --project=. script.jl
 
-.. SlurmManager errors on LUMI.
+      .. code-block:: console
 
-   .. exercise:: Run multi node distributed job on LUMI cluster
-
-      Run the following files on two node job with 128 tasks per node and one CPU code per task.
-      Add Julia workers using ``SlurmManager`` from the ClusterManager.jl package.
-
-      .. code-block:: toml
-
-         [deps]
-         ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
-         Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
-
-      .. code-block:: julia
-
-         using Distributed
-         using ClusterManagers
-         proc_num = parse(Int, ENV["SLURM_NTASKS"])
-         addprocs(SlurmManager(proc_num); exeflags="--project=.")
-
-         @everywhere task() = myid()
-         futures = [@spawnat id task() for id in workers()]
-         outputs = fetch.(futures)
-         println(outputs)
-
-      .. solution::
-
-         ``batch.sh``
-
-         .. code-block:: bash
-
-            #!/bin/bash
-            #SBATCH --account=project_465001310
-            #SBATCH --partition=standard
-            #SBATCH --time=00:15:00
-            #SBATCH --nodes=2
-            #SBATCH --ntasks-per-node=128
-            #SBATCH --cpus-per-task=1
-            #SBATCH --mem-per-cpu=0
-
-            module use /appl/local/csc/modulefiles
-            module load julia
-            julia --project=. -e 'using Pkg; Pkg.instantiate()'
-            julia --project=. script.jl
-
-         .. code-block:: bash
-
-            sbatch batch.sh
+         $ sbatch batch.sh
 
 
 .. exercise:: Run MPI job on LUMI cluster
 
    Run the following files MPI code using two nodes with two slurm tasks per node and one CPU per task.
 
-   ``Project.toml``
-
    .. code-block:: toml
+      :caption: ``Project.toml``
 
       [deps]
       MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 
-   ``script.jl``
-
    .. code-block:: julia
+      :caption: ``script.jl``
 
       using MPI
 
@@ -524,9 +520,8 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``batch.sh``
-
       .. code-block:: bash
+         :caption: ``batch.sh``
 
          #!/bin/bash
          #SBATCH --account=project_465001310
@@ -543,25 +538,23 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
          julia --project=. -e 'using Pkg; Pkg.instantiate()'
          srun julia --project=. script.jl
 
-      .. code-block:: bash
+      .. code-block:: console
 
-         sbatch batch.sh
+         $ sbatch batch.sh
 
 
 .. exercise:: Run GPU job on LUMI cluster
 
    Run the following files GPU code using one node with one slurm tasks per node, one GPU per node and sixteen CPUs per task.
 
-   ``Project.toml``
-
    .. code-block:: toml
+      :caption: ``Project.toml``
 
       [deps]
       AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
 
-   ``script.jl``
-
    .. code-block:: julia
+      :caption: ``script.jl``
 
       using AMDGPU
 
@@ -571,9 +564,8 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
 
    .. solution::
 
-      ``batch.sh``
-
       .. code-block:: bash
+         :caption: ``batch.sh``
 
          #!/bin/bash
          #SBATCH --account=project_465001310
@@ -591,7 +583,7 @@ If the course has a resource reservation, we can use the :code:`--reservation="<
          julia --project=. -e 'using Pkg; Pkg.instantiate()'
          julia --project=. script.jl
 
-      .. code-block:: bash
+      .. code-block:: console
 
-         sbatch batch.sh
+         $ sbatch batch.sh
 
