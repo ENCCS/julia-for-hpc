@@ -177,7 +177,7 @@ Next we can call the shared object from Julia using the :code:`ccall` function:
 
 .. code-block:: julia
 
-   ccall((:__julia_fortran_MOD_add, "julia_fortran.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
+   ccall((:__julia_fortran_MOD_add, "./julia_fortran.so"), Float64, (Ref{Float64}, Ref{Float64}), 1.1, 3.5)
    # 4.6
 
 In addition, the :code:`add` function in the Fortran module can be further wrapped in the following Julia function to simplify the calling convention.
@@ -185,7 +185,7 @@ In addition, the :code:`add` function in the Fortran module can be further wrapp
 .. code-block:: julia
 
     function add(a::Float64, b::Float64)
-        ccall((:__julia_fortran_MOD_add, "julia_fortran.so"), Float64, (Ref{Float64}, Ref{Float64}), a, b)
+        ccall((:__julia_fortran_MOD_add, "./julia_fortran.so"), Float64, (Ref{Float64}, Ref{Float64}), a, b)
     end
     # add (generic function with 1 method)
 
@@ -203,7 +203,7 @@ Here is another Fortran wrapper example.
     function addsub(a::Float64, b::Float64)
         x = Ref{Float64}()
         y = Ref{Float64}()
-        ccall((:__julia_fortran_MOD_addsub, "julia_fortran.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Float64}), x, y, a, b)
+        ccall((:__julia_fortran_MOD_addsub, "./julia_fortran.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{Float64}), x, y, a, b)
         x[], y[]
     end
     # addsub (generic function with 1 method)
@@ -225,7 +225,7 @@ Here is another example to concatenate two strings via calling a Fortran subrout
 
     function concatenate(a::String, b::String)
         x = Vector{UInt8}(undef, sizeof(a) + sizeof(b))
-        ccall((:__julia_fortran_MOD_concatenate, "julia_fortran.so"), Nothing, (Ref{UInt8}, Ref{UInt8}, Ptr{UInt8}, UInt, UInt, UInt), x, Vector{UInt8}(a), b, sizeof(x), sizeof(a), sizeof(b))
+        ccall((:__julia_fortran_MOD_concatenate, "./julia_fortran.so"), Nothing, (Ref{UInt8}, Ref{UInt8}, Ptr{UInt8}, UInt, UInt, UInt), x, Vector{UInt8}(a), b, sizeof(x), sizeof(a), sizeof(b))
         String(x)
     end
     # concatenate (generic function with 1 method)
@@ -240,7 +240,7 @@ Finally, we have the sample to passing to and fetching an output array from the 
 
     function add_array(a::Array{Float64,1}, b::Array{Float64,1})
         x = Array{Float64,1}(undef, length(a))
-        ccall((:__julia_fortran_MOD_add_array, "julia_fortran.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{UInt32}), x, a, b, length(x))
+        ccall((:__julia_fortran_MOD_add_array, "./julia_fortran.so"), Nothing, (Ref{Float64}, Ref{Float64}, Ref{Float64}, Ref{UInt32}), x, a, b, length(x))
         x
     end
     # add_array (generic function with 1 method)
